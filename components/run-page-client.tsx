@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AgentVerdictCard } from "@/components/agent-verdict-card";
 import { MemeGrid } from "@/components/meme-grid";
 import { ScoreDashboard } from "@/components/score-dashboard";
+import { ScoreRadar } from "@/components/score-radar";
 import { PageShell } from "@/components/page-shell";
 import { SectionHeader } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
@@ -166,6 +167,9 @@ export default function RunPageClient({ id }: { id: string }) {
           title="Backfire Score breakdown"
           description="Six composite metrics measuring campaign vulnerability."
         />
+        <div className="mb-6">
+          <ScoreRadar scores={run.scores} labels={labels} />
+        </div>
         <ScoreDashboard scores={run.scores} labels={labels} />
       </section>
 

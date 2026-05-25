@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/page-shell";
+import { LogoBadge } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -50,10 +51,8 @@ export default function SignupPage() {
 
         <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur-xl">
           <div className="px-8 pt-10 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ff7a82,#c92c39)] shadow-[0_8px_24px_-8px_var(--accent-glow)]">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white" aria-hidden>
-                <path d="M13 2L4.5 13h6L11 22l8.5-11h-6L13 2z" />
-              </svg>
+            <div className="mx-auto inline-flex">
+              <LogoBadge size="xl" />
             </div>
             <h1 className="mt-5 font-display text-[26px] font-semibold tracking-tight text-[var(--fg)]">
               Create your account

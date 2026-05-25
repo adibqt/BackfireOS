@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { LogoBadge } from "@/components/logo";
 
 export function PageShell({
   children,
@@ -35,11 +36,9 @@ function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#ff7a82,#c92c39)] shadow-[0_4px_16px_-4px_var(--accent-glow)]">
-              <span className="font-display text-sm font-bold text-white">B</span>
-            </div>
+            <LogoBadge size="sm" glow={false} />
             <span className="font-display text-sm font-semibold tracking-tight text-[var(--fg)]">
-              Backfire OS
+              Backfire <span className="text-[var(--fg-muted)] font-medium">OS</span>
             </span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-[var(--fg-muted)]">

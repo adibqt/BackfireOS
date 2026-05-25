@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthButton } from "./auth-button";
 import { useLanguage } from "./language-provider";
+import { LogoBadge } from "./logo";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -22,24 +23,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/post-mortem", key: "postMortem" },
 ];
 
-function Logo() {
+function HeaderLogo() {
   return (
-    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center">
-      <div className="absolute inset-0 rounded-xl bg-[linear-gradient(135deg,#ff7a82,#c92c39)] shadow-[0_4px_20px_-4px_var(--accent-glow)]" />
-      <svg
-        viewBox="0 0 24 24"
-        width="18"
-        height="18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="relative text-white"
-        aria-hidden
-      >
-        <path d="M13 2L4.5 13h6L11 22l8.5-11h-6L13 2z" />
-      </svg>
+    <div className="relative">
+      <LogoBadge size="md" />
       <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--success)] ring-2 ring-[var(--bg)] pulse-dot" />
     </div>
   );
@@ -69,7 +56,7 @@ export function SiteHeader() {
     >
       <div className="flex w-full items-center justify-between gap-4 px-5 py-3.5 md:px-8">
         <Link href="/" className="group flex items-center gap-3 no-underline">
-          <Logo />
+          <HeaderLogo />
           <div className="flex flex-col">
             <span className="font-display text-[15px] font-semibold leading-none tracking-tight text-[var(--fg)] transition-colors group-hover:text-[var(--accent-400)]">
               Backfire OS
