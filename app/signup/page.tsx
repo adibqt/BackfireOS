@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { SiteHeader } from "@/components/site-header";
+import { PageShell } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,9 +26,7 @@ export default function SignupPage() {
     const { error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
 
     if (authError) {
@@ -41,54 +41,74 @@ export default function SignupPage() {
   };
 
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-16">
-        <div className="w-full rounded-2xl border border-white/10 bg-zinc-900/70 p-8 shadow-2xl">
-          <h1 className="mb-2 text-2xl font-bold text-white">Create account</h1>
-          <p className="mb-6 text-sm text-zinc-400">
-            Your simulations and generated memes will be saved to your account.
-          </p>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm text-zinc-300">Email</label>
-              <input
+    <PageShell footer={false}>
+      <div className="relative mx-auto flex min-h-[72vh] max-w-md flex-col justify-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-12 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,rgba(255,77,87,0.18),transparent_70%)] blur-3xl"
+        />
+
+        <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+          <div className="px-8 pt-10 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ff7a82,#c92c39)] shadow-[0_8px_24px_-8px_var(--accent-glow)]">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white" aria-hidden>
+                <path d="M13 2L4.5 13h6L11 22l8.5-11h-6L13 2z" />
+              </svg>
+            </div>
+            <h1 className="mt-5 font-display text-[26px] font-semibold tracking-tight text-[var(--fg)]">
+              Create your account
+            </h1>
+            <p className="mt-1.5 text-[14px] text-[var(--fg-muted)]">
+              Save runs, revisit memes, fork campaigns later.
+            </p>
+          </div>
+          <div className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                label="Email"
                 type="email"
                 required
+                autoComplete="email"
+                placeholder="you@brand.co"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-red-500"
               />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm text-zinc-300">Password</label>
-              <input
+              <Input
+                label="Password"
                 type="password"
                 required
                 minLength={6}
+                autoComplete="new-password"
+                placeholder="At least 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-red-500"
               />
-            </div>
-            {error && <p className="text-sm text-red-400">{error}</p>}
-            {message && <p className="text-sm text-emerald-400">{message}</p>}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-500 disabled:opacity-50"
-            >
-              {loading ? "Creating account..." : "Sign up"}
-            </button>
-            <p className="text-center text-sm text-zinc-400">
-              Already have an account?{" "}
-              <Link href="/login" className="text-red-300 hover:text-red-200">
-                Sign in
-              </Link>
-            </p>
-          </form>
+              {error && (
+                <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger-soft)] px-3.5 py-2.5 text-sm text-[var(--danger)]">
+                  {error}
+                </div>
+              )}
+              {message && (
+                <div className="rounded-lg border border-[var(--success)]/30 bg-[var(--success-soft)] px-3.5 py-2.5 text-sm text-[var(--success)]">
+                  {message}
+                </div>
+              )}
+              <Button type="submit" size="lg" disabled={loading} className="w-full">
+                {loading ? "Creating account…" : "Create account"}
+              </Button>
+              <p className="pt-2 text-center text-sm text-[var(--fg-muted)]">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="font-medium text-[var(--accent-400)] hover:text-[var(--accent)]"
+                >
+                  Sign in →
+                </Link>
+              </p>
+            </form>
+          </div>
         </div>
-      </main>
-    </>
+      </div>
+    </PageShell>
   );
 }
