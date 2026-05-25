@@ -36,6 +36,7 @@ export interface MemeResult {
   caption: string;
   imageUrl: string;
   memeabilityScore: number;
+  imageFallback?: boolean;
 }
 
 export interface SimulationRun {
@@ -46,5 +47,6 @@ export interface SimulationRun {
   campaign?: CampaignInput & { id: string; imageUrl?: string };
   verdicts?: AgentVerdict[];
   memes?: MemeResult[];
+  imageWarning?: string;
   createdAt: string;
 }

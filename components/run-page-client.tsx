@@ -108,7 +108,7 @@ export default function RunPageClient({ id }: { id: string }) {
           <h2 className="mb-4 text-xl font-semibold text-white">
             {t(locale, "generatedMemes")}
           </h2>
-          <MemeGrid memes={run.memes ?? []} />
+          <MemeGrid memes={run.memes ?? []} imageWarning={run.imageWarning} />
         </section>
       </main>
     </>

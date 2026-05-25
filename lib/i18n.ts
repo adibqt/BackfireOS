@@ -32,7 +32,8 @@ export const strings = {
     sampleAttack: "Sample Attack",
     reasoning: "Reasoning",
     newSimulation: "New Simulation",
-    demoMode: "Demo mode — add API keys in .env.local for live AI",
+    demoMode: "Demo mode — add GEMINI_API_KEY in .env.local for live AI",
+    liveMode: "Live AI enabled — Gemini agents and meme generation active",
   },
   bn: {
     title: "ব্যাকফায়ার OS",
@@ -65,7 +66,8 @@ export const strings = {
     sampleAttack: "নমুনা আক্রমণ",
     reasoning: "যুক্তি",
     newSimulation: "নতুন সিমুলেশন",
-    demoMode: "ডেমো মোড — লাইভ AI-এর জন্য .env.local-এ API কী যোগ করুন",
+    demoMode: "ডেমো মোড — লাইভ AI-এর জন্য .env.local-এ GEMINI_API_KEY যোগ করুন",
+    liveMode: "লাইভ AI সক্রিয় — Gemini এজেন্ট ও মিম জেনারেশন চালু",
   },
 } as const;
 

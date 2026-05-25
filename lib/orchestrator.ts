@@ -1,25 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
-import OpenAI from "openai";
 import type { AgentVerdict, CampaignInput } from "./agents/types";
 import { AGENTS } from "./agents/definitions";
 import { formatRagExamples, retrieveBanglishExamples } from "./rag";
+import { generateJson, describeImage, isGeminiConfigured } from "./gemini";
 
 interface RawVerdict {
   severity: number;
   reasoning: string;
   sample_attack: string;
   citation_ids?: string[];
-}
-
-function parseVerdictJson(text: string): RawVerdict {
-  const cleaned = text.replace(/```json\n?|\n?```/g, "").trim();
-  const parsed = JSON.parse(cleaned) as RawVerdict;
-  return {
-    severity: Math.max(0, Math.min(100, Math.round(parsed.severity))),
-    reasoning: parsed.reasoning,
-    sample_attack: parsed.sample_attack,
-    citation_ids: parsed.citation_ids ?? [],
-  };
 }
 
 function mockVerdict(
@@ -62,21 +50,14 @@ function mockVerdict(
   };
 }
 
-async function runAgentWithClaude(
-  prompt: string
-): Promise<RawVerdict> {
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 1024,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const block = message.content.find((b) => b.type === "text");
-  if (!block || block.type !== "text") {
-    throw new Error("No text response from Claude");
-  }
-  return parseVerdictJson(block.text);
+async function runAgentWithGemini(prompt: string): Promise<RawVerdict> {
+  const raw = await generateJson<RawVerdict>(prompt);
+  return {
+    severity: Math.max(0, Math.min(100, Math.round(raw.severity))),
+    reasoning: raw.reasoning,
+    sample_attack: raw.sample_attack,
+    citation_ids: raw.citation_ids ?? [],
+  };
 }
 
 export async function parseCampaignImage(
@@ -87,33 +68,18 @@ export async function parseCampaignImage(
     return "No visual provided — text-only campaign analysis.";
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    return "Uploaded campaign visual (demo mode — add OPENAI_API_KEY for vision analysis).";
+  if (!isGeminiConfigured()) {
+    return "Uploaded campaign visual (demo mode — add GEMINI_API_KEY for vision analysis).";
   }
 
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const imageUrl = campaign.imageBase64
-    ? `data:image/jpeg;base64,${campaign.imageBase64}`
-    : campaign.imageUrl!;
+  if (campaign.imageBase64) {
+    return describeImage(
+      "Describe this Bangladeshi ad campaign visual for brand safety analysis. Include visible text, people, setting, tone, and potential cultural tripwires. Be concise.",
+      campaign.imageBase64
+    );
+  }
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "Describe this Bangladeshi ad campaign visual for brand safety analysis. Include visible text, people, setting, tone, and potential cultural tripwires. Be concise.",
-          },
-          { type: "image_url", image_url: { url: imageUrl } },
-        ],
-      },
-    ],
-    max_tokens: 300,
-  });
-
-  return response.choices[0]?.message?.content ?? "Visual analysis unavailable.";
+  return "Image URL provided but vision requires base64 upload in this demo build.";
 }
 
 export async function runAllAgents(
@@ -125,7 +91,7 @@ export async function runAllAgents(
   const ragExamples = formatRagExamples(ragSamples);
   const ragIds = ragSamples.map((s) => s.id);
 
-  const useLiveAi = Boolean(process.env.ANTHROPIC_API_KEY);
+  const useLiveAi = isGeminiConfigured();
 
   const results = await Promise.all(
     AGENTS.map(async (agent) => {
@@ -141,7 +107,7 @@ export async function runAllAgents(
         if (!useLiveAi) {
           return mockVerdict(agent.id, agent.name, campaign, ragIds);
         }
-        const raw = await runAgentWithClaude(prompt);
+        const raw = await runAgentWithGemini(prompt);
         return {
           agentId: agent.id,
           agentName: agent.name,

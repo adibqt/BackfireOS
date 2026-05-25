@@ -78,7 +78,8 @@ export function saveVerdicts(id: string, verdicts: AgentVerdict[]): void {
 export function completeRun(
   id: string,
   scores: RunScores,
-  memes: MemeResult[]
+  memes: MemeResult[],
+  imageWarning?: string
 ): SimulationRun | undefined {
-  return updateRun(id, { scores, memes, status: "complete" });
+  return updateRun(id, { scores, memes, status: "complete", imageWarning });
 }

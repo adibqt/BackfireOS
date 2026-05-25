@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { isGeminiConfigured } from "@/lib/gemini";
 
 export function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -15,6 +16,6 @@ export function isSupabaseRagReady(): boolean {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.SUPABASE_SERVICE_ROLE_KEY &&
-      process.env.OPENAI_API_KEY
+      isGeminiConfigured()
   );
 }

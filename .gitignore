@@ -20,6 +20,10 @@
 # production
 /build
 
+# BnSentMix dataset (download with pnpm download:bnsentmix)
+/data/bnsentmix/dataset.csv
+/data/bnsentmix/.seed-progress.json
+
 # misc
 .DS_Store
 *.pem

@@ -9,7 +9,7 @@ Penetration testing for marketing campaigns in emerging markets. Upload a draft 
 ```powershell
 pnpm install
 cp .env.example .env.local
-# Add API keys (optional — demo mode works without keys)
+# Add GEMINI_API_KEY (free: https://aistudio.google.com/apikey)
 pnpm dev
 ```
 
@@ -42,7 +42,30 @@ Open http://localhost:3000
 
 ## Environment Variables
 
-See [.env.example](./.env.example). Demo mode works without API keys using mock agent responses and placeholder meme images.
+See [.env.example](./.env.example).
+
+| Key | Required? | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | Recommended | Agents, meme captions, vision, RAG embeddings |
+| `POLLINATIONS_API_KEY` | Recommended | Meme images via Pollinations (Flux) |
+| `GEMINI_IMAGE_API_KEY` | Optional | Fallback meme images if Pollinations fails |
+| Supabase keys | Optional | pgvector semantic RAG + persistence schema |
+
+Demo mode works without keys using mock responses and placeholder images.
+
+## BnSentMix RAG (optional)
+
+Semantic Banglish RAG uses the real [BnSentMix dataset](https://huggingface.co/datasets/aplycaebous/BnSentMix) (~20K rows) in Supabase pgvector.
+
+```powershell
+# 1. Run supabase/schema.sql in Supabase SQL Editor (+ GRANT block at bottom)
+# 2. Set NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GEMINI_API_KEY in .env.local
+pnpm download:bnsentmix
+pnpm seed:bnsentmix -- --limit 500    # test batch first
+pnpm seed:bnsentmix -- --resume       # continue full seed (~5–6 hrs for 20K)
+```
+
+Without Supabase, the app falls back to 50 local Banglish samples in `lib/bnsentmix-data.ts`.
 
 ## Deploy
 

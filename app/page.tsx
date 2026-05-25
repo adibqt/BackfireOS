@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { UploadForm } from "@/components/upload-form";
 import { SiteHeader } from "@/components/site-header";
+import { isGeminiConfigured } from "@/lib/gemini";
 
 export default function HomePage() {
+  const liveAi = isGeminiConfigured();
+
   return (
     <>
       <SiteHeader />
@@ -37,7 +40,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <UploadForm />
+          <UploadForm liveAi={liveAi} />
         </section>
       </main>
       <footer className="border-t border-white/10 py-6 text-center text-xs text-zinc-500">

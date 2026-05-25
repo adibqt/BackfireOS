@@ -1,5 +1,5 @@
-import OpenAI from "openai";
 import { BNSENTMIX_SAMPLES } from "./bnsentmix-data";
+import { embedText, isGeminiConfigured } from "./gemini";
 import { createAdminClient, isSupabaseRagReady } from "./supabase/admin";
 
 export interface RagSample {
@@ -44,31 +44,35 @@ async function retrieveFromPgvector(
   count: number
 ): Promise<RagSample[]> {
   const supabase = createAdminClient();
-  if (!supabase) return retrieveLocal(query, count);
-
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const embeddingRes = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: query,
-  });
-  const embedding = embeddingRes.data[0]?.embedding;
-  if (!embedding) return retrieveLocal(query, count);
-
-  const { data, error } = await supabase.rpc("match_bnsentmix", {
-    query_embedding: embedding,
-    match_count: count,
-  });
-
-  if (error || !data?.length) {
-    console.warn("pgvector RAG fallback to local:", error?.message);
+  if (!supabase || !isGeminiConfigured()) {
     return retrieveLocal(query, count);
   }
 
-  return (data as RagSample[]).map((row) => ({
-    id: String(row.id),
-    text: row.text,
-    sentiment: row.sentiment,
-  }));
+  try {
+    const embedding = await embedText(query);
+
+    const { data, error } = await supabase.rpc("match_bnsentmix", {
+      query_embedding: embedding,
+      match_count: count,
+    });
+
+    if (error || !data?.length) {
+      console.warn("pgvector RAG fallback to local:", error?.message);
+      return retrieveLocal(query, count);
+    }
+
+    return (data as RagSample[]).map((row) => ({
+      id: String(row.id),
+      text: row.text,
+      sentiment: row.sentiment,
+    }));
+  } catch (error) {
+    console.warn(
+      "Embedding/RAG failed, using local fallback:",
+      error instanceof Error ? error.message : error
+    );
+    return retrieveLocal(query, count);
+  }
 }
 
 export async function retrieveBanglishExamples(

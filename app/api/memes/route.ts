@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No verdicts available" }, { status: 400 });
     }
 
-    const memes = await generateMemes(run.campaign, verdicts);
+    const { memes, imageWarning } = await generateMemes(run.campaign, verdicts);
     const campaignText = `${run.campaign.slogan} ${run.campaign.brief ?? ""}`;
     const scores = computeScores(
       verdicts,
@@ -33,12 +33,13 @@ export async function POST(request: NextRequest) {
       run.campaign.brandValues ?? ""
     );
 
-    const completed = completeRun(body.runId, scores, memes);
+    const completed = completeRun(body.runId, scores, memes, imageWarning);
 
     return NextResponse.json({
       run: completed,
       scores,
       memes,
+      imageWarning,
     });
   } catch (error) {
     return NextResponse.json(

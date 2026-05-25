@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "placehold.co" },
-      { protocol: "https", hostname: "replicate.delivery" },
-      { protocol: "https", hostname: "*.replicate.delivery" },
+      { protocol: "https", hostname: "gen.pollinations.ai" },
+      { protocol: "https", hostname: "image.pollinations.ai" },
     ],
   },
 };

@@ -50,7 +50,7 @@ create table if not exists bnsentmix_samples (
   id text primary key,
   text text not null,
   sentiment text not null,
-  embedding vector(1536),
+  embedding vector(768),
   created_at timestamptz default now()
 );
 
@@ -58,7 +58,7 @@ create index if not exists bnsentmix_samples_embedding_idx
   on bnsentmix_samples using ivfflat (embedding vector_cosine_ops) with (lists = 100);
 
 create or replace function match_bnsentmix(
-  query_embedding vector(1536),
+  query_embedding vector(768),
   match_count int default 5
 )
 returns table (id text, text text, sentiment text, similarity float)
@@ -69,3 +69,14 @@ as $$
   order by embedding <=> query_embedding
   limit match_count;
 $$;
+
+-- PostgREST roles need explicit grants (tables created via SQL editor do not get them automatically)
+grant usage on schema public to anon, authenticated, service_role;
+
+grant all on table public.campaigns to anon, authenticated, service_role;
+grant all on table public.simulation_runs to anon, authenticated, service_role;
+grant all on table public.agent_verdicts to anon, authenticated, service_role;
+grant all on table public.memes to anon, authenticated, service_role;
+grant all on table public.bnsentmix_samples to anon, authenticated, service_role;
+
+grant execute on function public.match_bnsentmix(vector, int) to anon, authenticated, service_role;

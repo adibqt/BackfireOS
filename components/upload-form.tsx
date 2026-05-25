@@ -6,7 +6,7 @@ import type { AgentVerdict } from "@/lib/agents/types";
 import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
 
-export function UploadForm() {
+export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
   const router = useRouter();
   const { locale } = useLanguage();
   const [slogan, setSlogan] = useState("");
@@ -159,7 +159,11 @@ export function UploadForm() {
           {loading ? status || t(locale, "analyzing") : t(locale, "runSimulation")}
         </button>
         {!loading && (
-          <p className="text-xs text-amber-400">{t(locale, "demoMode")}</p>
+          <p
+            className={`text-xs ${liveAi ? "text-emerald-400" : "text-amber-400"}`}
+          >
+            {t(locale, liveAi ? "liveMode" : "demoMode")}
+          </p>
         )}
         {error && <p className="text-sm text-red-400">{error}</p>}
         {verdicts.length > 0 && (
