@@ -2,13 +2,21 @@ import { NextRequest } from "next/server";
 import { resolveDbContext } from "@/lib/supabase/persistence";
 import {
   attachImageBase64,
+  getBrand,
   getCampaignImageBase64,
   getRun,
+  listPastCampaigns,
   markRunFailed,
   saveImageDescription,
+  saveStressMap,
   saveVerdicts,
 } from "@/lib/store";
 import { parseCampaignImage, runAllAgents } from "@/lib/orchestrator";
+import { generateCulturalStressMap } from "@/lib/cultural-stress-map";
+import {
+  formatBrandContext,
+  formatPastCampaigns,
+} from "@/lib/agents/definitions";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -75,18 +83,47 @@ export async function POST(request: NextRequest) {
           "cynical_journalist",
           "rival_brand",
           "regulatory_activist",
+          "brand_purist",
         ]) {
           send("agent_start", { agentId });
         }
 
-        const verdicts = await runAllAgents(run.campaign!, imageDescription);
+        const brandId = run.campaign?.brandId ?? null;
+        const brand = brandId
+          ? await getBrand(supabase, userId, brandId)
+          : null;
+
+        const pastSnapshots = await listPastCampaigns(
+          supabase,
+          brand,
+          run.campaignId,
+          10
+        );
+        const pastCampaigns = formatPastCampaigns(pastSnapshots);
+        const brandContext = formatBrandContext(brand);
+
+        const verdicts = await runAllAgents(
+          run.campaign!,
+          imageDescription,
+          pastCampaigns,
+          brandContext
+        );
 
         for (const verdict of verdicts) {
           send("agent_verdict", verdict);
         }
 
+        send("status", { message: "Building cultural stress map..." });
+        const culturalStressMap = await generateCulturalStressMap(
+          run.campaign!,
+          imageDescription,
+          verdicts
+        );
+        send("stress_map", culturalStressMap);
+
         await saveVerdicts(supabase, body.runId, verdicts, userId);
-        send("complete", { verdicts, imageDescription });
+        await saveStressMap(supabase, body.runId, culturalStressMap, userId);
+        send("complete", { verdicts, imageDescription, culturalStressMap });
       } catch (error) {
         await markRunFailed(supabase, body.runId, userId);
         send("error", {

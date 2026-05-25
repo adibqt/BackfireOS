@@ -30,6 +30,8 @@ function mockVerdict(
     severity = 61;
   } else if (agentId === "regional_outsider") {
     severity = slogan.includes("dhaka") ? 72 : 58;
+  } else if (agentId === "brand_purist") {
+    severity = 63;
   }
 
   const attacks: Record<AgentVerdict["agentId"], string> = {
@@ -38,6 +40,7 @@ function mockVerdict(
     cynical_journalist: `EXCLUSIVE: Brand claims '${campaign.slogan}' but customers disagree`,
     rival_brand: `Thanks for the free slogan — our reply meme drops in 1 hour`,
     regulatory_activist: "Essential Commodities Act risk: scarcity language detected",
+    brand_purist: `'${campaign.slogan}' contradicts your stated brand values — this is the definition of value drift`,
   };
 
   return {
@@ -84,7 +87,9 @@ export async function parseCampaignImage(
 
 export async function runAllAgents(
   campaign: CampaignInput,
-  imageDescription: string
+  imageDescription: string,
+  pastCampaigns: string,
+  brandContext: string
 ): Promise<AgentVerdict[]> {
   const query = `${campaign.slogan} ${campaign.brief ?? ""} ${campaign.brandValues ?? ""}`;
   const ragSamples = await retrieveBanglishExamples(query, 5);
@@ -101,6 +106,8 @@ export async function runAllAgents(
         brief: campaign.brief ?? "Not specified",
         imageDescription,
         ragExamples,
+        pastCampaigns,
+        brandContext,
       });
 
       try {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { PageShell, PageHero } from "@/components/page-shell";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { riskLevel } from "@/lib/scoring";
@@ -24,7 +24,15 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString();
 }
 
-function RunRow({ run }: { run: SimulationRun }) {
+function RunRow({
+  run,
+  onDelete,
+  deleting,
+}: {
+  run: SimulationRun;
+  onDelete: () => void;
+  deleting: boolean;
+}) {
   const score = run.scores?.backfireScore ?? 0;
   const level = riskLevel(score);
   const tone = {
@@ -34,14 +42,16 @@ function RunRow({ run }: { run: SimulationRun }) {
   }[level];
 
   return (
-    <Link
-      href={`/runs/${run.id}`}
+    <div
       className={cn(
-        "group block rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl lift",
+        "group flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl lift",
         tone.border
       )}
     >
-      <div className="flex flex-wrap items-center gap-4">
+      <Link
+        href={`/runs/${run.id}`}
+        className="flex min-w-0 flex-1 flex-wrap items-center gap-4"
+      >
         {/* Score ring */}
         <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
           <svg className="absolute h-14 w-14 -rotate-90" viewBox="0 0 56 56" aria-hidden>
@@ -107,8 +117,20 @@ function RunRow({ run }: { run: SimulationRun }) {
           <line x1="5" y1="12" x2="19" y2="12" />
           <polyline points="12 5 19 12 12 19" />
         </svg>
-      </div>
-    </Link>
+      </Link>
+      <Button
+        variant="danger"
+        size="sm"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete();
+        }}
+        disabled={deleting}
+      >
+        {deleting ? "Deleting…" : "Delete"}
+      </Button>
+    </div>
   );
 }
 
@@ -117,6 +139,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/campaigns?list=true")
@@ -149,6 +172,27 @@ export default function HistoryPage() {
     const high = runs.filter((r) => (r.scores?.backfireScore ?? 0) >= 70).length;
     return { total, avg, high };
   }, [runs]);
+
+  const handleDelete = async (runId: string) => {
+    if (!confirm("Delete this simulation? This cannot be undone.")) {
+      return;
+    }
+    setDeletingId(runId);
+    setError("");
+    try {
+      const res = await fetch(`/api/campaigns/${runId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Failed to delete simulation");
+        return;
+      }
+      setRuns((prev) => prev.filter((r) => r.id !== runId));
+    } catch {
+      setError("Failed to delete simulation");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <PageShell footer={false}>
@@ -224,7 +268,12 @@ export default function HistoryPage() {
 
       <div className="space-y-3">
         {filtered.map((run) => (
-          <RunRow key={run.id} run={run} />
+          <RunRow
+            key={run.id}
+            run={run}
+            onDelete={() => handleDelete(run.id)}
+            deleting={deletingId === run.id}
+          />
         ))}
         {!loading && !error && filtered.length === 0 && runs.length > 0 && (
           <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-elev-1)]/40 py-10 text-center text-sm text-[var(--fg-muted)]">

@@ -1,8 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   AgentVerdict,
+  Brand,
   CampaignInput,
+  CulturalStressMap,
   MemeResult,
+  PastCampaignSnapshot,
   RunScores,
   SimulationRun,
 } from "@/lib/agents/types";
@@ -10,6 +13,7 @@ import type {
 type DbCampaign = {
   id: string;
   user_id: string;
+  brand_id: string | null;
   slogan: string;
   brand_values: string | null;
   brief: string | null;
@@ -17,6 +21,25 @@ type DbCampaign = {
   image_description: string | null;
   created_at: string;
 };
+
+type DbBrand = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  stated_values: string | null;
+  created_at: string;
+};
+
+function mapBrand(row: DbBrand): Brand {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description ?? undefined,
+    statedValues: row.stated_values ?? undefined,
+    createdAt: row.created_at,
+  };
+}
 
 type DbRun = {
   id: string;
@@ -30,6 +53,7 @@ type DbRun = {
   brand_safety_drift: number | null;
   polarization_coefficient: number | null;
   image_warning: string | null;
+  cultural_stress_map: CulturalStressMap | null;
   created_at: string;
 };
 
@@ -65,6 +89,7 @@ function mapCampaign(row: DbCampaign): CampaignInput & { id: string; imageUrl?: 
   return {
     id: row.id,
     slogan: row.slogan,
+    brandId: row.brand_id ?? undefined,
     brandValues: row.brand_values ?? undefined,
     brief: row.brief ?? undefined,
     imageUrl: row.image_url ?? undefined,
@@ -161,6 +186,7 @@ export async function dbCreateCampaignAndRun(
   const { error: campaignError } = await supabase.from("campaigns").insert({
     id: campaignId,
     user_id: userId,
+    brand_id: input.brandId ?? null,
     slogan: input.slogan.trim(),
     brand_values: input.brandValues?.trim() || null,
     brief: input.brief?.trim() || null,
@@ -227,6 +253,7 @@ export async function dbGetRun(
     campaign: campaignRow ? mapCampaign(campaignRow as DbCampaign) : undefined,
     verdicts: (verdictRows as DbVerdict[] | null)?.map(mapVerdict),
     memes: (memeRows as DbMeme[] | null)?.map(mapMeme),
+    culturalStressMap: run.cultural_stress_map ?? undefined,
     imageWarning: run.image_warning ?? undefined,
     createdAt: run.created_at,
   };
@@ -287,6 +314,22 @@ export async function dbSaveVerdicts(
   }));
 
   const { error } = await supabase.from("agent_verdicts").insert(rows);
+  if (error) throw new Error(error.message);
+}
+
+export async function dbSaveStressMap(
+  supabase: SupabaseClient,
+  runId: string,
+  stressMap: CulturalStressMap,
+  userId?: string
+): Promise<void> {
+  let query = supabase
+    .from("simulation_runs")
+    .update({ cultural_stress_map: stressMap })
+    .eq("id", runId);
+  if (userId) query = query.eq("user_id", userId);
+
+  const { error } = await query;
   if (error) throw new Error(error.message);
 }
 
@@ -373,10 +416,146 @@ export async function dbListRuns(
   return runs;
 }
 
+type DbPastCampaign = {
+  slogan: string;
+  brand_values: string | null;
+  brief: string | null;
+  created_at: string;
+};
+
+type DbPastCampaignRow = DbPastCampaign & { id: string };
+
+export async function dbListPastCampaigns(
+  supabase: SupabaseClient,
+  brand: Brand,
+  excludeCampaignId: string,
+  limit: number
+): Promise<PastCampaignSnapshot[]> {
+  const { data: campaigns, error: campaignError } = await supabase
+    .from("campaigns")
+    .select("id, slogan, brand_values, brief, created_at")
+    .eq("brand_id", brand.id)
+    .neq("id", excludeCampaignId)
+    .gte("created_at", brand.createdAt)
+    .order("created_at", { ascending: false });
+
+  if (campaignError) throw new Error(campaignError.message);
+  if (!campaigns?.length) return [];
+
+  const campaignIds = (campaigns as DbPastCampaignRow[]).map((row) => row.id);
+  const { data: runs, error: runError } = await supabase
+    .from("simulation_runs")
+    .select("campaign_id")
+    .eq("status", "complete")
+    .in("campaign_id", campaignIds);
+
+  if (runError) throw new Error(runError.message);
+
+  const completedIds = new Set(
+    (runs ?? []).map((row) => row.campaign_id as string)
+  );
+
+  return (campaigns as DbPastCampaignRow[])
+    .filter((row) => completedIds.has(row.id))
+    .slice(0, limit)
+    .map((row) => ({
+      slogan: row.slogan,
+      brandValues: row.brand_values ?? undefined,
+      brief: row.brief ?? undefined,
+      createdAt: row.created_at,
+    }));
+}
+
+export async function dbCreateBrand(
+  supabase: SupabaseClient,
+  userId: string,
+  input: { name: string; description?: string; statedValues?: string }
+): Promise<Brand> {
+  const id = crypto.randomUUID();
+  const { data, error } = await supabase
+    .from("brands")
+    .insert({
+      id,
+      user_id: userId,
+      name: input.name.trim(),
+      description: input.description?.trim() || null,
+      stated_values: input.statedValues?.trim() || null,
+    })
+    .select("id, user_id, name, description, stated_values, created_at")
+    .single();
+
+  if (error) throw new Error(error.message);
+  return mapBrand(data as DbBrand);
+}
+
+export async function dbListBrands(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<Brand[]> {
+  const { data, error } = await supabase
+    .from("brands")
+    .select("id, user_id, name, description, stated_values, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  if (!data) return [];
+  return (data as DbBrand[]).map(mapBrand);
+}
+
+export async function dbGetBrand(
+  supabase: SupabaseClient,
+  userId: string,
+  brandId: string
+): Promise<Brand | null> {
+  const { data, error } = await supabase
+    .from("brands")
+    .select("id, user_id, name, description, stated_values, created_at")
+    .eq("user_id", userId)
+    .eq("id", brandId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  return mapBrand(data as DbBrand);
+}
+
+export async function dbDeleteBrand(
+  supabase: SupabaseClient,
+  userId: string,
+  brandId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("brands")
+    .delete()
+    .eq("user_id", userId)
+    .eq("id", brandId);
+
+  if (error) throw new Error(error.message);
+}
+
 export async function dbMarkRunFailed(
   supabase: SupabaseClient,
   runId: string,
   userId?: string
 ): Promise<void> {
   await dbUpdateRunStatus(supabase, runId, "failed", userId);
+}
+
+export async function dbDeleteRun(
+  supabase: SupabaseClient,
+  userId: string,
+  runId: string
+): Promise<boolean> {
+  const run = await dbGetRun(supabase, runId, userId);
+  if (!run) return false;
+
+  const { error } = await supabase
+    .from("campaigns")
+    .delete()
+    .eq("id", run.campaignId)
+    .eq("user_id", userId);
+
+  if (error) throw new Error(error.message);
+  return true;
 }

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
@@ -77,12 +78,23 @@ export function Textarea({ label, hint, error, className, id, ...props }: Textar
 type FileInputProps = {
   label?: string;
   hint?: string;
+  previewUrl?: string;
   onFileChange?: (file?: File) => void;
+  onClear?: () => void;
   accept?: string;
   className?: string;
 };
 
-export function FileInput({ label, hint, onFileChange, accept, className }: FileInputProps) {
+export function FileInput({ label, hint, previewUrl, onFileChange, onClear, accept, className }: FileInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inputRef.current) inputRef.current.value = "";
+    onClear?.();
+  };
+
   return (
     <div>
       {label && (
@@ -90,32 +102,81 @@ export function FileInput({ label, hint, onFileChange, accept, className }: File
           {label}
         </span>
       )}
-      <label
-        className={cn(
-          "group relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-lg",
-          "border border-dashed border-[var(--border-strong)] bg-[var(--bg-elev-1)] px-4 py-3.5",
-          "transition-all duration-200",
-          "hover:border-[var(--accent)]/50 hover:bg-[var(--accent-soft)]",
-          className
+      <div className="relative">
+        <label
+          className={cn(
+            "group relative flex cursor-pointer overflow-hidden rounded-lg",
+            "border border-dashed border-[var(--border-strong)] bg-[var(--bg-elev-1)]",
+            "transition-all duration-200",
+            previewUrl
+              ? "block"
+              : "items-center gap-3 px-4 py-3.5 hover:border-[var(--accent)]/50 hover:bg-[var(--accent-soft)]",
+            className
+          )}
+        >
+          {previewUrl ? (
+            <>
+              <img
+                src={previewUrl}
+                alt="Upload preview"
+                className="max-h-52 w-full object-contain"
+              />
+              <div
+                className={cn(
+                  "absolute inset-0 flex flex-col items-center justify-center gap-1",
+                  "bg-black/55 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                )}
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-white/15 text-white">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </span>
+                <span className="text-sm font-medium text-white">Click to change</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--accent-soft)] text-[var(--accent)] transition-transform duration-300 group-hover:scale-110">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </span>
+              <span className="text-sm text-[var(--fg-muted)]">
+                <span className="font-medium text-[var(--fg)]">Click to upload</span> or drag and drop
+              </span>
+            </>
+          )}
+          <input
+            ref={inputRef}
+            type="file"
+            accept={accept}
+            className="sr-only"
+            onChange={(e) => onFileChange?.(e.target.files?.[0])}
+          />
+        </label>
+        {previewUrl && onClear && (
+          <button
+            type="button"
+            onClick={handleClear}
+            aria-label="Remove image"
+            className={cn(
+              "absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-md",
+              "border border-white/20 bg-black/70 text-white shadow-sm backdrop-blur-sm",
+              "transition-colors duration-200 hover:bg-[var(--danger)] hover:border-[var(--danger)]/50"
+            )}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         )}
-      >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--accent-soft)] text-[var(--accent)] transition-transform duration-300 group-hover:scale-110">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-        </span>
-        <span className="text-sm text-[var(--fg-muted)]">
-          <span className="font-medium text-[var(--fg)]">Click to upload</span> or drag and drop
-        </span>
-        <input
-          type="file"
-          accept={accept}
-          className="sr-only"
-          onChange={(e) => onFileChange?.(e.target.files?.[0])}
-        />
-      </label>
+      </div>
       {hint && <FieldHint>{hint}</FieldHint>}
     </div>
   );

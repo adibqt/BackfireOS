@@ -3,7 +3,8 @@ export type AgentId =
   | "regional_outsider"
   | "cynical_journalist"
   | "rival_brand"
-  | "regulatory_activist";
+  | "regulatory_activist"
+  | "brand_purist";
 
 export interface AgentVerdict {
   agentId: AgentId;
@@ -14,8 +15,24 @@ export interface AgentVerdict {
   citationIds: string[];
 }
 
+export interface Brand {
+  id: string;
+  name: string;
+  description?: string;
+  statedValues?: string;
+  createdAt: string;
+}
+
+export interface PastCampaignSnapshot {
+  slogan: string;
+  brandValues?: string;
+  brief?: string;
+  createdAt: string;
+}
+
 export interface CampaignInput {
   slogan: string;
+  brandId?: string;
   brandValues?: string;
   brief?: string;
   imageUrl?: string;
@@ -39,6 +56,26 @@ export interface MemeResult {
   imageFallback?: boolean;
 }
 
+export type MacroRegion = "south_asia" | "mena" | "sea";
+export type TriggerType = "copy" | "visual";
+
+export interface CulturalTrigger {
+  type: TriggerType;
+  text: string;
+  reason: string;
+}
+
+export interface MarketStress {
+  marketId: string;
+  severity: number;
+  summary: string;
+  triggers: CulturalTrigger[];
+}
+
+export interface CulturalStressMap {
+  markets: MarketStress[];
+}
+
 export interface SimulationRun {
   id: string;
   campaignId: string;
@@ -47,6 +84,7 @@ export interface SimulationRun {
   campaign?: CampaignInput & { id: string; imageUrl?: string };
   verdicts?: AgentVerdict[];
   memes?: MemeResult[];
+  culturalStressMap?: CulturalStressMap;
   imageWarning?: string;
   createdAt: string;
 }

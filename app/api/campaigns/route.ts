@@ -3,6 +3,7 @@ import { resolveDbContext } from "@/lib/supabase/persistence";
 import {
   attachImageBase64,
   createCampaignAndRun,
+  getBrand,
   getCampaignImageBase64,
   getRun,
   listRuns,
@@ -29,6 +30,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = ctx.mode === "db" ? ctx.supabase : null;
     const userId = ctx.mode === "db" ? ctx.userId : null;
+
+    if (body.brandId) {
+      const brand = await getBrand(supabase, userId, body.brandId);
+      if (!brand) {
+        return NextResponse.json(
+          { error: "Brand not found or not owned by user" },
+          { status: 400 }
+        );
+      }
+    }
 
     const { campaignId, runId } = await createCampaignAndRun(
       supabase,

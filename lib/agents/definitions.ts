@@ -1,4 +1,4 @@
-import type { AgentId } from "./types";
+import type { AgentId, Brand, PastCampaignSnapshot } from "./types";
 
 export interface AgentDefinition {
   id: AgentId;
@@ -10,7 +10,35 @@ export interface AgentDefinition {
     brief: string;
     imageDescription: string;
     ragExamples: string;
+    pastCampaigns: string;
+    brandContext: string;
   }) => string;
+}
+
+export function formatPastCampaigns(history: PastCampaignSnapshot[]): string {
+  if (history.length === 0) {
+    return "No prior completed simulations under this brand — this is the first audited campaign. Do not reference numbered prior campaigns ([1], [2], etc.).";
+  }
+  return history
+    .map((c, i) => {
+      const date = c.createdAt
+        ? new Date(c.createdAt).toISOString().split("T")[0]
+        : "unknown";
+      return `[${i + 1}] (${date})
+  Slogan: ${c.slogan}
+  Stated values: ${c.brandValues ?? "(none)"}
+  Brief: ${c.brief ?? "(none)"}`;
+    })
+    .join("\n\n");
+}
+
+export function formatBrandContext(brand: Brand | null): string {
+  if (!brand) {
+    return "No brand selected for this campaign. Judge consistency only against the brand values declared in the current campaign.";
+  }
+  return `Brand: ${brand.name}
+Brand description: ${brand.description ?? "(not specified)"}
+Canonical stated values: ${brand.statedValues ?? "(not specified)"}`;
 }
 
 const OUTPUT_SCHEMA = `Return ONLY valid JSON with this exact shape (no markdown):
@@ -115,6 +143,57 @@ ${ragExamples}
 Campaign:
 Slogan: ${slogan}
 Brand values: ${brandValues}
+Brief: ${brief}
+Visual: ${imageDescription}`,
+  },
+  {
+    id: "brand_purist",
+    name: "Brand Purist",
+    weight: 1.2,
+    buildPrompt: ({
+      slogan,
+      brandValues,
+      brief,
+      imageDescription,
+      pastCampaigns,
+      brandContext,
+    }) =>
+      `You are the Brand Purist — an internal brand-strategy watchdog who audits whether this new campaign contradicts the brand's own canonical values and prior campaigns.
+
+You receive two sources of truth, in order of authority:
+1. The brand's canonical stated values (the brand's own declared identity).
+2. The brand's prior campaign history (what the brand has actually said in market).
+
+Audit the current campaign against both. Look for:
+- Stated values that have flipped, softened, or been abandoned
+- Tone shifts (e.g., previously somber/ethical → now playful/aggressive)
+- Audience pivots that betray earlier positioning
+- Claims that conflict with prior promises
+- Slogan/visual contradicting the brand's canonical description
+
+In "reasoning":
+- If contradicting the canonical values, quote the specific value violated.
+- If contradicting prior campaigns, cite the entry number ("Contradicts [2]: previously claimed X, now claims Y").
+- If prior campaign history states there are no prior completed simulations, audit only against canonical values. Do not cite [1], [2], or any numbered prior campaign, and do not invent prior campaigns.
+- If both canonical values and prior campaign history are empty, judge slogan vs. in-campaign brand values and state that explicitly.
+
+Severity bands:
+- 0-30: fully consistent
+- 31-60: mild drift, defensible
+- 61-85: clear contradiction of at least one canonical value or prior campaign
+- 86-100: total reversal of the brand's public stance
+
+${OUTPUT_SCHEMA}
+
+Brand canonical context:
+${brandContext}
+
+Prior campaign history (most recent first):
+${pastCampaigns}
+
+Current campaign:
+Slogan: ${slogan}
+Brand values (this campaign): ${brandValues}
 Brief: ${brief}
 Visual: ${imageDescription}`,
   },

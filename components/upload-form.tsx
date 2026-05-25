@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { AgentVerdict } from "@/lib/agents/types";
+import type { AgentVerdict, Brand, CulturalStressMap } from "@/lib/agents/types";
+import { countFlaggedMarkets } from "@/lib/cultural-stress-map";
 import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Input, Textarea, FileInput } from "@/components/ui/input";
 import { Badge, RiskBadge } from "@/components/ui/badge";
 import { riskLevel } from "@/lib/scoring";
@@ -14,38 +16,73 @@ import { cn } from "@/lib/utils";
 export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
   const router = useRouter();
   const { locale } = useLanguage();
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandsLoading, setBrandsLoading] = useState(true);
+  const [brandId, setBrandId] = useState("");
   const [slogan, setSlogan] = useState("");
   const [brandValues, setBrandValues] = useState("");
   const [brief, setBrief] = useState("");
   const [imageBase64, setImageBase64] = useState<string | undefined>();
-  const [imageName, setImageName] = useState<string | undefined>();
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [verdicts, setVerdicts] = useState<AgentVerdict[]>([]);
+  const [stressMapPreview, setStressMapPreview] = useState<CulturalStressMap | null>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/brands")
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = (data.brands ?? []) as Brand[];
+        setBrands(list);
+        if (list.length > 0) {
+          setBrandId(list[0].id);
+          if (list[0].statedValues && !brandValues) {
+            setBrandValues(list[0].statedValues);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setBrandsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleBrandChange = (newBrandId: string) => {
+    setBrandId(newBrandId);
+    const next = brands.find((b) => b.id === newBrandId);
+    if (next?.statedValues) setBrandValues(next.statedValues);
+  };
 
   const handleImage = (file?: File) => {
     if (!file) return;
-    setImageName(file.name);
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
+      setImagePreviewUrl(result);
       setImageBase64(result.split(",")[1]);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
+    setImagePreviewUrl(undefined);
+    setImageBase64(undefined);
   };
 
   const runSimulation = async () => {
     setLoading(true);
     setError("");
     setVerdicts([]);
+    setStressMapPreview(null);
     setStatus("Creating campaign...");
 
     try {
       const createRes = await fetch("/api/campaigns", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slogan, brandValues, brief, imageBase64 }),
+        body: JSON.stringify({ brandId, slogan, brandValues, brief, imageBase64 }),
       });
       const createData = await createRes.json();
       if (!createRes.ok) throw new Error(createData.error || "Failed to create campaign");
@@ -86,6 +123,8 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
                 setVerdicts([...collected]);
               } else if (event === "status") {
                 setStatus((data as { message: string }).message);
+              } else if (event === "stress_map") {
+                setStressMapPreview(data as CulturalStressMap);
               } else if (event === "error") {
                 reject(new Error((data as { message: string }).message));
               }
@@ -143,6 +182,12 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
         </div>
 
         <div className="space-y-4 p-5">
+          <BrandSelector
+            brands={brands}
+            brandsLoading={brandsLoading}
+            brandId={brandId}
+            onChange={handleBrandChange}
+          />
           <Input
             label={t(locale, "slogan")}
             value={slogan}
@@ -166,14 +211,15 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
           <FileInput
             label={t(locale, "imageUpload")}
             accept="image/*"
+            previewUrl={imagePreviewUrl}
             onFileChange={handleImage}
-            hint={imageName ? `Selected: ${imageName}` : undefined}
+            onClear={handleClearImage}
           />
 
           <Button
             type="button"
             size="lg"
-            disabled={loading || !slogan.trim()}
+            disabled={loading || !slogan.trim() || !brandId}
             onClick={runSimulation}
             className="w-full"
           >
@@ -219,7 +265,7 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
                 <p className="text-[13px] font-medium text-[var(--fg)]">
                   {t(locale, "agentVerdicts")}
                 </p>
-                <Badge variant="accent">{verdicts.length} / 5</Badge>
+                <Badge variant="accent">{verdicts.length} / 6</Badge>
               </div>
               <div className="space-y-1.5">
                 {verdicts.map((v) => (
@@ -236,8 +282,104 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
               </div>
             </div>
           )}
+
+          {stressMapPreview && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/80 p-4 fade-up">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[13px] font-medium text-[var(--fg)]">
+                  {t(locale, "stressMapTitle")}
+                </p>
+                <Badge variant="accent">
+                  {stressMapPreview.markets.length} {t(locale, "stressMapPreview")} ·{" "}
+                  {countFlaggedMarkets(stressMapPreview)} {t(locale, "marketsFlagged")}
+                </Badge>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function BrandSelector({
+  brands,
+  brandsLoading,
+  brandId,
+  onChange,
+}: {
+  brands: Brand[];
+  brandsLoading: boolean;
+  brandId: string;
+  onChange: (id: string) => void;
+}) {
+  if (brandsLoading) {
+    return (
+      <div>
+        <span className="mb-1.5 block text-[13px] font-medium text-[var(--fg-muted)]">
+          Brand
+        </span>
+        <div className="shimmer h-11 rounded-lg" />
+      </div>
+    );
+  }
+
+  if (brands.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-[var(--accent)]/40 bg-[var(--accent-soft)] p-4">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/30">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-medium text-[var(--fg)]">
+              Create a brand to run a simulation
+            </p>
+            <p className="mt-1 text-[12px] text-[var(--fg-muted)]">
+              Campaigns are run under a brand so the Brand Purist can audit them against the brand&rsquo;s history.
+            </p>
+            <ButtonLink href="/brands" variant="primary" size="sm" className="mt-3">
+              Create your first brand
+            </ButtonLink>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <label htmlFor="brand-id" className="text-[13px] font-medium text-[var(--fg-muted)]">
+          Brand
+        </label>
+        <Link
+          href="/brands"
+          className="text-[12px] text-[var(--accent-400)] hover:underline"
+        >
+          Manage brands
+        </Link>
+      </div>
+      <select
+        id="brand-id"
+        value={brandId}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          "h-11 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elev-1)] px-3 text-[15px] text-[var(--fg)]",
+          "transition-[border-color,box-shadow,background-color] duration-200",
+          "hover:border-[var(--border-bright)]",
+          "focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] focus:bg-[var(--bg-elev-2)]"
+        )}
+      >
+        {brands.map((b) => (
+          <option key={b.id} value={b.id}>
+            {b.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

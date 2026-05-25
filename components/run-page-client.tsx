@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { AgentVerdictCard } from "@/components/agent-verdict-card";
+import {
+  CulturalHeatmap,
+  CulturalHeatmapEmpty,
+} from "@/components/cultural-heatmap";
 import { MemeGrid } from "@/components/meme-grid";
 import { ScoreDashboard } from "@/components/score-dashboard";
 import { ScoreRadar } from "@/components/score-radar";
@@ -12,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/language-provider";
 import { t } from "@/lib/i18n";
 import { riskLevel } from "@/lib/scoring";
+import { highestRiskRegion } from "@/lib/cultural-stress-map";
 import type { SimulationRun } from "@/lib/agents/types";
 import { cn } from "@/lib/utils";
 
@@ -171,6 +176,32 @@ export default function RunPageClient({ id }: { id: string }) {
           <ScoreRadar scores={run.scores} labels={labels} />
         </div>
         <ScoreDashboard scores={run.scores} labels={labels} />
+      </section>
+
+      {/* Cultural stress map */}
+      <section className="mb-16">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <SectionHeader
+            eyebrow={t(locale, "heatmap")}
+            title={t(locale, "stressMapTitle")}
+            description={t(locale, "stressMapDescription")}
+          />
+          {run.culturalStressMap && (
+            <ButtonLink href={`/heatmap?runId=${id}`} variant="secondary" size="md">
+              {t(locale, "openFullStressMap")} →
+            </ButtonLink>
+          )}
+        </div>
+        {run.culturalStressMap ? (
+          <CulturalHeatmap
+            stressMap={run.culturalStressMap}
+            locale={locale}
+            compact
+            defaultRegion={highestRiskRegion(run.culturalStressMap)}
+          />
+        ) : (
+          <CulturalHeatmapEmpty locale={locale} />
+        )}
       </section>
 
       {/* Verdicts */}

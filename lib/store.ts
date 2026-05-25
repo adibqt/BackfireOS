@@ -1,19 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   AgentVerdict,
+  Brand,
   CampaignInput,
+  CulturalStressMap,
   MemeResult,
+  PastCampaignSnapshot,
   RunScores,
   SimulationRun,
 } from "./agents/types";
 import { isSupabaseAuthConfigured } from "./supabase/client";
 import {
   dbCompleteRun,
+  dbCreateBrand,
   dbCreateCampaignAndRun,
+  dbDeleteBrand,
+  dbDeleteRun,
+  dbGetBrand,
   dbGetRun,
+  dbListBrands,
+  dbListPastCampaigns,
   dbListRuns,
   dbMarkRunFailed,
   dbSaveImageDescription,
+  dbSaveStressMap,
   dbSaveVerdicts,
   uploadCampaignImage,
 } from "./db/runs";
@@ -22,8 +32,9 @@ declare global {
   // eslint-disable-next-line no-var
   var __backfireStore: {
     runs: Map<string, SimulationRun>;
-    campaigns: Map<string, CampaignInput & { id: string; imageUrl?: string }>;
+    campaigns: Map<string, CampaignInput & { id: string; imageUrl?: string; createdAt: string }>;
     imageBase64: Map<string, string>;
+    brands: Map<string, Brand>;
   } | undefined;
 }
 
@@ -33,6 +44,7 @@ function getMemoryStore() {
       runs: new Map(),
       campaigns: new Map(),
       imageBase64: new Map(),
+      brands: new Map(),
     };
   }
   return globalThis.__backfireStore;
@@ -51,7 +63,7 @@ export function getCampaignImageBase64(campaignId: string): string | undefined {
 }
 
 function memorySaveCampaign(
-  input: CampaignInput & { id: string; imageUrl?: string }
+  input: CampaignInput & { id: string; imageUrl?: string; createdAt: string }
 ): void {
   getMemoryStore().campaigns.set(input.id, input);
 }
@@ -141,11 +153,13 @@ export async function createCampaignAndRun(
   const campaignId = crypto.randomUUID();
   memorySaveCampaign({
     id: campaignId,
+    brandId: input.brandId,
     slogan: input.slogan.trim(),
     brandValues: input.brandValues?.trim(),
     brief: input.brief?.trim(),
     imageUrl: input.imageUrl,
     imageBase64: input.imageBase64,
+    createdAt: new Date().toISOString(),
   });
   if (input.imageBase64) {
     saveCampaignImageBase64(campaignId, input.imageBase64);
@@ -176,6 +190,19 @@ export async function saveVerdicts(
     return;
   }
   memoryUpdateRun(runId, { verdicts, status: "running" });
+}
+
+export async function saveStressMap(
+  supabase: SupabaseClient | null,
+  runId: string,
+  stressMap: CulturalStressMap,
+  userId?: string | null
+): Promise<void> {
+  if (supabase) {
+    await dbSaveStressMap(supabase, runId, stressMap, userId ?? undefined);
+    return;
+  }
+  memoryUpdateRun(runId, { culturalStressMap: stressMap });
 }
 
 export async function saveImageDescription(
@@ -223,6 +250,118 @@ export async function listRuns(
     const campaign = getMemoryStore().campaigns.get(run.campaignId);
     return { ...run, campaign };
   });
+}
+
+export async function listPastCampaigns(
+  supabase: SupabaseClient | null,
+  brand: Brand | null,
+  excludeCampaignId: string,
+  limit: number
+): Promise<PastCampaignSnapshot[]> {
+  if (!brand) return [];
+
+  if (supabase) {
+    return dbListPastCampaigns(supabase, brand, excludeCampaignId, limit);
+  }
+
+  const completedCampaignIds = new Set(
+    Array.from(getMemoryStore().runs.values())
+      .filter((run) => run.status === "complete")
+      .map((run) => run.campaignId)
+  );
+
+  const campaigns = Array.from(getMemoryStore().campaigns.values())
+    .filter(
+      (c) =>
+        c.brandId === brand.id &&
+        c.id !== excludeCampaignId &&
+        c.createdAt >= brand.createdAt &&
+        completedCampaignIds.has(c.id)
+    )
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+    .slice(0, limit);
+
+  return campaigns.map((c) => ({
+    slogan: c.slogan,
+    brandValues: c.brandValues,
+    brief: c.brief,
+    createdAt: c.createdAt,
+  }));
+}
+
+export async function createBrand(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  input: { name: string; description?: string; statedValues?: string }
+): Promise<Brand> {
+  if (supabase && userId) {
+    return dbCreateBrand(supabase, userId, input);
+  }
+  const brand: Brand = {
+    id: crypto.randomUUID(),
+    name: input.name.trim(),
+    description: input.description?.trim() || undefined,
+    statedValues: input.statedValues?.trim() || undefined,
+    createdAt: new Date().toISOString(),
+  };
+  getMemoryStore().brands.set(brand.id, brand);
+  return brand;
+}
+
+export async function listBrands(
+  supabase: SupabaseClient | null,
+  userId: string | null
+): Promise<Brand[]> {
+  if (supabase && userId) {
+    return dbListBrands(supabase, userId);
+  }
+  return Array.from(getMemoryStore().brands.values()).sort((a, b) =>
+    a.createdAt < b.createdAt ? 1 : -1
+  );
+}
+
+export async function getBrand(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  brandId: string
+): Promise<Brand | null> {
+  if (supabase && userId) {
+    return dbGetBrand(supabase, userId, brandId);
+  }
+  return getMemoryStore().brands.get(brandId) ?? null;
+}
+
+export async function deleteBrand(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  brandId: string
+): Promise<void> {
+  if (supabase && userId) {
+    await dbDeleteBrand(supabase, userId, brandId);
+    return;
+  }
+  getMemoryStore().brands.delete(brandId);
+  for (const [id, campaign] of getMemoryStore().campaigns) {
+    if (campaign.brandId === brandId) {
+      getMemoryStore().campaigns.set(id, { ...campaign, brandId: undefined });
+    }
+  }
+}
+
+export async function deleteRun(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  runId: string
+): Promise<boolean> {
+  if (supabase && userId) {
+    return dbDeleteRun(supabase, userId, runId);
+  }
+  const run = getMemoryStore().runs.get(runId);
+  if (!run) return false;
+  getMemoryStore().runs.delete(runId);
+  getMemoryStore().campaigns.delete(run.campaignId);
+  getMemoryStore().imageBase64.delete(run.campaignId);
+  return true;
 }
 
 export async function markRunFailed(
