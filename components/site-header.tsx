@@ -67,7 +67,7 @@ export function SiteHeader() {
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
+      <div className="flex w-full items-center justify-between gap-4 px-5 py-3.5 md:px-8">
         <Link href="/" className="group flex items-center gap-3 no-underline">
           <Logo />
           <div className="flex flex-col">

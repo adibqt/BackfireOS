@@ -17,7 +17,6 @@ function isPublicPath(pathname: string) {
 }
 
 function isProtectedPath(pathname: string) {
-  if (pathname === "/") return true;
   if (pathname.startsWith("/runs")) return true;
   if (pathname.startsWith("/history")) return true;
   if (pathname.startsWith("/api/campaigns")) return true;
