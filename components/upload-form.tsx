@@ -52,7 +52,7 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
         fetch("/api/simulate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ runId }),
+          body: JSON.stringify({ runId, imageBase64 }),
         }).then(async (res) => {
           if (!res.ok || !res.body) {
             reject(new Error("Simulation failed"));

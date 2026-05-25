@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { resolveDbContext } from "@/lib/supabase/persistence";
 import {
-  createRun,
+  attachImageBase64,
+  createCampaignAndRun,
+  getCampaignImageBase64,
   getRun,
-  saveCampaign,
+  listRuns,
 } from "@/lib/store";
 import type { CampaignInput } from "@/lib/agents/types";
 
@@ -13,21 +16,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Slogan is required" }, { status: 400 });
     }
 
-    const campaignId = crypto.randomUUID();
-    saveCampaign({
-      id: campaignId,
-      slogan: body.slogan.trim(),
-      brandValues: body.brandValues?.trim(),
-      brief: body.brief?.trim(),
-      imageUrl: body.imageUrl,
-      imageBase64: body.imageBase64,
-    });
+    const ctx = await resolveDbContext();
+    if (ctx.mode === "unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (ctx.mode === "db_unconfigured") {
+      return NextResponse.json(
+        { error: "Database persistence is not configured" },
+        { status: 503 }
+      );
+    }
 
-    const run = createRun(campaignId);
-    return NextResponse.json({
-      campaignId,
-      runId: run.id,
-    });
+    const supabase = ctx.mode === "db" ? ctx.supabase : null;
+    const userId = ctx.mode === "db" ? ctx.userId : null;
+
+    const { campaignId, runId } = await createCampaignAndRun(
+      supabase,
+      userId,
+      body
+    );
+
+    return NextResponse.json({ campaignId, runId });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to create campaign" },
@@ -37,15 +46,47 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const runId = request.nextUrl.searchParams.get("runId");
-  if (!runId) {
-    return NextResponse.json({ error: "runId required" }, { status: 400 });
-  }
+  try {
+    const runId = request.nextUrl.searchParams.get("runId");
+    const list = request.nextUrl.searchParams.get("list");
 
-  const run = getRun(runId);
-  if (!run) {
-    return NextResponse.json({ error: "Run not found" }, { status: 404 });
-  }
+    const ctx = await resolveDbContext();
+    if (ctx.mode === "unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (ctx.mode === "db_unconfigured") {
+      return NextResponse.json(
+        { error: "Database persistence is not configured" },
+        { status: 503 }
+      );
+    }
 
-  return NextResponse.json(run);
+    const supabase = ctx.mode === "db" ? ctx.supabase : null;
+    const userId = ctx.mode === "db" ? ctx.userId : null;
+
+    if (list === "true") {
+      const runs = await listRuns(supabase, userId);
+      return NextResponse.json({ runs });
+    }
+
+    if (!runId) {
+      return NextResponse.json({ error: "runId required" }, { status: 400 });
+    }
+
+    const run = await getRun(supabase, runId, userId);
+    if (!run) {
+      return NextResponse.json({ error: "Run not found" }, { status: 404 });
+    }
+
+    const imageBase64 = getCampaignImageBase64(run.campaignId);
+    return NextResponse.json(attachImageBase64(run, imageBase64));
+  } catch (error) {
+    console.error("GET /api/campaigns failed:", error);
+    const message = error instanceof Error ? error.message : "Failed to load runs";
+    const hint =
+      message.includes("permission denied") ?
+        "Run supabase/fix-grants.sql in the Supabase SQL Editor, then reload."
+      : message;
+    return NextResponse.json({ error: hint }, { status: 500 });
+  }
 }

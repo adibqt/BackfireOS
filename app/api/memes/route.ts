@@ -3,6 +3,7 @@ import type { AgentVerdict } from "@/lib/agents/types";
 import { generateMemes } from "@/lib/memes";
 import { computeScores } from "@/lib/scoring";
 import { completeRun, getRun } from "@/lib/store";
+import { resolveDbContext } from "@/lib/supabase/persistence";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -14,7 +15,21 @@ export async function POST(request: NextRequest) {
       verdicts?: AgentVerdict[];
     };
 
-    const run = getRun(body.runId);
+    const ctx = await resolveDbContext();
+    if (ctx.mode === "unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (ctx.mode === "db_unconfigured") {
+      return NextResponse.json(
+        { error: "Database persistence is not configured" },
+        { status: 503 }
+      );
+    }
+
+    const supabase = ctx.mode === "db" ? ctx.supabase : null;
+    const userId = ctx.mode === "db" ? ctx.userId : null;
+
+    const run = await getRun(supabase, body.runId, userId);
     if (!run?.campaign) {
       return NextResponse.json({ error: "Run not found" }, { status: 404 });
     }
@@ -33,7 +48,14 @@ export async function POST(request: NextRequest) {
       run.campaign.brandValues ?? ""
     );
 
-    const completed = completeRun(body.runId, scores, memes, imageWarning);
+    const completed = await completeRun(
+      supabase,
+      userId,
+      body.runId,
+      scores,
+      memes,
+      imageWarning
+    );
 
     return NextResponse.json({
       run: completed,

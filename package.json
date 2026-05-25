@@ -9,7 +9,8 @@
     "lint": "eslint",
     "download:bnsentmix": "tsx scripts/download-bnsentmix.ts",
     "seed:bnsentmix": "tsx scripts/seed-bnsentmix.ts",
-    "test:pollinations": "tsx scripts/test-pollinations-image.ts"
+    "test:pollinations": "tsx scripts/test-pollinations-image.ts",
+    "test:db": "tsx scripts/test-db-access.ts"
   },
   "dependencies": {
     "@google/genai": "^2.6.0",

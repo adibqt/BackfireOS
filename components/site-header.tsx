@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AuthButton } from "./auth-button";
 import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
 
@@ -17,6 +18,7 @@ export function SiteHeader() {
           <p className="text-sm text-zinc-400">{t(locale, "tagline")}</p>
         </div>
         <div className="flex items-center gap-3">
+          <AuthButton />
           <nav className="hidden gap-3 text-sm text-zinc-300 md:flex">
             <Link href="/heatmap" className="hover:text-white">
               {t(locale, "heatmap")}

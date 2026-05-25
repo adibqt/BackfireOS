@@ -49,9 +49,26 @@ See [.env.example](./.env.example).
 | `GEMINI_API_KEY` | Recommended | Agents, meme captions, vision, RAG embeddings |
 | `POLLINATIONS_API_KEY` | Recommended | Meme images via Pollinations (Flux) |
 | `GEMINI_IMAGE_API_KEY` | Optional | Fallback meme images if Pollinations fails |
-| Supabase keys | Optional | pgvector semantic RAG + persistence schema |
+| `NEXT_PUBLIC_SUPABASE_URL` | For auth + persistence | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For auth + persistence | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional | pgvector RAG seeding (server-only) |
 
 Demo mode works without keys using mock responses and placeholder images.
+
+When Supabase auth keys are set, sign-in is required and all simulations/memes are persisted to the database.
+
+## Supabase setup (auth + persistence)
+
+```powershell
+# 1. Run supabase/schema.sql in Supabase SQL Editor
+# 2. Run supabase/migrate-auth.sql for RLS + storage buckets
+# 3. If History shows "permission denied", run supabase/fix-grants.sql
+# 4. Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local
+# 5. (Optional) SUPABASE_SERVICE_ROLE_KEY for RAG seeding
+pnpm dev
+```
+
+Disable email confirmation in Supabase Auth settings for faster local testing.
 
 ## BnSentMix RAG (optional)
 

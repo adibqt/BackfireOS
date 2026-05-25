@@ -5,16 +5,19 @@ create extension if not exists vector;
 
 create table if not exists campaigns (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
   slogan text not null,
   brand_values text,
   brief text,
   image_url text,
+  image_description text,
   created_at timestamptz default now()
 );
 
 create table if not exists simulation_runs (
   id uuid primary key default gen_random_uuid(),
   campaign_id uuid references campaigns(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   status text default 'pending',
   backfire_score numeric,
   resonance numeric,
@@ -22,6 +25,7 @@ create table if not exists simulation_runs (
   memeability numeric,
   brand_safety_drift numeric,
   polarization_coefficient numeric,
+  image_warning text,
   created_at timestamptz default now()
 );
 
@@ -43,6 +47,7 @@ create table if not exists memes (
   caption text not null,
   image_url text,
   memeability_score integer check (memeability_score between 0 and 100),
+  image_fallback boolean default false,
   created_at timestamptz default now()
 );
 
