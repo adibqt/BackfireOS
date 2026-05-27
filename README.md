@@ -45,7 +45,7 @@ Legend: ✅ live (in `main`) · 🟡 in progress · ⏳ planned · 🧪 experime
 | Core | Bangla / English UI toggle | ✅ | `lib/i18n.ts` |
 | RAG | BnSentMix Banglish RAG (pgvector) | ✅ | `lib/rag.ts`, fallback in `lib/bnsentmix-data.ts` |
 | RAG | 20K-row BnSentMix seed pipeline | ✅ | `scripts/seed-bnsentmix.ts` |
-| Vision | Multimodal campaign visual parsing | ✅ | Gemini 2.0 Flash |
+| Vision | Multimodal campaign visual parsing | ✅ | Gemini 3.5 Flash |
 | Brands | Brand entities (canonical values + history) | ✅ | `app/api/brands`, `supabase/migrate-brands.sql` |
 | Brands | Brand Purist agent (consistency audit) | ✅ | `lib/agents/definitions.ts:150` |
 | Maps | Cultural Stress Heatmap (geo + demographic) | ✅ | `components/cultural-heatmap.tsx`, `components/world-stress-map.tsx` |
@@ -111,7 +111,7 @@ flowchart TD
 
     ORCH --> A1 & A2 & A3 & A4 & A5 & A6
 
-    A1 & A2 & A3 & A4 & A5 & A6 --> LLM[Gemini 2.0 Flash<br/>structured JSON verdicts]
+    A1 & A2 & A3 & A4 & A5 & A6 --> LLM[Gemini 3.5 Flash<br/>structured JSON verdicts]
 
     MEME --> LLM
     MEME --> IMG[Pollinations / Flux Schnell<br/>image generation]
@@ -155,7 +155,7 @@ flowchart LR
 
     subgraph AI[AI Layer]
         AI1[6 agent prompts<br/>built in parallel]
-        AI2[Gemini 2.0 Flash<br/>structured JSON]
+        AI2[Gemini 3.5 Flash<br/>structured JSON]
         AI3[Score aggregator<br/>weighted mean &amp; stdev]
         AI4[Meme mutator<br/>4 captions + images]
         AI5[Cultural stress map<br/>geo + demographic]
@@ -214,8 +214,8 @@ flowchart LR
 - **Fallback:** in-memory store (`lib/store.ts`) when Supabase keys absent
 
 ### AI Stack
-- **LLM:** Google Gemini 2.0 Flash via `@google/genai` and `@google/generative-ai`
-- **Vision:** Gemini 2.0 Flash (multimodal — same model)
+- **LLM:** Google Gemini 3.5 Flash via `@google/genai` and `@google/generative-ai`
+- **Vision:** Gemini 3.5 Flash (multimodal — same model)
 - **Embeddings:** Gemini `text-embedding-004` (768 dim)
 - **Image generation:** Pollinations.ai (Flux) primary, Gemini image fallback
 - **RAG corpus:** BnSentMix (~20K Banglish samples) — see `scripts/download-bnsentmix.ts`, `scripts/seed-bnsentmix.ts`
@@ -278,7 +278,7 @@ Clear Supabase session cookies.
 ### APIs consumed (outbound)
 | Service | Used for | File |
 |---|---|---|
-| Google Gemini `gemini-2.0-flash` | Agent verdicts, vision, meme captions | `lib/gemini.ts` |
+| Google Gemini `gemini-3.5-flash` | Agent verdicts, vision, meme captions | `lib/gemini.ts` |
 | Google Gemini `text-embedding-004` | RAG query + seed embeddings | `lib/rag.ts`, `scripts/seed-bnsentmix.ts` |
 | Pollinations.ai (Flux) | Meme image generation | `lib/pollinations.ts` |
 | Gemini image generation | Meme image fallback | `lib/meme-fallback.ts` |
@@ -327,10 +327,10 @@ Clear Supabase session cookies.
 ### Models
 | Role | Model | Provider |
 |---|---|---|
-| Agent reasoning (all 6 personas) | `gemini-2.0-flash` | Google AI |
-| Vision (campaign image → description) | `gemini-2.0-flash` (multimodal) | Google AI |
+| Agent reasoning (all 6 personas) | `gemini-3.5-flash` | Google AI |
+| Vision (campaign image → description) | `gemini-3.5-flash` (multimodal) | Google AI |
 | Embeddings | `text-embedding-004` (768 dim) | Google AI |
-| Meme captions | `gemini-2.0-flash` | Google AI |
+| Meme captions | `gemini-3.5-flash` | Google AI |
 | Meme images (primary) | Flux Schnell via Pollinations | Pollinations.ai |
 | Meme images (fallback) | Gemini image generation | Google AI |
 
