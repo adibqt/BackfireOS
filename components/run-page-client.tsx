@@ -7,6 +7,7 @@ import {
   CulturalHeatmapEmpty,
 } from "@/components/cultural-heatmap";
 import { MemeGrid } from "@/components/meme-grid";
+import { PolarizationGraph } from "@/components/polarization-graph";
 import { ScoreDashboard } from "@/components/score-dashboard";
 import { ScoreRadar } from "@/components/score-radar";
 import { PageShell } from "@/components/page-shell";
@@ -178,6 +179,43 @@ export default function RunPageClient({ id }: { id: string }) {
         <ScoreDashboard scores={run.scores} labels={labels} />
       </section>
 
+      {/* Verdicts */}
+      <section className="mb-16">
+        <SectionHeader
+          eyebrow="Red team"
+          title={t(locale, "agentVerdicts")}
+          description="Tap any agent to read its reasoning and sample attack."
+        />
+        <div className="space-y-3">
+          {(run.verdicts ?? []).map((verdict, i) => (
+            <div key={verdict.agentId} className="fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+              <AgentVerdictCard
+                verdict={verdict}
+                labels={{
+                  severity: labels.severity,
+                  reasoning: labels.reasoning,
+                  sampleAttack: labels.sampleAttack,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Polarization network */}
+      <section className="mb-16">
+        <SectionHeader
+          eyebrow="Polarization"
+          title="Co-amplification network"
+          description="Each circle is a simulated critic of your campaign. Lines connect critics who are hitting the same weakness — those overlaps are where real-world pile-ons start."
+        />
+        <PolarizationGraph
+          verdicts={run.verdicts ?? []}
+          polarizationCoefficient={run.scores.polarizationCoefficient}
+          campaignSlogan={run.campaign?.slogan ?? "Campaign"}
+        />
+      </section>
+
       {/* Cultural stress map */}
       <section className="mb-16">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -202,29 +240,6 @@ export default function RunPageClient({ id }: { id: string }) {
         ) : (
           <CulturalHeatmapEmpty locale={locale} />
         )}
-      </section>
-
-      {/* Verdicts */}
-      <section className="mb-16">
-        <SectionHeader
-          eyebrow="Red team"
-          title={t(locale, "agentVerdicts")}
-          description="Tap any agent to read its reasoning and sample attack."
-        />
-        <div className="space-y-3">
-          {(run.verdicts ?? []).map((verdict, i) => (
-            <div key={verdict.agentId} className="fade-up" style={{ animationDelay: `${i * 60}ms` }}>
-              <AgentVerdictCard
-                verdict={verdict}
-                labels={{
-                  severity: labels.severity,
-                  reasoning: labels.reasoning,
-                  sampleAttack: labels.sampleAttack,
-                }}
-              />
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* Memes */}
