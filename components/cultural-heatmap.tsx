@@ -393,14 +393,9 @@ export function CulturalHeatmap({
         })}
       </div>
 
-      <div className={cn("grid gap-4", compact ? "lg:grid-cols-2" : "lg:grid-cols-[1.1fr_0.9fr]")}>
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Market cards grid */}
-        <div
-          className={cn(
-            "grid gap-2.5",
-            compact ? "sm:grid-cols-2" : "sm:grid-cols-2 xl:grid-cols-2",
-          )}
-        >
+        <div className="grid gap-2.5 sm:grid-cols-2">
           {regionStresses.map((stress) => (
             <MarketCard
               key={stress.marketId}
@@ -413,8 +408,8 @@ export function CulturalHeatmap({
           ))}
         </div>
 
-        {/* Detail panel (non-compact only) */}
-        {!compact && selectedStress && (
+        {/* Detail panel */}
+        {selectedStress && (
           <DetailPanel stress={selectedStress} locale={locale} />
         )}
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { AuthButton } from "./auth-button";
 import { useLanguage } from "./language-provider";
 import { LogoBadge } from "./logo";
@@ -23,6 +23,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/post-mortem", key: "postMortem" },
 ];
 
+// Pages that carry runId as a query param
+const RUN_AWARE_PATHS = new Set(["/heatmap", "/branches", "/boardroom", "/post-mortem"]);
+
 function HeaderLogo() {
   return (
     <div className="relative">
@@ -32,11 +35,55 @@ function HeaderLogo() {
   );
 }
 
-export function SiteHeader() {
+type Pill = { left: number; top: number; width: number; height: number };
+
+function SiteHeaderInner() {
   const { locale, setLocale } = useLanguage();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [pill, setPill] = useState<Pill | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Run ID from path (/runs/[id]) or from query string on any run-aware page
+  const runIdFromPath = pathname?.match(/^\/runs\/([^/]+)/)?.[1] ?? null;
+  const runIdFromQuery = RUN_AWARE_PATHS.has(pathname ?? "")
+    ? (searchParams.get("runId") ?? null)
+    : null;
+  const activeRunId = runIdFromPath ?? runIdFromQuery;
+
+  function resolveHref(href: string): string {
+    if (!activeRunId) return href;
+    if (href === "/") {
+      // On /runs/[id] stay on the run; from any run-aware page go back to the run
+      return runIdFromPath ? (pathname ?? href) : `/runs/${activeRunId}`;
+    }
+    if (RUN_AWARE_PATHS.has(href)) return `${href}?runId=${activeRunId}`;
+    return href;
+  }
+
+  function isActive(href: string): boolean {
+    // "Simulate" is only highlighted when directly on a /runs/[id] page
+    if (runIdFromPath && href === "/") return true;
+    return pathname === href || (href !== "/" && pathname?.startsWith(href));
+  }
+
+  // Measure active nav item and update sliding pill position
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const active = nav.querySelector<HTMLElement>('[data-active="true"]');
+    if (!active) { setPill(null); return; }
+    const navRect = nav.getBoundingClientRect();
+    const elRect = active.getBoundingClientRect();
+    setPill({
+      left: elRect.left - navRect.left,
+      top: elRect.top - navRect.top,
+      width: elRect.width,
+      height: elRect.height,
+    });
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -68,16 +115,26 @@ export function SiteHeader() {
         </Link>
 
         <nav
-          className="hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-elev-1)]/60 p-1 backdrop-blur lg:flex"
+          ref={navRef}
+          className="relative hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-elev-1)]/60 p-1 backdrop-blur lg:flex"
           aria-label="Main"
         >
+          {/* Sliding active pill */}
+          {pill && (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute rounded-full bg-white/[0.06] transition-[left,top,width,height] duration-200 ease-out"
+              style={{ left: pill.left, top: pill.top, width: pill.width, height: pill.height }}
+            />
+          )}
+
           {NAV_ITEMS.map(({ href, key, labelOverride }) => {
-            const active =
-              pathname === href || (href !== "/" && pathname?.startsWith(href));
+            const active = isActive(href);
             return (
               <Link
                 key={href}
-                href={href}
+                href={resolveHref(href)}
+                data-active={String(active)}
                 className={cn(
                   "relative rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-200",
                   active
@@ -85,9 +142,6 @@ export function SiteHeader() {
                     : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
                 )}
               >
-                {active && (
-                  <span className="absolute inset-0 rounded-full bg-white/[0.06]" />
-                )}
                 <span className="relative">
                   {labelOverride ?? t(locale, key as Exclude<typeof key, "home">)}
                 </span>
@@ -150,11 +204,11 @@ export function SiteHeader() {
         >
           <div className="flex flex-col gap-1">
             {NAV_ITEMS.map(({ href, key, labelOverride }) => {
-              const active = pathname === href;
+              const active = isActive(href);
               return (
                 <Link
                   key={href}
-                  href={href}
+                  href={resolveHref(href)}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "rounded-lg px-3 py-2.5 text-sm transition-colors",
@@ -183,5 +237,13 @@ export function SiteHeader() {
         </nav>
       )}
     </header>
+  );
+}
+
+export function SiteHeader() {
+  return (
+    <Suspense fallback={null}>
+      <SiteHeaderInner />
+    </Suspense>
   );
 }

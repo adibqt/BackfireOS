@@ -400,7 +400,20 @@ export async function dbListRuns(
 ): Promise<SimulationRun[]> {
   const { data, error } = await supabase
     .from("simulation_runs")
-    .select("id")
+    .select(
+      `id,
+       campaign_id,
+       status,
+       created_at,
+       backfire_score,
+       resonance,
+       backfire_risk,
+       memeability,
+       brand_safety_drift,
+       polarization_coefficient,
+       campaigns!campaign_id (id, slogan, brand_id, brand_values, brief, image_url, image_description),
+       memes (caption)`
+    )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -408,12 +421,41 @@ export async function dbListRuns(
   if (error) throw new Error(error.message);
   if (!data) return [];
 
-  const runs: SimulationRun[] = [];
-  for (const row of data) {
-    const run = await dbGetRun(supabase, row.id, userId);
-    if (run) runs.push(run);
-  }
-  return runs;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data as any[]).map((row) => {
+    const c = row.campaigns;
+    return {
+      id: row.id,
+      campaignId: row.campaign_id,
+      status: row.status as SimulationRun["status"],
+      scores: row.backfire_score != null ? {
+        backfireScore: Number(row.backfire_score),
+        resonance: Number(row.resonance),
+        backfireRisk: Number(row.backfire_risk),
+        memeability: Number(row.memeability),
+        brandSafetyDrift: Number(row.brand_safety_drift),
+        polarizationCoefficient: Number(row.polarization_coefficient),
+      } : undefined,
+      campaign: c ? {
+        id: c.id,
+        slogan: c.slogan,
+        brandId: c.brand_id ?? undefined,
+        brandValues: c.brand_values ?? undefined,
+        brief: c.brief ?? undefined,
+        imageUrl: c.image_url ?? undefined,
+        imageDescription: c.image_description ?? undefined,
+      } : undefined,
+      memes: Array.isArray(row.memes)
+        ? row.memes.map((m: { caption: string }) => ({
+            caption: m.caption,
+            imageUrl: "",
+            memeabilityScore: 0,
+            imageFallback: false,
+          }))
+        : undefined,
+      createdAt: row.created_at,
+    } satisfies SimulationRun;
+  });
 }
 
 type DbPastCampaign = {

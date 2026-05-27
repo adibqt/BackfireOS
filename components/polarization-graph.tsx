@@ -147,11 +147,35 @@ export function PolarizationGraph({
   campaignSlogan: string;
 }) {
   const p = useProgress();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   if (verdicts.length === 0) return null;
 
   const { nodes, edges } = buildGraph(verdicts, campaignSlogan);
   const byId = new Map(nodes.map((n) => [n.id, n]));
+
+  const connectedTo = selectedId
+    ? new Set(
+        edges.flatMap((e) =>
+          e.src === selectedId ? [e.tgt] : e.tgt === selectedId ? [e.src] : []
+        )
+      )
+    : null;
+
+  function nodeAlpha(nodeId: string): number {
+    if (!selectedId) return 1;
+    if (nodeId === selectedId || connectedTo?.has(nodeId)) return 1;
+    return 0.1;
+  }
+
+  function edgeAlpha(e: GraphEdge): number {
+    if (!selectedId) return 1;
+    return e.src === selectedId || e.tgt === selectedId ? 1 : 0;
+  }
+
+  function toggleNode(nodeId: string) {
+    setSelectedId((prev) => (prev === nodeId ? null : nodeId));
+  }
 
   const crossEdges = edges
     .filter((e) => e.kind !== "spoke")
@@ -190,6 +214,8 @@ export function PolarizationGraph({
             className="h-auto w-full"
             role="img"
             aria-label="Agent co-amplification network graph"
+            onClick={() => setSelectedId(null)}
+            style={{ cursor: selectedId ? "default" : "default" }}
           >
             <defs>
               <filter id="pgNodeGlow" x="-40%" y="-40%" width="180%" height="180%">
@@ -235,8 +261,9 @@ export function PolarizationGraph({
                     x2={CX + (tgt.x - CX) * p}
                     y2={CY + (tgt.y - CY) * p}
                     stroke={color}
-                    strokeOpacity={0.14 + e.weight * 0.22}
+                    strokeOpacity={(0.14 + e.weight * 0.22) * edgeAlpha(e)}
                     strokeWidth={1 + e.weight * 2.2}
+                    style={{ transition: "stroke-opacity 0.2s" }}
                   />
                 );
               })}
@@ -265,11 +292,13 @@ export function PolarizationGraph({
                     stroke={isCitation ? "var(--accent)" : "var(--fg-muted)"}
                     strokeOpacity={
                       (isCitation ? 0.45 + e.weight * 0.35 : 0.18 + e.weight * 0.22) *
-                      crossOpacity
+                      crossOpacity *
+                      edgeAlpha(e)
                     }
                     strokeWidth={isCitation ? 1.5 : 1}
                     strokeDasharray={e.kind === "proximity" ? "3 4" : undefined}
                     filter={isCitation ? "url(#pgEdgeGlow)" : undefined}
+                    style={{ transition: "stroke-opacity 0.2s" }}
                   />
                 );
               })}
@@ -280,17 +309,42 @@ export function PolarizationGraph({
               .map((n) => {
                 const color = severityColor(n.severity);
                 const soft = severitySoft(n.severity);
+                const isSelected = selectedId === n.id;
+                const isHighlighted = !selectedId || isSelected || connectedTo?.has(n.id);
                 return (
-                  <g key={n.id} style={{ opacity: p }}>
-                    <circle cx={n.x} cy={n.y} r={AGENT_R + 7} fill={color} fillOpacity={0.06} />
+                  <g
+                    key={n.id}
+                    style={{ opacity: p * nodeAlpha(n.id), cursor: "pointer", transition: "opacity 0.2s" }}
+                    onClick={(evt) => { evt.stopPropagation(); toggleNode(n.id); }}
+                  >
+                    {/* selection / connection ring */}
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={AGENT_R + 7}
+                      fill={color}
+                      fillOpacity={isHighlighted ? (isSelected ? 0.18 : 0.06) : 0.06}
+                    />
+                    {isSelected && (
+                      <circle
+                        cx={n.x}
+                        cy={n.y}
+                        r={AGENT_R + 10}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={1.5}
+                        strokeOpacity={0.55}
+                        strokeDasharray="4 3"
+                      />
+                    )}
                     <circle
                       cx={n.x}
                       cy={n.y}
                       r={AGENT_R}
                       fill={soft}
                       stroke={color}
-                      strokeWidth={1.5}
-                      strokeOpacity={0.65}
+                      strokeWidth={isHighlighted ? 2 : 1.5}
+                      strokeOpacity={isHighlighted ? 0.9 : 0.65}
                       filter="url(#pgNodeGlow)"
                     />
                     <text
@@ -322,16 +376,31 @@ export function PolarizationGraph({
               })}
 
             {/* Center campaign node */}
-            <g style={{ opacity: p }}>
-              <circle cx={CX} cy={CY} r={CENTER_R + 9} fill="var(--accent)" fillOpacity={0.07} />
+            <g
+              style={{ opacity: p * nodeAlpha("campaign"), cursor: "pointer", transition: "opacity 0.2s" }}
+              onClick={(evt) => { evt.stopPropagation(); toggleNode("campaign"); }}
+            >
+              <circle cx={CX} cy={CY} r={CENTER_R + 9} fill="var(--accent)" fillOpacity={selectedId === "campaign" ? 0.15 : 0.07} />
+              {selectedId === "campaign" && (
+                <circle
+                  cx={CX}
+                  cy={CY}
+                  r={CENTER_R + 13}
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth={1.5}
+                  strokeOpacity={0.45}
+                  strokeDasharray="4 3"
+                />
+              )}
               <circle
                 cx={CX}
                 cy={CY}
                 r={CENTER_R}
                 fill="var(--bg-elev-2)"
                 stroke="var(--accent)"
-                strokeWidth={1.5}
-                strokeOpacity={0.5}
+                strokeWidth={selectedId === "campaign" ? 2 : 1.5}
+                strokeOpacity={selectedId === "campaign" ? 0.85 : 0.5}
               />
               <text
                 x={CX}
