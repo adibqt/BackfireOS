@@ -12,6 +12,12 @@ import {
   MARKET_CATALOG,
   MARKET_IDS,
 } from "./markets/catalog";
+import {
+  buildMarketTriggers,
+  hashString,
+  MARKET_PROFILES,
+  pickVariant,
+} from "./markets/profiles";
 import { generateJson, isGeminiConfigured } from "./gemini";
 
 interface RawStressMap {
@@ -31,14 +37,6 @@ function clampSeverity(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function hashString(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h * 31 + s.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h);
-}
-
 function formatVerdicts(verdicts: AgentVerdict[]): string {
   return verdicts
     .map(
@@ -48,85 +46,72 @@ function formatVerdicts(verdicts: AgentVerdict[]): string {
     .join("\n\n");
 }
 
-function normalizeStressMap(raw: RawStressMap): CulturalStressMap {
+function normalizeStressMap(
+  raw: RawStressMap,
+  fallback: CulturalStressMap
+): CulturalStressMap {
+  const fallbackById = new Map(fallback.markets.map((m) => [m.marketId, m]));
+
   const byId = new Map(
     raw.markets
       .filter((m) => MARKET_IDS.has(m.market_id))
-      .map((m) => [
-        m.market_id,
-        {
+      .map((m) => {
+        const cleaned: MarketStress = {
           marketId: m.market_id,
           severity: clampSeverity(m.severity),
-          summary: m.summary.trim(),
+          summary: (m.summary ?? "").trim(),
           triggers: (m.triggers ?? [])
-            .filter((t) => t.type === "copy" || t.type === "visual")
+            .filter((t) => t && (t.type === "copy" || t.type === "visual"))
             .map(
               (t): CulturalTrigger => ({
                 type: t.type,
-                text: t.text.trim(),
-                reason: t.reason.trim(),
+                text: (t.text ?? "").trim(),
+                reason: (t.reason ?? "").trim(),
               })
             )
             .filter((t) => t.text && t.reason),
-        } satisfies MarketStress,
-      ])
+        };
+
+        // If the LLM left summary blank OR returned the same generic
+        // "campaign reads as culturally misaligned" line for many markets,
+        // splice in the rich market-specific summary from our profile.
+        const fb = fallbackById.get(m.market_id);
+        if (fb && (!cleaned.summary || cleaned.summary.length < 24)) {
+          cleaned.summary = fb.summary;
+        }
+
+        // If the LLM omitted triggers for a flagged market, use ours.
+        if (cleaned.severity >= 40 && cleaned.triggers.length === 0 && fb) {
+          cleaned.triggers = fb.triggers;
+        }
+
+        return [m.market_id, cleaned] as const;
+      })
   );
 
   const markets: MarketStress[] = MARKET_CATALOG.map((def) => {
     const existing = byId.get(def.id);
     if (existing) return existing;
-    return {
-      marketId: def.id,
-      severity: 25,
-      summary: "No major cultural tripwires detected for this market.",
-      triggers: [],
-    };
+    // Market missing from LLM response — use the profile-driven fallback
+    // (rich summary + triggers) instead of a generic placeholder.
+    return (
+      fallbackById.get(def.id) ?? {
+        marketId: def.id,
+        severity: 25,
+        summary: "No major cultural tripwires detected for this market.",
+        triggers: [],
+      }
+    );
   });
 
   return { markets };
 }
 
-const REGION_TRIGGERS: Record<
-  MacroRegion,
-  Array<{ type: "copy" | "visual"; textTemplate: string; reason: string }>
-> = {
-  south_asia: [
-    {
-      type: "copy",
-      textTemplate: "{slogan}",
-      reason: "Metro-centric Banglish tone may not land in non-urban or non-Dhaka audiences.",
-    },
-    {
-      type: "visual",
-      textTemplate: "Urban elite casting in campaign visual",
-      reason: "Class and regional representation gap typical in South Asian ad backlash.",
-    },
-  ],
-  mena: [
-    {
-      type: "copy",
-      textTemplate: "{slogan}",
-      reason: "Casual or scarcity-driven copy can clash with conservative or regulatory-sensitive MENA norms.",
-    },
-    {
-      type: "visual",
-      textTemplate: "Mixed-gender or Westernized visual framing",
-      reason: "Gender and modesty expectations vary sharply across MENA markets.",
-    },
-  ],
-  sea: [
-    {
-      type: "copy",
-      textTemplate: "{slogan}",
-      reason: "English-heavy or US-centric phrasing often underperforms in local SEA social discourse.",
-    },
-    {
-      type: "visual",
-      textTemplate: "Non-local setting or skin-tone mismatch in hero visual",
-      reason: "SEA audiences flag campaigns that feel imported rather than locally rooted.",
-    },
-  ],
-};
+function severityTier(severity: number): "high" | "medium" | "low" {
+  if (severity >= 70) return "high";
+  if (severity >= 40) return "medium";
+  return "low";
+}
 
 function mockStressMap(
   campaign: CampaignInput,
@@ -137,65 +122,61 @@ function mockStressMap(
   const lower = slogan.toLowerCase();
   const baseHash = hashString(slogan);
   const maxAgentSeverity = Math.max(...verdicts.map((v) => v.severity), 50);
-  const hasVisual = Boolean(campaign.imageBase64 || campaign.imageUrl || imageDescription.length > 20);
-
-  const keywordBoosts: Record<string, string[]> = {
-    dhaka: ["sylhet", "chittagong", "rural_bd", "kolkata", "karachi"],
-    price: ["karachi", "lahore", "cairo", "jakarta", "manila"],
-    limited: ["riyadh", "dubai", "cairo", "karachi"],
-    cash: ["dubai", "singapore", "riyadh"],
-    bKash: ["mumbai", "delhi", "colombo"],
-    meme: ["dhaka", "jakarta", "manila", "bangkok"],
-  };
-
-  const boosted = new Set<string>();
-  for (const [kw, markets] of Object.entries(keywordBoosts)) {
-    if (lower.includes(kw.toLowerCase())) {
-      for (const m of markets) boosted.add(m);
-    }
-  }
+  const hasVisual = Boolean(
+    campaign.imageBase64 || campaign.imageUrl || imageDescription.length > 20
+  );
 
   const markets: MarketStress[] = MARKET_CATALOG.map((def, i) => {
-    const seed = (baseHash + i * 17) % 100;
-    let severity = 30 + (seed % 35);
+    const profile = MARKET_PROFILES[def.id];
+    // Per-market deterministic seed — same campaign, same market, same result.
+    const marketSeed = hashString(`${slogan}::${def.id}`);
+    const baseRoll = (baseHash + i * 17) % 100;
 
-    if (boosted.has(def.id)) {
-      severity = Math.max(severity, 55 + (seed % 30));
+    // Base severity floats in a [25, 60] band — different per market.
+    let severity = 25 + (baseRoll % 35);
+
+    // Profile-driven keyword boost — uses the market's own hotKeywords list.
+    if (profile?.hotKeywords) {
+      const matches = profile.hotKeywords.filter((kw) =>
+        lower.includes(kw.toLowerCase())
+      ).length;
+      if (matches > 0) {
+        severity = Math.max(severity, 55 + Math.min(25, matches * 10));
+      }
     }
 
+    // Special case: Dhaka-self-reference dampens its own Dhaka backlash.
     if (def.id === "dhaka" && lower.includes("dhaka")) {
       severity = Math.min(severity, 35);
     }
 
-    severity = Math.min(100, Math.round(severity * (0.7 + maxAgentSeverity / 200)));
+    // Modulate by the red-team's peak severity — bad agent verdicts elevate
+    // every market, but not uniformly.
+    severity = Math.min(
+      100,
+      Math.round(severity * (0.7 + maxAgentSeverity / 200))
+    );
 
-    const triggers: CulturalTrigger[] = [];
-    if (severity >= 40) {
-      const templates = REGION_TRIGGERS[def.region];
-      const copyTrigger = templates[0];
-      triggers.push({
-        type: copyTrigger.type,
-        text: copyTrigger.textTemplate.replace("{slogan}", slogan),
-        reason: copyTrigger.reason,
-      });
-
-      if (hasVisual && severity >= 55) {
-        const visualTrigger = templates[1];
-        triggers.push({
-          type: visualTrigger.type,
-          text: visualTrigger.textTemplate,
-          reason: visualTrigger.reason,
-        });
-      }
-    }
-
+    // Per-market summary — picked from that market's own pool.
+    const tier = severityTier(severity);
     const market = getMarket(def.id)!;
-    const summary =
-      severity >= 70
-        ? `High backlash risk in ${market.label} — campaign reads as culturally misaligned.`
-        : severity >= 40
-          ? `Moderate friction in ${market.label} — specific copy or visual elements may misfire.`
-          : `Low risk in ${market.label} — no major tripwires flagged.`;
+    const summary = profile
+      ? pickVariant(profile.summaries[tier], marketSeed)
+      : tier === "high"
+        ? `High backlash risk in ${market.label}.`
+        : tier === "medium"
+          ? `Moderate friction in ${market.label}.`
+          : `Low risk in ${market.label} — no major tripwires.`;
+
+    // Per-market triggers — pulled from that market's own archetypes.
+    const triggers: CulturalTrigger[] = profile
+      ? buildMarketTriggers(profile, {
+          slogan,
+          severity,
+          hasVisual,
+          seed: marketSeed,
+        })
+      : [];
 
     return { marketId: def.id, severity, summary, triggers };
   });
@@ -234,6 +215,17 @@ Rules:
 - Flag specific copy lines from the slogan/brief AND specific visual elements from the image description.
 - Synthesize signals from all agent verdicts — regional dialect, religion, labor, memeability, regulatory.
 
+CRITICAL — every market's summary and reasoning MUST cite that market's specific context.
+NEVER write the same sentence with just the city name swapped (e.g. do NOT write
+"Moderate friction in <city> — specific copy or visual elements may misfire" for multiple markets).
+Each summary must reference the market's actual local triggers: language register (Banglish vs Urdu vs
+Darija), religious-conservative segment, regulatory regime (POFMA, MUI, Hai'a), political fault-line
+(Bumi/Chinese/Indian, Sinhala/Tamil, Mohajir/Sindhi), economic moment (Pakistan inflation crisis,
+Sri Lanka post-Aragalaya, Egypt pound devaluation, Turkey lira volatility, OFW remittance lens), or
+meme culture (Trolls Dhaka, Mumbai Bollywood meme machine, kreng jai Thai politeness norm).
+If two markets get similar severities, their summaries must STILL read differently because the
+local reasons differ.
+
 Market catalog:
 ${formatCatalogForPrompt()}
 
@@ -252,17 +244,19 @@ export async function generateCulturalStressMap(
   imageDescription: string,
   verdicts: AgentVerdict[]
 ): Promise<CulturalStressMap> {
+  const fallback = mockStressMap(campaign, imageDescription, verdicts);
+
   if (!isGeminiConfigured()) {
-    return mockStressMap(campaign, imageDescription, verdicts);
+    return fallback;
   }
 
   try {
     const raw = await generateJson<RawStressMap>(
       buildPrompt(campaign, imageDescription, verdicts)
     );
-    return normalizeStressMap(raw);
+    return normalizeStressMap(raw, fallback);
   } catch {
-    return mockStressMap(campaign, imageDescription, verdicts);
+    return fallback;
   }
 }
 

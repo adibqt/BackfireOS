@@ -20,18 +20,27 @@ const LEVEL_TONE = {
     bar: "bg-[var(--success)]",
     bg: "bg-[var(--success-soft)]",
     border: "border-[var(--success)]/20",
+    accent: "var(--success)",
+    badgeBg: "var(--success-soft)",
+    glow: "rgba(34,197,94,0.2)",
   },
   medium: {
     ring: "text-[var(--warning)]",
     bar: "bg-[var(--warning)]",
     bg: "bg-[var(--warning-soft)]",
     border: "border-[var(--warning)]/20",
+    accent: "var(--warning)",
+    badgeBg: "var(--warning-soft)",
+    glow: "rgba(255,138,61,0.2)",
   },
   high: {
     ring: "text-[var(--danger)]",
     bar: "bg-[var(--danger)]",
     bg: "bg-[var(--danger-soft)]",
     border: "border-[var(--danger)]/20",
+    accent: "var(--danger)",
+    badgeBg: "var(--danger-soft)",
+    glow: "rgba(255,77,87,0.2)",
   },
 } as const;
 
@@ -46,13 +55,15 @@ function regionLabel(locale: Locale, region: MacroRegion): string {
 }
 
 function MiniRing({ value }: { value: number }) {
-  const radius = 18;
+  const radius = 16;
+  const strokeWidth = 3.5;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.min(100, Math.max(0, value)) / 100) * circumference;
-  const tone = LEVEL_TONE[riskLevel(value)];
+  const level = riskLevel(value);
+  const tone = LEVEL_TONE[level];
 
   return (
-    <div className="relative h-11 w-11 shrink-0">
+    <div className="relative h-12 w-12 shrink-0">
       <svg className="h-full w-full -rotate-90" viewBox="0 0 44 44" aria-hidden>
         <circle
           cx="22"
@@ -60,7 +71,7 @@ function MiniRing({ value }: { value: number }) {
           r={radius}
           fill="none"
           stroke="currentColor"
-          strokeWidth="3"
+          strokeWidth={strokeWidth}
           className="text-[var(--bg-elev-3)]"
         />
         <circle
@@ -69,14 +80,14 @@ function MiniRing({ value }: { value: number }) {
           r={radius}
           fill="none"
           stroke="currentColor"
-          strokeWidth="3"
+          strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className={cn("transition-all duration-500 ease-out", tone.ring)}
+          className={cn("transition-all duration-700 ease-out", tone.ring)}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-mono text-[11px] font-semibold text-[var(--fg)]">
+      <span className="absolute inset-0 flex items-center justify-center font-mono text-[11px] font-bold text-[var(--fg)]">
         {Math.round(value)}
       </span>
     </div>
@@ -108,18 +119,38 @@ function MarketCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        "card-glow w-full rounded-2xl border p-4 text-left transition-all duration-200 backdrop-blur-xl",
+        "group relative w-full overflow-hidden rounded-2xl border text-left transition-all duration-200",
+        compact ? "p-3 pl-[18px]" : "p-4 pl-[18px]",
         selected
-          ? cn("border-[var(--accent)]/40 ring-1 ring-[var(--accent)]/30", tone.bg)
-          : cn("border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))]", tone.border),
-        !flagged && "opacity-70",
-        compact && "p-3"
+          ? cn(
+              "border-transparent ring-1",
+              tone.bg,
+            )
+          : cn(
+              "border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))]",
+              "hover:border-[var(--border-strong)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]",
+            ),
+        !flagged && "opacity-55",
       )}
+      style={
+        selected
+          ? { boxShadow: `0 0 0 1px ${tone.accent}40, inset 0 0 0 1px ${tone.accent}20` }
+          : undefined
+      }
     >
+      {/* Left accent bar */}
+      <span
+        className={cn(
+          "absolute inset-y-0 left-0 w-[3px] rounded-l-2xl transition-opacity duration-200",
+          selected ? "opacity-100" : "opacity-40 group-hover:opacity-70",
+        )}
+        style={{ backgroundColor: tone.accent }}
+      />
+
       <div className="flex items-start gap-3">
         <MiniRing value={stress.severity} />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-baseline gap-1.5">
             <p className="font-display text-[14px] font-semibold text-[var(--fg)]">
               {def.label}
             </p>
@@ -131,12 +162,24 @@ function MarketCard({
             </p>
           )}
           {flagged && stress.triggers.length > 0 && (
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
-              {stress.triggers.length}{" "}
-              {stress.triggers.length === 1
-                ? t(locale, "triggerSingular")
-                : t(locale, "triggerPlural")}
-            </p>
+            <div
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5"
+              style={{ backgroundColor: tone.badgeBg }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: tone.accent }}
+              />
+              <span
+                className="font-mono text-[9px] uppercase tracking-wider"
+                style={{ color: tone.accent }}
+              >
+                {stress.triggers.length}{" "}
+                {stress.triggers.length === 1
+                  ? t(locale, "triggerSingular")
+                  : t(locale, "triggerPlural")}
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -145,8 +188,6 @@ function MarketCard({
 }
 
 function TriggerList({ stress, locale }: { stress: MarketStress; locale: Locale }) {
-  const def = getMarket(stress.marketId);
-
   if (stress.severity < 40) {
     return (
       <p className="text-[13px] text-[var(--fg-muted)]">{t(locale, "noTripwires")}</p>
@@ -256,6 +297,17 @@ export function CulturalHeatmap({
   const topMarkets = topRiskMarkets(stressMap, 3);
   const flaggedCount = countFlaggedMarkets(stressMap);
 
+  // Per-region high-risk counts for tab badges
+  const regionHighCounts = useMemo(() => {
+    const counts: Record<MacroRegion, number> = { south_asia: 0, mena: 0, sea: 0 };
+    for (const stress of stressMap.markets) {
+      const def = getMarket(stress.marketId);
+      if (!def) continue;
+      if (stress.severity >= 70) counts[def.region]++;
+    }
+    return counts;
+  }, [stressMap]);
+
   return (
     <div className={cn("space-y-6", compact && "space-y-4")}>
       {!compact && (
@@ -302,33 +354,51 @@ export function CulturalHeatmap({
         </div>
       )}
 
+      {/* Region tabs */}
       <div className="flex flex-wrap gap-2">
-        {MACRO_REGIONS.map((region) => (
-          <button
-            key={region}
-            type="button"
-            onClick={() => {
-              setActiveRegion(region);
-              const first = MARKET_CATALOG.find((m) => m.region === region);
-              if (first) handleSelectMarket(first.id);
-            }}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-[12px] font-medium transition-colors",
-              activeRegion === region
-                ? "border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent-400)]"
-                : "border-[var(--border)] bg-[var(--bg-elev-1)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
-            )}
-          >
-            {regionLabel(locale, region)}
-          </button>
-        ))}
+        {MACRO_REGIONS.map((region) => {
+          const isActive = activeRegion === region;
+          const highCount = regionHighCounts[region];
+          return (
+            <button
+              key={region}
+              type="button"
+              onClick={() => {
+                setActiveRegion(region);
+                const first = MARKET_CATALOG.find((m) => m.region === region);
+                if (first) handleSelectMarket(first.id);
+              }}
+              className={cn(
+                "relative inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-medium transition-all duration-200",
+                isActive
+                  ? "border-[var(--accent)]/50 bg-[var(--accent-soft)] text-[var(--accent-400)] shadow-[0_0_16px_-4px_rgba(255,77,87,0.35)]"
+                  : "border-[var(--border)] bg-[var(--bg-elev-1)] text-[var(--fg-muted)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elev-2)] hover:text-[var(--fg)]",
+              )}
+            >
+              {regionLabel(locale, region)}
+              {highCount > 0 && (
+                <span
+                  className={cn(
+                    "flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-[9px] font-bold",
+                    isActive
+                      ? "bg-[var(--accent)]/20 text-[var(--accent)]"
+                      : "bg-[var(--danger-soft)] text-[var(--danger)]",
+                  )}
+                >
+                  {highCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <div className={cn("grid gap-4", compact ? "lg:grid-cols-2" : "lg:grid-cols-[1.1fr_0.9fr]")}>
+        {/* Market cards grid */}
         <div
           className={cn(
             "grid gap-2.5",
-            compact ? "sm:grid-cols-2" : "sm:grid-cols-2 xl:grid-cols-2"
+            compact ? "sm:grid-cols-2" : "sm:grid-cols-2 xl:grid-cols-2",
           )}
         >
           {regionStresses.map((stress) => (
@@ -343,32 +413,64 @@ export function CulturalHeatmap({
           ))}
         </div>
 
+        {/* Detail panel (non-compact only) */}
         {!compact && selectedStress && (
-          <div className="card-glow rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <p className="font-display text-[16px] font-semibold text-[var(--fg)]">
-                  {getMarket(selectedStress.marketId)?.label}
-                </p>
-                <p className="text-[12px] text-[var(--fg-subtle)]">
-                  {getMarket(selectedStress.marketId)?.country}
-                </p>
-              </div>
-              <RiskBadge
-                level={riskLevel(selectedStress.severity)}
-                score={selectedStress.severity}
-                label={t(locale, "severity")}
-              />
-            </div>
-            <p className="mb-4 text-[13px] leading-relaxed text-[var(--fg-muted)]">
-              {selectedStress.summary}
-            </p>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
-              {t(locale, "flaggedElements")}
-            </p>
-            <TriggerList stress={selectedStress} locale={locale} />
-          </div>
+          <DetailPanel stress={selectedStress} locale={locale} />
         )}
+      </div>
+    </div>
+  );
+}
+
+function DetailPanel({ stress, locale }: { stress: MarketStress; locale: Locale }) {
+  const def = getMarket(stress.marketId);
+  const level = riskLevel(stress.severity);
+  const tone = LEVEL_TONE[level];
+
+  return (
+    <div className="card-glow overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+      {/* Colored header strip */}
+      <div
+        className="border-b border-[var(--border)] px-5 py-4"
+        style={{ background: `linear-gradient(135deg, ${tone.glow}, transparent)` }}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="font-display text-[17px] font-semibold text-[var(--fg)]">
+              {def?.label}
+            </p>
+            <p className="mt-0.5 text-[12px] text-[var(--fg-subtle)]">
+              {def?.country}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <RiskBadge
+              level={level}
+              score={stress.severity}
+              label={t(locale, "severity")}
+            />
+          </div>
+        </div>
+
+        {/* Severity progress bar */}
+        <div className="mt-4">
+          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--bg-elev-3)]">
+            <div
+              className={cn("h-full rounded-full transition-all duration-700", tone.bar)}
+              style={{ width: `${Math.min(100, stress.severity)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5">
+        <p className="mb-5 text-[13px] leading-relaxed text-[var(--fg-muted)]">
+          {stress.summary}
+        </p>
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
+          {t(locale, "flaggedElements")}
+        </p>
+        <TriggerList stress={stress} locale={locale} />
       </div>
     </div>
   );
