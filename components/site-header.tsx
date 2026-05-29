@@ -21,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/branches", key: "branches" },
   { href: "/boardroom", key: "boardroom" },
   { href: "/post-mortem", key: "postMortem" },
+  { href: "/docs", key: "home", labelOverride: "Docs" },
 ];
 
 // Pages that carry runId as a query param

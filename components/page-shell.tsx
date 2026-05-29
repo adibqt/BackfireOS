@@ -60,6 +60,7 @@ function SiteFooter() {
           links={[
             { href: "/boardroom", label: "Boardroom" },
             { href: "/post-mortem", label: "Pre-mortem" },
+            { href: "/docs", label: "Docs & deck" },
           ]}
         />
         <FooterCol

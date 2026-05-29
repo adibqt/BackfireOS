@@ -434,6 +434,36 @@ details[open] > summary .chevron {
   color: white;
 }
 
+/* ──────────────────────────────────────────────────────────────────
+   Print — /docs "Export as PDF" (window.print)
+   ────────────────────────────────────────────────────────────────── */
+
+@media print {
+  /* Hide interactive chrome (toolbar, sidebar, refresh, mobile jump) */
+  .no-print { display: none !important; }
+
+  /* Render colours/backgrounds so the dark deck prints faithfully */
+  .docs-root {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Collapse the two-pane layout into a single readable column */
+  .docs-layout { display: block !important; }
+  .docs-content { max-width: 100% !important; }
+
+  /* Reveal every section regardless of the on-screen search filter */
+  .docs-content section[aria-hidden="true"] { display: block !important; }
+
+  /* Keep headings with their content; avoid awkward mid-card breaks */
+  .docs-content h1,
+  .docs-content h2 { break-after: avoid; }
+  .docs-content section { break-inside: avoid; }
+
+  /* Drop the fixed aurora/grain so they don't tile across pages */
+  body::before, body::after { display: none !important; }
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
