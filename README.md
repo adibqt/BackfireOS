@@ -471,6 +471,96 @@ Clear Supabase session cookies.
 
 ---
 
+## 13. How to Use the App
+
+This is the end-to-end walkthrough of the product as a user experiences it in the browser. For getting a local instance running, skip to [Quick Start](#quick-start).
+
+### 13.1 Modes of access — demo vs. live
+
+Backfire OS runs in one of two modes, shown as a badge in the header and on the simulation card:
+
+- **Demo Mode** (no API keys configured) — the app works end-to-end with mock verdicts and placeholder meme images. No sign-in, no database, nothing leaves your machine. Use this to explore the flow or for a quick judge/demo run without burning LLM quota.
+- **Live AI · Gemini** (keys configured) — real Gemini verdicts, vision parsing, Banglish RAG, and generated meme images. When Supabase auth keys are also set, **sign-in is required** and every run is persisted to your account.
+
+> Verdict cards are tagged when an agent falls back to demo data. If you see a warning banner on the results page saying *"N of 6 red-team agents fell back to demo data,"* the Backfire Score is partly heuristic — re-run once the model is available for a full judgment.
+
+### 13.2 Sign in (live mode only)
+
+If the instance has Supabase auth enabled, create an account at **`/signup`** (email + password) and sign in at **`/login`**. The header auth button reflects your session; **Sign out** clears it. In demo mode you can skip this entirely.
+
+### 13.3 Step 1 — Create a brand
+
+Every campaign is run **under a brand** so the *Brand Purist* agent can audit it against that brand's stated values and prior runs. If you have no brands yet, the simulation card prompts you to create one.
+
+1. Go to **`/brands`** (or click *Manage brands* / *Create your first brand* from the simulation card).
+2. Click **Create brand** and fill in:
+   - **Brand name** — e.g. `Acme Bangladesh` (required).
+   - **Description** *(optional)* — one line on what the brand stands for.
+   - **Canonical stated values** — the brand's public stance. This is the ground truth the Brand Purist holds every future campaign accountable to, so be specific (e.g. *"affordable, family-first, politically neutral, halal-certified"*).
+3. Save. The brand now appears in the dropdown on the simulation card, and its stated values auto-fill the **Brand values** field when selected.
+
+> Deleting a brand detaches its past campaigns but does not delete them. The Brand Purist sharpens over time — it reads the brand's **10 most recent completed runs**, so consistency auditing improves the more you use a brand.
+
+### 13.4 Step 2 — Compose a campaign
+
+On the home page (**`/`**, also labeled *Simulate*), fill in the simulation card:
+
+| Field | Required | What it's for |
+|---|---|---|
+| **Brand** | ✅ | Which brand to run under (drives the Brand Purist audit). |
+| **Slogan / tagline** | ✅ | The headline copy being stress-tested. Bangla or English. |
+| **Brand values** | — | Pre-filled from the brand; edit per-campaign if needed. |
+| **Brief** | — | Campaign context: target audience, channel, occasion, tone. |
+| **Campaign visual** | — | Optional image upload. Sent to Gemini Vision and described in every agent prompt. |
+
+Use the **EN / BN toggle** in the header to switch the entire UI between English and Bangla at any time. The **Run simulation** button stays disabled until a brand and a slogan are present.
+
+### 13.5 Step 3 — Run the simulation
+
+Click **Run simulation**. The app:
+
+1. Creates the campaign + run.
+2. Opens a streaming connection and fans out to all **six adversarial personas in parallel**:
+   - **Dhaka Meme Engineer** · **Regional Outsider** · **Cynical Journalist** · **Rival Brand Social Team** · **Cultural / Regulatory Activist** · **Brand Purist**
+3. Streams verdicts back live — each agent's name and severity badge appears on the card as it lands (a `N / 6` counter tracks progress), followed by a cultural-stress-map preview.
+4. Generates four parody memes, then redirects you to the full results page at **`/runs/<id>`**.
+
+A typical cold run takes ~25–35 s. You can watch verdicts arrive before the run finishes; errors surface inline on the card.
+
+### 13.6 Step 4 — Read the Backfire Dashboard (`/runs/<id>`)
+
+The results page is laid out top to bottom:
+
+- **Headline verdict** — the campaign slogan, timestamp, and a big **Backfire Score / 100** with a one-word call: **Ship it** (low) · **Tune it** (medium) · **Pull back** (high).
+- **Score breakdown** — a radar chart plus six composite metrics: **Backfire Score, Resonance, Backfire Risk, Memeability, Brand-Safety Drift, Polarization.** Color coding: green < 40, amber 40–69, red ≥ 70.
+- **Red team** — the six agent verdict cards. **Tap any card** to expand its *severity*, *reasoning* (2–3 sentences), and a concrete *sample attack* (the parody, headline, or complaint that persona would actually produce). Citations link back to the Banglish RAG samples that informed the verdict.
+- **Polarization / co-amplification network** — each node is a simulated critic; edges connect critics hitting the same weakness. Dense clusters are where real-world pile-ons start.
+- **Cultural Stress Map** — a geographic + demographic heatmap of the blast radius across Bangladeshi markets (Dhaka, Sylhet, Chittagong, rural, etc.). Click **Open full stress map** to expand it.
+- **Meme Mutation** — the four most likely parody memes, each captioned and scored for Memeability.
+
+### 13.7 Step 5 — Explore the modes
+
+The header nav and the home *Modes* grid link to deeper surfaces. Once you're on a run, these pages carry the `runId` automatically so they stay scoped to that campaign:
+
+- **Cultural Heat Map** (`/heatmap`) — ✅ live. Full city-by-city severity overlay.
+- **Counterfactual Branching** (`/branches`) — ✅ live. "Git for campaigns" — fork the slogan / target / channel and watch the scores shift, then re-run a variant.
+- **Boardroom Mode** (`/boardroom`) — 🟡 preview. Watch the personas debate the campaign live.
+- **Regulatory Pre-Mortem** (`/post-mortem`) — 🟡 preview. Auto-drafts the apology/compliance note the brand would otherwise have to publish later.
+
+### 13.8 Step 6 — Review history
+
+**`/history`** (also *View past runs* / *View history* on the home page) lists every run on your account, newest first, with its Backfire Score. Select any entry to reopen its full dashboard. *(History requires live mode with Supabase; demo-mode runs live only in memory and are lost on reload.)*
+
+### 13.9 Tips for interpreting results
+
+- **Treat the Backfire Score as a risk gauge, not a grade.** A low score means *less likely to backfire*, not *good campaign*.
+- **Read the sample attacks first.** They're the fastest way to feel the failure mode — a single screenshot of the parody meme or the journalist's headline is more persuasive in a review than the number.
+- **Watch Brand-Safety Drift over a brand's history.** Rising drift across runs signals the brand is contradicting its own prior public stance.
+- **Use counterfactual branches before rewriting from scratch.** Fork, change one variable, re-run, and compare scores side by side.
+- **Re-run if you see the demo-fallback banner** — a partial heuristic score shouldn't drive a launch decision.
+
+---
+
 ## Quick Start
 
 ```powershell
