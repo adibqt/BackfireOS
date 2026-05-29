@@ -47,3 +47,6 @@ CLAUDE.md
 /docs
 PRELIM_BUILD_GUIDE.md
 .claude/launch.json
+
+.vercel
+.env*

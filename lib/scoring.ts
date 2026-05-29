@@ -37,6 +37,37 @@ function lexicalDrift(a: string, b: string): number {
   return Math.round((1 - jaccard) * 100);
 }
 
+/**
+ * Brand-safety drift = how far the campaign strays from the brand's identity.
+ *
+ * The Brand Purist agent already judges this *semantically* (against canonical
+ * values and prior campaigns), so its severity is the primary signal. Lexical
+ * Jaccard distance is kept only as a lightweight corroborating signal, and only
+ * when brand values are actually supplied — a bag-of-words score alone would
+ * flag aligned-but-differently-worded copy as a violation, so it can't stand on
+ * its own. When no brand values exist we fall back to the Purist's judgment
+ * (which still runs against in-campaign values) rather than comparing the text
+ * to itself, which previously always reported "0 / perfectly safe".
+ */
+function computeBrandSafetyDrift(
+  verdicts: AgentVerdict[],
+  campaignText: string,
+  brandValues: string
+): number {
+  const purist = verdicts.find((v) => v.agentId === "brand_purist");
+  const hasBrandValues = brandValues.trim().length > 0;
+  const lexical = hasBrandValues
+    ? lexicalDrift(campaignText, brandValues)
+    : null;
+
+  if (purist && lexical != null) {
+    return Math.round(purist.severity * 0.7 + lexical * 0.3);
+  }
+  if (purist) return purist.severity;
+  if (lexical != null) return lexical;
+  return 0;
+}
+
 export function computeScores(
   verdicts: AgentVerdict[],
   memeScores: number[],
@@ -64,7 +95,11 @@ export function computeScores(
   const memeability = Math.round(
     Math.max(memeEngineer?.severity ?? 0, mean(memeScores))
   );
-  const brandSafetyDrift = lexicalDrift(campaignText, brandValues || campaignText);
+  const brandSafetyDrift = computeBrandSafetyDrift(
+    verdicts,
+    campaignText,
+    brandValues
+  );
   const polarizationCoefficient = Math.round(stdev(severities));
 
   return {

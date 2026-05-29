@@ -64,6 +64,7 @@ type DbVerdict = {
   reasoning: string;
   sample_attack: string;
   citation_ids: string[] | null;
+  source: string | null;
 };
 
 type DbMeme = {
@@ -105,6 +106,7 @@ function mapVerdict(row: DbVerdict): AgentVerdict {
     reasoning: row.reasoning,
     sampleAttack: row.sample_attack,
     citationIds: row.citation_ids ?? [],
+    source: row.source === "mock" ? "mock" : "ai",
   };
 }
 
@@ -232,7 +234,7 @@ export async function dbGetRun(
 
   const { data: verdictRows, error: verdictError } = await supabase
     .from("agent_verdicts")
-    .select("agent_id, agent_name, severity, reasoning, sample_attack, citation_ids")
+    .select("agent_id, agent_name, severity, reasoning, sample_attack, citation_ids, source")
     .eq("run_id", runId);
 
   if (verdictError) throw new Error(verdictError.message);
@@ -311,6 +313,7 @@ export async function dbSaveVerdicts(
     reasoning: v.reasoning,
     sample_attack: v.sampleAttack,
     citation_ids: v.citationIds,
+    source: v.source,
   }));
 
   const { error } = await supabase.from("agent_verdicts").insert(rows);

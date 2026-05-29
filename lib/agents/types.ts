@@ -13,6 +13,12 @@ export interface AgentVerdict {
   reasoning: string;
   sampleAttack: string;
   citationIds: string[];
+  /**
+   * Provenance of this verdict. "ai" = produced by a live model call,
+   * "mock" = demo/heuristic fallback used because the model was unavailable
+   * or returned an unusable response. Used to flag degraded runs.
+   */
+  source: "ai" | "mock";
 }
 
 export interface Brand {

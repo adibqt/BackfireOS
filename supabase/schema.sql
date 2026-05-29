@@ -38,6 +38,7 @@ create table if not exists agent_verdicts (
   reasoning text not null,
   sample_attack text not null,
   citation_ids text[] default '{}',
+  source text not null default 'ai' check (source in ('ai', 'mock')),
   created_at timestamptz default now()
 );
 

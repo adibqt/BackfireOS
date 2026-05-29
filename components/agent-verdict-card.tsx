@@ -1,6 +1,6 @@
 import type { AgentVerdict } from "@/lib/agents/types";
 import { riskLevel } from "@/lib/scoring";
-import { RiskBadge } from "@/components/ui/badge";
+import { Badge, RiskBadge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const AGENT_INITIALS: Record<string, string> = {
@@ -72,9 +72,19 @@ export function AgentVerdictCard({
               {initials}
             </div>
             <div className="min-w-0">
-              <h3 className="font-display text-[15px] font-semibold text-[var(--fg)]">
-                {verdict.agentName}
-              </h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-display text-[15px] font-semibold text-[var(--fg)]">
+                  {verdict.agentName}
+                </h3>
+                {verdict.source === "mock" && (
+                  <Badge
+                    variant="demo"
+                    title="This agent fell back to demo data — the model was unavailable or returned an unusable response. Its severity is heuristic, not a real judgment."
+                  >
+                    Demo data
+                  </Badge>
+                )}
+              </div>
               <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
                 {verdict.agentId}
               </p>

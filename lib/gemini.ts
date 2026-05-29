@@ -173,6 +173,35 @@ function parseJson<T>(text: string): T {
   return JSON.parse(cleaned) as T;
 }
 
+const TEXT_MAX_RETRIES = Number(process.env.GEMINI_TEXT_MAX_RETRIES ?? 5);
+const TEXT_MAX_RETRY_DELAY_MS = 30_000;
+
+/**
+ * Retries a text/vision call on rate-limit (429) errors, waiting the delay the
+ * API asks for (capped). Without this a single 429 — common on the free tier,
+ * which allows only a few requests per minute — would surface as a hard failure
+ * and drop the run to mock data.
+ */
+async function withTextRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= TEXT_MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (!isRateLimitError(error) || attempt === TEXT_MAX_RETRIES) {
+        throw error;
+      }
+      const delay = Math.min(parseRetryDelayMs(error), TEXT_MAX_RETRY_DELAY_MS);
+      console.warn(
+        `Gemini rate-limited; retrying in ${delay}ms (attempt ${attempt + 1}/${TEXT_MAX_RETRIES}).`
+      );
+      await sleep(delay);
+    }
+  }
+  throw lastError;
+}
+
 export async function generateJson<T>(
   prompt: string,
   model = TEXT_MODEL
@@ -183,7 +212,9 @@ export async function generateJson<T>(
     generationConfig: { responseMimeType: "application/json" },
   });
 
-  const result = await generativeModel.generateContent(prompt);
+  const result = await withTextRetry(() =>
+    generativeModel.generateContent(prompt)
+  );
   return parseJson<T>(result.response.text());
 }
 
@@ -193,7 +224,9 @@ export async function generateText(
 ): Promise<string> {
   const genAI = getTextClient();
   const generativeModel = genAI.getGenerativeModel({ model });
-  const result = await generativeModel.generateContent(prompt);
+  const result = await withTextRetry(() =>
+    generativeModel.generateContent(prompt)
+  );
   return result.response.text();
 }
 
@@ -205,10 +238,12 @@ export async function describeImage(
   const genAI = getTextClient();
   const generativeModel = genAI.getGenerativeModel({ model: TEXT_MODEL });
 
-  const result = await generativeModel.generateContent([
-    prompt,
-    { inlineData: { data: base64, mimeType } },
-  ]);
+  const result = await withTextRetry(() =>
+    generativeModel.generateContent([
+      prompt,
+      { inlineData: { data: base64, mimeType } },
+    ])
+  );
 
   return result.response.text();
 }
