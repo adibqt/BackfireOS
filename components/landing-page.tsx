@@ -3,11 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 
 const AGENTS = [
-  { id: "meme_engineer", name: "Meme Engineer", role: "Spots meme-able frames & Banglish slogans", initials: "ME", tone: "from-rose-500/30 to-amber-500/10" },
-  { id: "regional_outsider", name: "Regional Outsider", role: "Compares Dhaka · Sylhet · Chittagong", initials: "RO", tone: "from-violet-500/30 to-sky-500/10" },
-  { id: "cynical_journalist", name: "Cynical Journalist", role: "Writes the worst plausible headline", initials: "CJ", tone: "from-emerald-500/25 to-teal-500/10" },
-  { id: "rival_brand", name: "Rival Brand Social", role: "Shows how competitors hijack the slogan", initials: "RB", tone: "from-orange-500/30 to-rose-500/10" },
-  { id: "cultural_activist", name: "Cultural Activist", role: "Flags religion, labor, gender, regulatory", initials: "CA", tone: "from-fuchsia-500/30 to-indigo-500/10" },
+  { id: "meme_engineer", name: "Dhaka Meme Engineer", role: "Spots viral parody potential & awkward Banglish slogans", initials: "ME", weight: 1.2, tone: "from-rose-500/30 to-amber-500/10" },
+  { id: "regional_outsider", name: "Regional Outsider", role: "Compares Dhaka · Sylhet · Chittagong · rural", initials: "RO", weight: 1.0, tone: "from-violet-500/30 to-sky-500/10" },
+  { id: "cynical_journalist", name: "Cynical Journalist", role: "Writes the most damaging plausible headline", initials: "CJ", weight: 1.3, tone: "from-emerald-500/25 to-teal-500/10" },
+  { id: "rival_brand", name: "Rival Brand Social Team", role: "Shows how a competitor would hijack the slogan", initials: "RB", weight: 1.1, tone: "from-orange-500/30 to-rose-500/10" },
+  { id: "regulatory_activist", name: "Cultural / Regulatory Activist", role: "Flags religion, labor, gender & compliance tripwires", initials: "RA", weight: 1.4, tone: "from-fuchsia-500/30 to-indigo-500/10" },
+  { id: "brand_purist", name: "Brand Purist", role: "Audits drift against your brand's canonical values & history", initials: "BP", weight: 1.2, tone: "from-sky-500/30 to-cyan-500/10" },
 ] as const;
 
 const METRICS = [
@@ -20,16 +21,25 @@ const METRICS = [
 ] as const;
 
 const STEPS = [
-  { n: "01", title: "Submit your brief", desc: "Drop in a slogan, brand values, optional visual. Bangla or English." },
-  { n: "02", title: "Five agents attack", desc: "Parallel adversarial personas stress-test it against local context." },
-  { n: "03", title: "Score, fork, ship", desc: "Six composite metrics, parody memes, regulatory pre-mortem." },
+  { n: "01", title: "Submit your brief", desc: "Drop in a slogan, brand values, brief, optional visual. Bangla or English." },
+  { n: "02", title: "Six agents attack", desc: "A weighted panel of adversarial personas stress-tests it in parallel, grounded in Banglish RAG." },
+  { n: "03", title: "Score, fork, ship", desc: "Six composite metrics, parody memes, a cultural heatmap and counterfactual branches." },
 ] as const;
 
 const MODES = [
-  { href: "/heatmap", title: "Cultural Heat Map", desc: "City-by-city severity overlay across Bangladesh." },
-  { href: "/branches", title: "Counterfactual Branching", desc: "Git for campaigns — fork, tweak, watch scores shift." },
-  { href: "/boardroom", title: "Boardroom Mode", desc: "Watch synthetic personas debate your campaign live." },
-  { href: "/post-mortem", title: "Regulatory Pre-Mortem", desc: "Auto-drafts the apology your brand would publish later." },
+  { href: "/heatmap", title: "Cultural Heat Map", desc: "City-by-city severity overlay across Bangladesh.", status: "live" },
+  { href: "/branches", title: "Counterfactual Branching", desc: "Git for campaigns — fork, tweak, watch scores shift.", status: "live" },
+  { href: "/boardroom", title: "Boardroom Mode", desc: "Watch synthetic personas debate your campaign live.", status: "preview" },
+  { href: "/post-mortem", title: "Regulatory Pre-Mortem", desc: "Auto-drafts the apology your brand would publish later.", status: "preview" },
+] as const;
+
+const CAPABILITIES = [
+  { title: "Brand-consistency audit", desc: "The Brand Purist remembers your prior campaigns and flags when a new one contradicts your stated values." },
+  { title: "Multimodal vision", desc: "Upload the visual — Gemini parses it and every persona reasons over the image, not just the copy." },
+  { title: "Banglish RAG", desc: "Each verdict retrieves from ~20K code-mixed sentiment samples, with citations back to the source rows." },
+  { title: "Persistent history", desc: "Every run, verdict and meme is saved per-account with row-level security. Revisit and compare any time." },
+  { title: "Streaming verdicts", desc: "Verdicts land over Server-Sent Events as each agent finishes — no waiting for the full panel." },
+  { title: "Works key-free", desc: "Demo mode runs the whole flow with mock verdicts and placeholder memes — no API key, no signup." },
 ] as const;
 
 export function LandingPage() {
@@ -65,7 +75,7 @@ export function LandingPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-[var(--fg-muted)] md:text-[19px] fade-up" style={{ animationDelay: "120ms" }}>
-            Five adversarial AI personas stress-test your campaign against
+            Six adversarial AI personas stress-test your campaign against
             Bangladesh&apos;s cultural, linguistic, and regulatory landscape
             — before the internet does.
           </p>
@@ -126,19 +136,25 @@ export function LandingPage() {
 
       {/* ── Trust strip ── */}
       <section className="relative -mx-5 mb-24 border-y border-[var(--border)] bg-[var(--bg-elev-1)]/40 px-5 py-6 backdrop-blur md:mb-32">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
             The red team
           </p>
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
-            {AGENTS.map((a) => (
-              <div key={a.id} className="flex items-center gap-2.5">
-                <span className={`flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br ${a.tone} font-mono text-[11px] font-semibold text-white/95 ring-1 ring-white/10`}>
-                  {a.initials}
-                </span>
-                <span className="text-[13px] text-[var(--fg-muted)]">{a.name}</span>
-              </div>
-            ))}
+          <div className="marquee-mask relative min-w-0 flex-1 overflow-hidden">
+            <div className="marquee flex w-max items-center">
+              {[0, 1].map((copy) => (
+                <div key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center gap-x-7 pr-7">
+                  {AGENTS.map((a) => (
+                    <div key={a.id} className="flex items-center gap-2.5">
+                      <span className={`flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br ${a.tone} font-mono text-[11px] font-semibold text-white/95 ring-1 ring-white/10`}>
+                        {a.initials}
+                      </span>
+                      <span className="whitespace-nowrap text-[13px] text-[var(--fg-muted)]">{a.name}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -150,11 +166,12 @@ export function LandingPage() {
             <span className="h-px w-7 bg-[var(--accent)]/60" /> The agents
           </p>
           <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--fg)] md:text-4xl">
-            Five personas. Five angles of attack.
+            Six personas. Six angles of attack.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--fg-muted)]">
             Each agent runs in parallel, retrieves from a Banglish sentiment
             corpus, and returns a severity-scored verdict with a sample attack.
+            Verdicts are weighted by real-world blast radius before aggregating.
           </p>
         </div>
 
@@ -169,7 +186,7 @@ export function LandingPage() {
                 <span className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${a.tone} font-mono text-[14px] font-semibold text-white ring-1 ring-white/10`}>
                   {a.initials}
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <h3 className="font-display text-[15px] font-semibold text-[var(--fg)]">
                     {a.name}
                   </h3>
@@ -177,6 +194,9 @@ export function LandingPage() {
                     {a.id}
                   </p>
                 </div>
+                <span className="shrink-0 rounded-md border border-[var(--border)] bg-[var(--bg-elev-2)]/60 px-2 py-1 font-mono text-[10px] text-[var(--fg-subtle)]" title="Severity weight in the Backfire Score">
+                  ×{a.weight.toFixed(1)}
+                </span>
               </div>
               <p className="mt-4 text-[14px] leading-relaxed text-[var(--fg-muted)]">
                 {a.role}
@@ -252,7 +272,11 @@ export function LandingPage() {
                   {m.desc}
                 </p>
                 <div className="mt-3">
-                  <Badge variant="outline">Coming June 12</Badge>
+                  {m.status === "live" ? (
+                    <Badge variant="accent" dot>Live</Badge>
+                  ) : (
+                    <Badge variant="outline">In preview</Badge>
+                  )}
                 </div>
               </div>
               <svg
@@ -273,6 +297,38 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ── Capabilities ── */}
+      <section className="mb-28 md:mb-36">
+        <div className="mb-12">
+          <p className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">
+            <span className="h-px w-7 bg-[var(--accent)]/60" /> The platform
+          </p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--fg)] md:text-4xl">
+            More than a score.
+          </h2>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--fg-muted)]">
+            A full pre-launch workbench — grounded retrieval, multimodal input,
+            and a memory of everything your brand has ever shipped.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {CAPABILITIES.map((c, i) => (
+            <div
+              key={c.title}
+              className="card-glow rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl fade-up"
+              style={{ animationDelay: `${i * 50}ms` }}
+            >
+              <h3 className="font-display text-[16px] font-semibold tracking-tight text-[var(--fg)]">
+                {c.title}
+              </h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-[var(--fg-muted)]">
+                {c.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Localization callout ── */}
       <section className="mb-28 md:mb-36">
         <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(135deg,#1a0d12,#0a0708)] p-8 md:p-14">
@@ -288,9 +344,9 @@ export function LandingPage() {
                 <span className="text-gradient-accent">Built for the diaspora.</span>
               </h2>
               <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-[var(--fg-muted)]">
-                Every agent retrieves from a 12k-sample Banglish sentiment corpus
-                before responding. Toggle Bangla ⇄ English across the entire UI.
-                Memes generate in the local register.
+                Every agent retrieves from a ~20K-sample Banglish sentiment corpus
+                before responding, citing the rows that shaped its verdict. Toggle
+                Bangla ⇄ English across the entire UI. Memes generate in the local register.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -316,9 +372,9 @@ export function LandingPage() {
                 </p>
                 <p className="mt-2 text-[14px] text-[var(--fg-muted)]">
                   <span className="font-display text-[18px] font-semibold text-[var(--fg)]">
-                    12,284
+                    ~20,000
                   </span>{" "}
-                  Banglish sentiment samples · 5 districts · 3 register tiers
+                  Banglish sentiment samples · pgvector semantic retrieval · cited verdicts
                 </p>
               </div>
             </div>

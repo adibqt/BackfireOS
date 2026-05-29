@@ -50,3 +50,4 @@ PRELIM_BUILD_GUIDE.md
 
 .vercel
 .env*
+/pitch-deck

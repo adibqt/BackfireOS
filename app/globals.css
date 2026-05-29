@@ -385,6 +385,16 @@ body > * {
   animation: marquee 30s linear infinite;
 }
 
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Fade the left & right edges of a horizontal carousel */
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+
 /* Float */
 @keyframes float {
   0%, 100% { transform: translateY(0); }

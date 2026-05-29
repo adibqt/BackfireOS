@@ -4,11 +4,12 @@ import { Badge, Kbd } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 
 const AGENTS = [
-  { id: "meme_engineer", name: "Meme Engineer", initials: "ME", tone: "from-rose-500/30 to-amber-500/10" },
+  { id: "meme_engineer", name: "Dhaka Meme Engineer", initials: "ME", tone: "from-rose-500/30 to-amber-500/10" },
   { id: "regional_outsider", name: "Regional Outsider", initials: "RO", tone: "from-violet-500/30 to-sky-500/10" },
   { id: "cynical_journalist", name: "Cynical Journalist", initials: "CJ", tone: "from-emerald-500/25 to-teal-500/10" },
-  { id: "rival_brand", name: "Rival Brand Social", initials: "RB", tone: "from-orange-500/30 to-rose-500/10" },
-  { id: "cultural_activist", name: "Cultural/Regulatory Activist", initials: "CA", tone: "from-fuchsia-500/30 to-indigo-500/10" },
+  { id: "rival_brand", name: "Rival Brand Social Team", initials: "RB", tone: "from-orange-500/30 to-rose-500/10" },
+  { id: "regulatory_activist", name: "Cultural / Regulatory Activist", initials: "RA", tone: "from-fuchsia-500/30 to-indigo-500/10" },
+  { id: "brand_purist", name: "Brand Purist", initials: "BP", tone: "from-sky-500/30 to-cyan-500/10" },
 ] as const;
 
 const METRICS = [
@@ -21,16 +22,16 @@ const METRICS = [
 ] as const;
 
 const MODES = [
-  { href: "/heatmap", title: "Cultural Heat Map", desc: "City-by-city severity overlay across Bangladesh.", icon: <><circle cx="12" cy="10" r="3" /><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.95 8 11.7z" /></> },
-  { href: "/branches", title: "Counterfactual Branching", desc: "Git for campaigns — fork, tweak, watch scores shift.", icon: <><circle cx="6" cy="3" r="2.5" /><circle cx="6" cy="18" r="2.5" /><circle cx="18" cy="6" r="2.5" /><path d="M6 5.5v10" /><path d="M18 9c0 3-4 4-12 4" /></> },
-  { href: "/boardroom", title: "Boardroom Mode", desc: "Watch synthetic personas debate your campaign live.", icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></> },
-  { href: "/post-mortem", title: "Regulatory Pre-Mortem", desc: "Auto-drafts the apology your brand would publish later.", icon: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="13" y2="17" /></> },
+  { href: "/heatmap", title: "Cultural Heat Map", desc: "City-by-city severity overlay across Bangladesh.", status: "live", icon: <><circle cx="12" cy="10" r="3" /><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.95 8 11.7z" /></> },
+  { href: "/branches", title: "Counterfactual Branching", desc: "Git for campaigns — fork, tweak, watch scores shift.", status: "live", icon: <><circle cx="6" cy="3" r="2.5" /><circle cx="6" cy="18" r="2.5" /><circle cx="18" cy="6" r="2.5" /><path d="M6 5.5v10" /><path d="M18 9c0 3-4 4-12 4" /></> },
+  { href: "/boardroom", title: "Boardroom Mode", desc: "Watch synthetic personas debate your campaign live.", status: "preview", icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></> },
+  { href: "/post-mortem", title: "Regulatory Pre-Mortem", desc: "Auto-drafts the apology your brand would publish later.", status: "preview", icon: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="13" y2="17" /></> },
 ] as const;
 
 const STEPS = [
-  { n: "01", title: "Submit your brief", desc: "Drop in a slogan, brand values, optional visual. Bangla or English." },
-  { n: "02", title: "Five agents attack", desc: "Parallel adversarial personas stress-test it against local context." },
-  { n: "03", title: "Score, fork, ship", desc: "Get six composite metrics, parody memes, and a regulatory pre-mortem." },
+  { n: "01", title: "Submit your brief", desc: "Drop in a slogan, brand values, brief, optional visual. Bangla or English." },
+  { n: "02", title: "Six agents attack", desc: "A weighted panel of adversarial personas stress-tests it in parallel, grounded in Banglish RAG." },
+  { n: "03", title: "Score, fork, ship", desc: "Get six composite metrics, parody memes, a cultural heatmap and counterfactual branches." },
 ] as const;
 
 export function HomeApp({ liveAi }: { liveAi: boolean }) {
@@ -59,7 +60,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
             </h1>
 
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[var(--fg-muted)] md:text-[18px]">
-              Upload a draft and watch five adversarial AI personas stress-test it
+              Upload a draft and watch six adversarial AI personas stress-test it
               against Bangladesh&apos;s cultural, linguistic, and regulatory
               landscape — before the internet does.
             </p>
@@ -100,17 +101,23 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
 
       {/* ── Trust strip ── */}
       <section className="relative -mx-5 mb-24 border-y border-[var(--border)] bg-[var(--bg-elev-1)]/40 px-5 py-6 backdrop-blur md:mb-32">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">The red team</p>
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
-            {AGENTS.map((a) => (
-              <div key={a.id} className="flex items-center gap-2.5">
-                <span className={`flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br ${a.tone} font-mono text-[11px] font-semibold text-white/95 ring-1 ring-white/10`}>
-                  {a.initials}
-                </span>
-                <span className="text-[13px] text-[var(--fg-muted)]">{a.name}</span>
-              </div>
-            ))}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">The red team</p>
+          <div className="marquee-mask relative min-w-0 flex-1 overflow-hidden">
+            <div className="marquee flex w-max items-center">
+              {[0, 1].map((copy) => (
+                <div key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center gap-x-7 pr-7">
+                  {AGENTS.map((a) => (
+                    <div key={a.id} className="flex items-center gap-2.5">
+                      <span className={`flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br ${a.tone} font-mono text-[11px] font-semibold text-white/95 ring-1 ring-white/10`}>
+                        {a.initials}
+                      </span>
+                      <span className="whitespace-nowrap text-[13px] text-[var(--fg-muted)]">{a.name}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -151,7 +158,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
               One dashboard.<br />Every angle of failure.
             </h2>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[var(--fg-muted)]">
-              Backfire Score, Resonance, Memeability, Brand-Safety Drift, and Polarization — composite scores that translate adversarial output into board-room numbers.
+              Backfire Score, Resonance, Backfire Risk, Memeability, Brand-Safety Drift, and Polarization — composite scores that translate adversarial output into board-room numbers.
             </p>
             <div className="mt-7">
               <ButtonLink href="#simulate" variant="outline" size="md">Try it now</ButtonLink>
@@ -192,7 +199,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
             <span className="h-px w-7 bg-[var(--accent)]/60" /> Modes
           </p>
           <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--fg)] md:text-4xl">Beyond the verdict.</h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--fg-muted)]">Four interactive surfaces that ship on BuildFest Day.</p>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--fg-muted)]">Four interactive surfaces — heatmaps and branches are live; boardroom and pre-mortem are in preview.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {MODES.map((m, i) => (
@@ -213,7 +220,11 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
                 </svg>
               </div>
               <div className="mt-5">
-                <Badge variant="outline">Coming June 12</Badge>
+                {m.status === "live" ? (
+                  <Badge variant="accent" dot>Live</Badge>
+                ) : (
+                  <Badge variant="outline">In preview</Badge>
+                )}
               </div>
             </Link>
           ))}
