@@ -171,6 +171,12 @@ export const SECTIONS: DocSection[] = [
         { title: "Brand Purist", body: "Audits consistency against the brand's own prior public stance.", tag: "weight 1.2" },
       ] },
       { kind: "para", text: "Output: a Backfire Score, mutated parody memes, a cultural stress heatmap, a polarization graph, and counterfactual branches — in ~30 seconds." },
+      { kind: "callout", tone: "info", title: "Under active development", text: "Three additional surfaces are shipping by June 24, 2026 — expanding Backfire OS from a verdict engine into a full pre-launch war room." },
+      { kind: "cards", items: [
+        { title: "Counterfactual Branching", body: "Git for campaigns — fork the slogan, tweak a value, and watch how the Backfire Score shifts in real time.", tag: "In Progress" },
+        { title: "Boardroom Mode", body: "Synthetic C-suite personas debate the campaign live; produces a structured go / no-go with dissenting views.", tag: "In Progress" },
+        { title: "Regulatory Pre-Mortem", body: "Auto-drafts the apology the brand would publish after a regulatory misfire — before it happens.", tag: "In Progress" },
+      ] },
     ],
   },
   {
@@ -386,7 +392,7 @@ export const SECTIONS: DocSection[] = [
     title: "Product roadmap",
     blocks: [
       { kind: "cards", items: [
-        { title: "Short term — by Jun 24, 2026", body: "Finish Boardroom Mode & Regulatory Pre-Mortem; per-run shareable URLs; better meme image quality.", tag: "Now" },
+        { title: "Short term — by Jun 10, 2026", body: "Finish Counterfactual Branching, Boardroom Mode & Regulatory Pre-Mortem; per-run shareable URLs; better meme image quality.", tag: "Now" },
         { title: "Mid term — by Aug 2026", body: "Firecrawl live-news ingestion; GraphRAG over brand × backlash; CSV/Figma import; Slack/Teams alerts; multi-brand workspaces; expand map to IN/PK/ID/NG.", tag: "Next" },
         { title: "Long term — by 2027 Q2", body: "LoResLM on-prem fine-tune; agentic safer-slogan rewriter; API/SDK; audit-grade signed compliance reports; community persona marketplace.", tag: "Later" },
       ] },
