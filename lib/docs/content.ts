@@ -171,7 +171,7 @@ export const SECTIONS: DocSection[] = [
         { title: "Brand Purist", body: "Audits consistency against the brand's own prior public stance.", tag: "weight 1.2" },
       ] },
       { kind: "para", text: "Output: a Backfire Score, mutated parody memes, a cultural stress heatmap, a polarization graph, and counterfactual branches — in ~30 seconds." },
-      { kind: "callout", tone: "info", title: "Under active development", text: "Three additional surfaces are shipping by June 24, 2026 — expanding Backfire OS from a verdict engine into a full pre-launch war room." },
+      { kind: "callout", tone: "info", title: "Under active development", text: "Three additional surfaces are shipping by June 10, 2026 — expanding Backfire OS from a verdict engine into a full pre-launch war room." },
       { kind: "cards", items: [
         { title: "Counterfactual Branching", body: "Git for campaigns — fork the slogan, tweak a value, and watch how the Backfire Score shifts in real time.", tag: "In Progress" },
         { title: "Boardroom Mode", body: "Synthetic C-suite personas debate the campaign live; produces a structured go / no-go with dissenting views.", tag: "In Progress" },
