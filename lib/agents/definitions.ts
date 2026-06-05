@@ -46,7 +46,9 @@ const SEVERITY_GUIDE = `Severity scale (the SAME scale every critic uses — cal
 - 0-30: negligible — unlikely to draw criticism, mockery, or spread.
 - 31-60: moderate — some friction, eye-rolls, or contained mockery; recoverable.
 - 61-85: serious — likely public backlash, ratio, or sustained criticism in your lane.
-- 86-100: severe — crisis-level, viral pile-on, or hard regulatory/brand breach.`;
+- 86-100: severe — crisis-level, viral pile-on, or hard regulatory/brand breach.
+
+Calibration discipline: score the campaign as it actually reads, not the worst campaign imaginable. Most ordinary, competent campaigns sit in 20-55; reserve 61+ for a concrete, nameable risk you can point to in the copy or visual, and 86+ only for a genuine crisis. If you cannot cite a specific tripwire, do not score above 40. A low score is a valid, expected verdict — do not inflate to seem useful.`;
 
 export const AGENTS: AgentDefinition[] = [
   {

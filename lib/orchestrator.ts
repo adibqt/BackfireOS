@@ -11,29 +11,69 @@ interface RawVerdict {
   citation_ids?: string[];
 }
 
+/**
+ * Per-critic lexicons of genuine risk signals. The heuristic fallback only
+ * raises a critic's severity when the campaign text actually contains tokens in
+ * that critic's lane — so a clean campaign stays low instead of being flagged as
+ * dangerous by default.
+ */
+const RISK_LEXICONS: Record<AgentVerdict["agentId"], string[]> = {
+  meme_engineer: ["meme", "cash", "viral", "trend", "swag", "vibe", "epic", "lit"],
+  regional_outsider: ["dhaka", "elite", "premium", "urban", "city", "english only"],
+  cynical_journalist: [
+    "best", "guarantee", "guaranteed", "100%", "pure", "natural", "eco",
+    "green", "save the", "world's", "number one",
+  ],
+  rival_brand: ["beat", "better than", "only", "unbeatable", "no.1", "#1"],
+  regulatory_activist: [
+    "price", "prices", "limited", "stock up", "hoard", "scarcity", "double",
+    "triple", "buy now", "last chance", "before your neighbors", "religion",
+    "halal", "haram",
+  ],
+  brand_purist: ["new direction", "rebrand", "bold", "aggressive", "rich", "luxury"],
+};
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Matches a risk signal against the campaign text. Pure single words are matched
+ * on word boundaries so "lit" does not fire inside "sustainability". Phrases and
+ * symbol/number tokens ("stock up", "100%", "#1") fall back to substring match.
+ */
+function matchesSignal(text: string, token: string): boolean {
+  if (/^[a-z]+$/.test(token)) {
+    return new RegExp(`\\b${escapeRegExp(token)}\\b`).test(text);
+  }
+  return text.includes(token);
+}
+
+/**
+ * Heuristic fallback used only when the live model is unavailable. Unlike the
+ * model, it cannot truly judge a campaign, so it must NOT fabricate alarming
+ * scores: it starts from a low neutral baseline and only climbs when the
+ * campaign text contains concrete risk signals in that critic's lane. Runs built
+ * this way are flagged with source: "mock" so the UI can mark them as degraded.
+ */
 function mockVerdict(
   agentId: AgentVerdict["agentId"],
   agentName: string,
   campaign: CampaignInput,
   ragIds: string[]
 ): AgentVerdict {
-  const slogan = campaign.slogan.toLowerCase();
-  let severity = 45;
+  const text = [campaign.slogan, campaign.brief, campaign.brandValues]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 
-  if (agentId === "meme_engineer") {
-    severity = slogan.includes("cash") || slogan.includes("meme") ? 82 : 68;
-  } else if (agentId === "regulatory_activist") {
-    severity =
-      slogan.includes("price") || slogan.includes("limited") ? 88 : 55;
-  } else if (agentId === "cynical_journalist") {
-    severity = 74;
-  } else if (agentId === "rival_brand") {
-    severity = 61;
-  } else if (agentId === "regional_outsider") {
-    severity = slogan.includes("dhaka") ? 72 : 58;
-  } else if (agentId === "brand_purist") {
-    severity = 63;
-  }
+  // Low neutral baseline — "no evidence of a problem", not "looks fine, ship it".
+  const BASELINE = 22;
+  const PER_SIGNAL = 16;
+  const hits = RISK_LEXICONS[agentId].filter((token) =>
+    matchesSignal(text, token)
+  ).length;
+  const severity = Math.min(85, BASELINE + hits * PER_SIGNAL);
 
   const attacks: Record<AgentVerdict["agentId"], string> = {
     meme_engineer: `POV: ${campaign.slogan} — screenshot ready meme template`,
@@ -44,11 +84,13 @@ function mockVerdict(
     brand_purist: `'${campaign.slogan}' contradicts your stated brand values — this is the definition of value drift`,
   };
 
+  const band =
+    severity >= 61 ? "elevated" : severity >= 38 ? "some" : "little";
   return {
     agentId,
     agentName,
     severity,
-    reasoning: `Demo analysis for ${agentName}: campaign '${campaign.slogan}' shows moderate-to-high backlash potential in Bangladesh social media context.`,
+    reasoning: `Heuristic fallback for ${agentName} (live model unavailable): a keyword scan of '${campaign.slogan}' found ${band} risk signal in this critic's lane. Re-run with the model available for a real judgment.`,
     sampleAttack: attacks[agentId],
     citationIds: ragIds,
     source: "mock",

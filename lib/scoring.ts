@@ -14,6 +14,22 @@ function stdev(values: number[]): number {
   return Math.sqrt(variance);
 }
 
+/**
+ * Mean of the N highest values. Used to estimate the "worst credible outcome"
+ * without letting a single outlier critic define it: averaging the top few
+ * severities is robust to one lone harsh voice, yet still rises sharply when
+ * several critics independently agree a campaign is dangerous.
+ */
+function meanOfTopN(values: number[], n: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => b - a);
+  return mean(sorted.slice(0, Math.max(1, Math.min(n, sorted.length))));
+}
+
+function clamp(value: number, min = 0, max = 100): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 function tokenize(text: string): Set<string> {
   return new Set(
     text
@@ -91,9 +107,24 @@ export function computeScores(
 
   const backfireScore = Math.round(weightedSum / Math.max(totalWeight, 1));
   const resonance = Math.round(100 - mean(audienceAgents.map((v) => v.severity)));
-  const backfireRisk = Math.max(...severities, 0);
+
+  // Backfire *risk* = likelihood of a serious public backlash event. We estimate
+  // it from the worst credible outcomes (mean of the two harshest critics)
+  // rather than the single maximum: with six adversarial critics the raw max is
+  // almost always high, so it flagged even benign campaigns as dangerous. The
+  // top-2 mean is robust to one lone harsh voice while still climbing when
+  // multiple critics agree.
+  const backfireRisk = Math.round(meanOfTopN(severities, 2));
+
+  // Memeability blends the meme specialist's judgment with the average score of
+  // the generated parody concepts. Previously this took the max of the two,
+  // which inflated the metric whenever either signal spiked.
+  const memeSignal = memeScores.length > 0 ? mean(memeScores) : null;
+  const engineerSignal = memeEngineer?.severity ?? null;
   const memeability = Math.round(
-    Math.max(memeEngineer?.severity ?? 0, mean(memeScores))
+    engineerSignal != null && memeSignal != null
+      ? engineerSignal * 0.6 + memeSignal * 0.4
+      : engineerSignal ?? memeSignal ?? 0
   );
   const brandSafetyDrift = computeBrandSafetyDrift(
     verdicts,
@@ -103,12 +134,12 @@ export function computeScores(
   const polarizationCoefficient = Math.round(stdev(severities));
 
   return {
-    backfireScore,
-    resonance: Math.max(0, Math.min(100, resonance)),
-    backfireRisk,
-    memeability,
-    brandSafetyDrift,
-    polarizationCoefficient,
+    backfireScore: clamp(backfireScore),
+    resonance: clamp(resonance),
+    backfireRisk: clamp(backfireRisk),
+    memeability: clamp(memeability),
+    brandSafetyDrift: clamp(brandSafetyDrift),
+    polarizationCoefficient: clamp(polarizationCoefficient),
   };
 }
 

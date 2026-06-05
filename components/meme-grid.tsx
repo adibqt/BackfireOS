@@ -6,10 +6,33 @@ import { riskLevel } from "@/lib/scoring";
 export function MemeGrid({
   memes,
   imageWarning,
+  memeability,
 }: {
   memes: MemeResult[];
   imageWarning?: string;
+  memeability?: number;
 }) {
+  if (memes.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--bg-elev-1)] px-6 py-12 text-center">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--success-soft)] text-[var(--success)] ring-1 ring-[var(--success)]/30">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+        </div>
+        <p className="font-display text-lg font-semibold text-[var(--fg)]">
+          Nothing memeable here
+        </p>
+        <p className="mt-1 max-w-sm text-sm text-[var(--fg-muted)]">
+          {memeability != null
+            ? `This campaign scored ${Math.round(memeability)}/100 on memeability — too low to spread as a parody. No memes were generated.`
+            : "This campaign has too little parody potential to spread. No memes were generated."}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {imageWarning && (

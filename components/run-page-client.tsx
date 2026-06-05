@@ -279,7 +279,11 @@ export default function RunPageClient({ id }: { id: string }) {
           title={t(locale, "generatedMemes")}
           description="Parodies the internet would have made — generated, scored, captioned."
         />
-        <MemeGrid memes={run.memes ?? []} imageWarning={run.imageWarning} />
+        <MemeGrid
+          memes={run.memes ?? []}
+          imageWarning={run.imageWarning}
+          memeability={run.scores.memeability}
+        />
       </section>
     </PageShell>
   );

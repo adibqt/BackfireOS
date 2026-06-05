@@ -72,6 +72,11 @@ Rules for each concept:
   Do NOT include any text, words, or labels that should appear in the image.
   Example: "Frustrated Bangladeshi office worker staring at phone showing a long cash-out fee receipt while an agent shop queue forms behind him."
 
+- "memeabilityScore": 0-100, how likely THIS specific meme actually spreads. Score
+  the joke honestly and relative to the others — most parodies of an ordinary
+  campaign are forgettable. Reserve 70+ for a genuinely shareable hook; if you are
+  reaching to mock a bland or wholesome campaign, score low.
+
 Return ONLY a JSON array:
 [
   {
@@ -151,19 +156,48 @@ function parseImageError(message: string): string {
   return "Image generation failed — showing text preview instead.";
 }
 
+const clampScore = (n: number) =>
+  Math.max(0, Math.min(100, Math.round(Number.isFinite(n) ? n : 0)));
+
+const mean = (values: number[]) =>
+  values.length === 0 ? 0 : values.reduce((a, b) => a + b, 0) / values.length;
+
+/**
+ * Below this campaign-level memeability (the meme specialist's severity), a
+ * campaign has too little parody potential to spread. Generating four memes
+ * anyway just manufactures forgettable jokes, so we suppress them and let the UI
+ * say "nothing memeable here".
+ */
+export const MEME_SUPPRESSION_THRESHOLD = 40;
+
 export async function generateMemes(
   campaign: CampaignInput,
   verdicts: AgentVerdict[]
 ): Promise<{ memes: MemeResult[]; imageWarning?: string }> {
-  const concepts = await generateMemeConcepts(campaign, verdicts);
+  const memeEngineer = verdicts.find((v) => v.agentId === "meme_engineer");
+
+  // Short-circuit unmemeable campaigns before spending any concept/image calls.
+  if (memeEngineer && memeEngineer.severity < MEME_SUPPRESSION_THRESHOLD) {
+    return { memes: [] };
+  }
+
+  const concepts = (await generateMemeConcepts(campaign, verdicts)).slice(0, 4);
   let imageWarning: string | undefined;
 
+  // A model rates its own jokes ~90 regardless of quality, so the per-concept
+  // self-score is only a *relative* signal (which of the four lands hardest).
+  // The memeability *level* is anchored to the meme specialist's calibrated
+  // judgment of the campaign's intrinsic parody potential — so memes mocking a
+  // wholesome, unmemeable campaign score low, as they should.
+  const selfScores = concepts.map((c) => clampScore(c.memeabilityScore));
+  const anchor = memeEngineer?.severity ?? (selfScores.length ? mean(selfScores) : 50);
+  const meanSelf = selfScores.length ? mean(selfScores) : anchor;
+
   const memes = await Promise.all(
-    concepts.slice(0, 4).map(async (concept, index) => {
-      const score = Math.max(
-        0,
-        Math.min(100, Math.round(concept.memeabilityScore))
-      );
+    concepts.map(async (concept, index) => {
+      // Re-center each concept's self-score on the calibrated anchor, keeping
+      // only its deviation from the batch mean as the relative-strength signal.
+      const score = clampScore(anchor + (selfScores[index] - meanSelf));
       const { imageUrl, imageFallback, imageError } = await generateImage(
         concept.visualPrompt,
         concept.caption,
