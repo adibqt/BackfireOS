@@ -80,6 +80,19 @@ export interface PersistedAi {
   scoredAt: string;
 }
 
+/** A single entry in a campaign tree's commit history. */
+export type BranchEventType = "fork" | "edit" | "prune" | "score" | "baseline";
+
+export interface BranchEvent {
+  id: string;
+  type: BranchEventType;
+  message: string;
+  /** Epoch ms (the row's created_at), for display + sorting. */
+  ts: number;
+  /** The branch the event concerns; null once that branch is gone. */
+  branchId: string | null;
+}
+
 /** A branch as it travels between the persistence layer and the client. */
 export interface StoredBranch extends Branch {
   ai: PersistedAi | null;

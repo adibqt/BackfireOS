@@ -1,4 +1,11 @@
-import type { Lang, PersistedAi, StoredBranch, Tone } from "./types";
+import type {
+  BranchEvent,
+  BranchEventType,
+  Lang,
+  PersistedAi,
+  StoredBranch,
+  Tone,
+} from "./types";
 
 /**
  * Thin client for the /api/branches persistence endpoints. All mutations are
@@ -133,5 +140,45 @@ export async function apiDeleteBranch(id: string): Promise<void> {
     await fetch(`/api/branches/${id}`, { method: "DELETE" });
   } catch (e) {
     console.error("Branch delete sync failed:", e);
+  }
+}
+
+/* ── Commit history ──────────────────────────────────────────────── */
+
+export interface EventCreatePayload {
+  id: string;
+  campaignId: string | null;
+  branchId: string | null;
+  type: BranchEventType;
+  message: string;
+  ts: number;
+}
+
+/** Loads a campaign's commit history; [] when unavailable. */
+export async function loadEvents(
+  campaignId: string | null
+): Promise<BranchEvent[]> {
+  try {
+    const url = campaignId
+      ? `/api/branch-events?campaign=${encodeURIComponent(campaignId)}`
+      : "/api/branch-events";
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { events?: BranchEvent[] };
+    return Array.isArray(data.events) ? data.events : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function apiAppendEvent(payload: EventCreatePayload): Promise<void> {
+  try {
+    await fetch("/api/branch-events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.error("Event append sync failed:", e);
   }
 }

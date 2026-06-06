@@ -8,18 +8,23 @@ import { scoreBranch } from "@/lib/branches/heuristic";
 import { branchContentKey } from "@/lib/branches/types";
 import { seedBranches } from "@/lib/branches/seed";
 import {
+  apiAppendEvent,
   apiCreateBranch,
   apiDeleteBranch,
   apiPatchBranch,
   listCampaigns,
   loadBranches,
+  loadEvents,
   type CampaignOption,
 } from "@/lib/branches/client";
 import type {
   Branch,
+  BranchEvent,
+  BranchEventType,
   BranchScores as Scores,
   BranchScoreResponse,
   Lang,
+  PersistedAi,
   ScoreSource,
   Tone,
   TopCritic,
@@ -55,6 +60,59 @@ type AiState = {
   error?: string;
 };
 
+/** Human-readable names for the editable fields, used in "edit" commit messages. */
+const FIELD_LABELS: Record<string, string> = {
+  slogan: "slogan",
+  cast: "cast",
+  tagline: "tagline",
+  cta: "CTA",
+  riskyLine: "risky line",
+  tone: "tone",
+  language: "language",
+  label: "label",
+  author: "author",
+};
+
+/**
+ * Reconstructs commit history from tree data — used to seed the demo log and as
+ * a fallback when a pre-existing campaign tree has no stored events yet. Only
+ * the data-derivable commits (forks + AI scores) are produced here; live edits /
+ * prunes / baselines accrue as real events once the user acts.
+ */
+function deriveEvents(
+  items: {
+    id: string;
+    parentId: string | null;
+    label: string;
+    createdAt: number;
+    ai?: PersistedAi | null;
+  }[]
+): BranchEvent[] {
+  const labelById = new Map(items.map((b) => [b.id, b.label]));
+  const out: BranchEvent[] = [];
+  for (const b of items) {
+    if (b.parentId) {
+      out.push({
+        id: `fork-${b.id}`,
+        type: "fork",
+        ts: b.createdAt,
+        message: `${b.label} forked from ${labelById.get(b.parentId) ?? "parent"}`,
+        branchId: b.id,
+      });
+    }
+    if (b.ai && b.ai.source === "ai") {
+      out.push({
+        id: `score-${b.id}`,
+        type: "score",
+        ts: Date.parse(b.ai.scoredAt) || b.createdAt,
+        message: `${b.label} scored by AI war room — backfire ${b.ai.scores.backfireScore}, resonance ${b.ai.scores.resonance}`,
+        branchId: b.id,
+      });
+    }
+  }
+  return out.sort((a, b) => b.ts - a.ts).slice(0, 100);
+}
+
 /* ──────────────────────────────────────────────────────────────────
    Seed tree — believable bKash-flavoured starter branches.
    Shared with the persistence layer (lib/branches/seed); used here as the
@@ -65,19 +123,29 @@ type AiState = {
 const SEED: Branch[] = seedBranches();
 
 /* ──────────────────────────────────────────────────────────────────
-   Tree layout — left-to-right tidy tree (git log --graph feel)
+   Tree layout — top-down tidy tree. Generations cascade DOWN the canvas
+   (root at the top, forks fanning out left/right beneath their parent) so
+   even a near-linear lineage fills the full vertical height instead of
+   stranding it as dead space. Row spacing stretches to fill a target
+   height, then floors at MIN_V_GAP and lets deep trees scroll.
    ────────────────────────────────────────────────────────────────── */
 
-type Pos = { x: number; y: number };
-const COL_W = 260;
-const ROW_H = 116;
-const OFFSET_X = 130;
-const OFFSET_Y = 70;
+type Pos = { x: number; y: number; depth: number };
+const NODE_W = 204;
+const NODE_H = 98;
+const H_GAP = 244; // horizontal distance between adjacent leaf centers
+const PAD_X = 96;
+const PAD_TOP = 104;
+const PAD_BOTTOM = 76;
+const CANVAS_H = 620; // target fill height for the tree viewport
+const MIN_V_GAP = 156; // floor on generation spacing before we scroll
 
 function layoutTree(branches: Branch[]): {
   positions: Record<string, Pos>;
   width: number;
   height: number;
+  maxDepth: number;
+  vGap: number;
 } {
   const byParent: Record<string, Branch[]> = {};
   for (const b of branches) {
@@ -88,37 +156,52 @@ function layoutTree(branches: Branch[]): {
     byParent[k].sort((a, b) => a.createdAt - b.createdAt);
   }
 
-  const positions: Record<string, Pos> = {};
-  let row = 0;
+  // First pass: assign each node a (depth, column) in abstract grid units.
+  // Leaves claim the next free column; parents center over their children.
+  const grid: Record<string, { depth: number; col: number }> = {};
+  let nextLeaf = 0;
   let maxDepth = 0;
 
   const visit = (id: string, depth: number): number => {
     maxDepth = Math.max(maxDepth, depth);
     const kids = byParent[id] ?? [];
     if (kids.length === 0) {
-      const y = row++;
-      positions[id] = { x: depth, y };
-      return y;
+      const col = nextLeaf++;
+      grid[id] = { depth, col };
+      return col;
     }
-    const ys = kids.map((c) => visit(c.id, depth + 1));
-    const y = (Math.min(...ys) + Math.max(...ys)) / 2;
-    positions[id] = { x: depth, y };
-    return y;
+    const cols = kids.map((c) => visit(c.id, depth + 1));
+    const col = (Math.min(...cols) + Math.max(...cols)) / 2;
+    grid[id] = { depth, col };
+    return col;
   };
 
   const roots = branches.filter((b) => b.parentId === null);
   for (const r of roots) visit(r.id, 0);
 
-  const px: Record<string, Pos> = {};
-  for (const id of Object.keys(positions)) {
-    px[id] = {
-      x: OFFSET_X + positions[id].x * COL_W,
-      y: OFFSET_Y + positions[id].y * ROW_H,
+  const leafCount = Math.max(1, nextLeaf);
+  const vGap =
+    maxDepth > 0
+      ? Math.max(MIN_V_GAP, (CANVAS_H - PAD_TOP - PAD_BOTTOM) / maxDepth)
+      : 0;
+
+  // Second pass: project grid units to pixels.
+  const positions: Record<string, Pos> = {};
+  for (const id of Object.keys(grid)) {
+    const g = grid[id];
+    positions[id] = {
+      x: PAD_X + NODE_W / 2 + g.col * H_GAP,
+      y: maxDepth > 0 ? PAD_TOP + g.depth * vGap : CANVAS_H / 2,
+      depth: g.depth,
     };
   }
-  const width = OFFSET_X * 2 + maxDepth * COL_W + 120;
-  const height = OFFSET_Y * 2 + row * ROW_H;
-  return { positions: px, width, height };
+
+  const width = PAD_X * 2 + NODE_W + (leafCount - 1) * H_GAP;
+  const height =
+    maxDepth > 0
+      ? PAD_TOP + maxDepth * vGap + NODE_H / 2 + PAD_BOTTOM
+      : CANVAS_H;
+  return { positions, width, height, maxDepth, vGap };
 }
 
 /* ──────────────────────────────────────────────────────────────────
@@ -272,22 +355,9 @@ function diffText(a: string, b: string): DiffOp[] {
 export function CounterfactualBranches() {
   const [branches, setBranches] = useState<Branch[]>(SEED);
   const [selectedId, setSelectedId] = useState<string>("fork-edge");
-  const [log, setLog] = useState<
-    { id: string; ts: number; text: string; tone: "fork" | "edit" | "delta" }[]
-  >([
-    {
-      id: "i-0",
-      ts: Date.now() - 1000 * 60 * 50,
-      text: "v1.3 · edge-push forked from v1.2 · celebrity — backfire surged +34",
-      tone: "fork",
-    },
-    {
-      id: "i-1",
-      ts: Date.now() - 1000 * 60 * 20,
-      text: "v1.4 · warm-family forked from v1.0 · main — resonance +22",
-      tone: "fork",
-    },
-  ]);
+  // Commit history. Seeded from the demo tree; replaced by the campaign's real
+  // events on load (see loadTree).
+  const [log, setLog] = useState<BranchEvent[]>(() => deriveEvents(SEED));
 
   // Persisted score baselines for delta vs last commit (auto-refreshes on fork)
   const [baselines, setBaselines] = useState<Record<string, Scores>>(() => {
@@ -334,7 +404,11 @@ export function CounterfactualBranches() {
   const loadTree = useCallback(async (cid: string | null) => {
     const seq = ++loadSeq.current;
     setTreeLoading(true);
-    const stored = await loadBranches(cid);
+    // Tree + commit history load together.
+    const [stored, events] = await Promise.all([
+      loadBranches(cid),
+      loadEvents(cid),
+    ]);
     if (seq !== loadSeq.current) return; // a newer load superseded this one
     setTreeLoading(false);
 
@@ -382,6 +456,9 @@ export function CounterfactualBranches() {
     setBaselines(base);
     setHistory(hist);
     setAi(aiHydrated);
+    // Real recorded events are authoritative; for a pre-existing tree with no
+    // events yet, fall back to derived fork/score commits so it isn't blank.
+    setLog(events.length > 0 ? events : deriveEvents(stored));
     setSelectedId(root.id);
     setCampaignId(cid);
     setPersisted(true);
@@ -415,6 +492,23 @@ export function CounterfactualBranches() {
       void loadTree(cid);
     },
     [campaignId, loadTree]
+  );
+
+  // Append a commit to the history: optimistic local prepend + durable POST
+  // (when persisted). Every mutation routes through here.
+  const recordEvent = useCallback(
+    (type: BranchEventType, message: string, branchId: string | null) => {
+      const id =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `ev-${Math.random().toString(36).slice(2)}`;
+      const event: BranchEvent = { id, type, message, ts: Date.now(), branchId };
+      setLog((l) => [event, ...l].slice(0, 100));
+      if (persisted) {
+        void apiAppendEvent({ id, campaignId, branchId, type, message, ts: event.ts });
+      }
+    },
+    [persisted, campaignId]
   );
 
   const selected = useMemo(
@@ -517,15 +611,11 @@ export function CounterfactualBranches() {
           : data.source === "mock"
           ? "engine fallback"
           : "heuristic (no model key)";
-      setLog((l) => [
-        {
-          id: `ai-${branch.id}-${Date.now()}`,
-          ts: Date.now(),
-          text: `${branch.label} scored by ${srcLabel} — backfire ${data.scores.backfireScore}, resonance ${data.scores.resonance}`,
-          tone: "delta",
-        },
-        ...l,
-      ]);
+      recordEvent(
+        "score",
+        `${branch.label} scored by ${srcLabel} — backfire ${data.scores.backfireScore}, resonance ${data.scores.resonance}`,
+        branch.id
+      );
     } catch (e) {
       setAi((prev) => ({
         ...prev,
@@ -536,7 +626,7 @@ export function CounterfactualBranches() {
         },
       }));
     }
-  }, [persisted]);
+  }, [persisted, recordEvent]);
 
   // Auto-rescore: when enabled, edits to a branch that already carries an AI
   // verdict re-run the panel after a short idle window. Only the selected
@@ -555,24 +645,31 @@ export function CounterfactualBranches() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoAi, selKey, selAi?.status, selAi?.contentKey, selected.id]);
 
-  // Debounced server save for field edits — coalesce keystrokes into one PATCH.
-  function schedulePatch(id: string, patch: Partial<Branch>) {
-    if (!persisted) return;
+  // Debounced field edit: coalesce keystrokes into one "edit" commit + one PATCH.
+  function schedulePatch(id: string, label: string, patch: Partial<Branch>) {
     pendingPatch.current[id] = { ...pendingPatch.current[id], ...patch };
     clearTimeout(saveTimers.current[id]);
     saveTimers.current[id] = setTimeout(async () => {
       const queued = pendingPatch.current[id];
       delete pendingPatch.current[id];
       if (!queued) return;
-      // If the branch is still being created, wait for that POST first.
-      await creating.current[id];
-      await apiPatchBranch(id, queued);
+      const fields = Object.keys(queued)
+        .map((k) => FIELD_LABELS[k] ?? k)
+        .filter(Boolean);
+      if (fields.length) {
+        recordEvent("edit", `${label} · edited ${fields.join(", ")}`, id);
+      }
+      if (persisted) {
+        // If the branch is still being created, wait for that POST first.
+        await creating.current[id];
+        await apiPatchBranch(id, queued);
+      }
     }, 700);
   }
 
   function patchSelected(patch: Partial<Branch>) {
     setBranches((bs) => bs.map((b) => (b.id === selected.id ? { ...b, ...patch } : b)));
-    schedulePatch(selected.id, patch);
+    schedulePatch(selected.id, selected.label, patch);
   }
 
   function forkSelected() {
@@ -607,15 +704,7 @@ export function CounterfactualBranches() {
       setAi((a) => ({ ...a, [id]: { ...parentAi, cached: true } }));
     }
     setSelectedId(id);
-    setLog((l) => [
-      {
-        id: `l-${id}`,
-        ts: Date.now(),
-        text: `${label} forked from ${selected.label}`,
-        tone: "fork",
-      },
-      ...l,
-    ]);
+    recordEvent("fork", `${label} forked from ${selected.label}`, id);
 
     if (persisted) {
       const createPromise = apiCreateBranch({
@@ -654,16 +743,7 @@ export function CounterfactualBranches() {
 
   function resetToBaseline() {
     if (!baseline) return;
-    setBranches((bs) => bs); // no-op; baselines are read-only refs
-    setLog((l) => [
-      {
-        id: `r-${Date.now()}`,
-        ts: Date.now(),
-        text: `${selected.label} baseline checkpoint refreshed`,
-        tone: "edit",
-      },
-      ...l,
-    ]);
+    recordEvent("baseline", `${selected.label} · baseline committed`, selected.id);
     setBaselines((b) => ({ ...b, [selected.id]: scoreBranch(selected) }));
   }
 
@@ -682,15 +762,11 @@ export function CounterfactualBranches() {
     }
     setBranches((bs) => bs.filter((b) => !drop.has(b.id)));
     setSelectedId(selected.parentId);
-    setLog((l) => [
-      {
-        id: `d-${Date.now()}`,
-        ts: Date.now(),
-        text: `${selected.label} pruned (${drop.size} node${drop.size > 1 ? "s" : ""})`,
-        tone: "edit",
-      },
-      ...l,
-    ]);
+    recordEvent(
+      "prune",
+      `${selected.label} pruned (${drop.size} node${drop.size > 1 ? "s" : ""})`,
+      selected.parentId
+    );
     // Server cascades the subtree from the root id we delete.
     if (persisted) void apiDeleteBranch(selected.id);
   }
@@ -1041,16 +1117,30 @@ function TreeCanvas({
   ai: Record<string, AiState>;
   onSelect: (id: string) => void;
 }) {
-  const NODE_W = 212;
-  const NODE_H = 92;
+  const h = Math.max(height, CANVAS_H);
+
+  // Generation rails — one faint guide per depth, derived from node positions.
+  const depthY = new Map<number, number>();
+  for (const p of Object.values(positions)) {
+    if (!depthY.has(p.depth)) depthY.set(p.depth, p.y);
+  }
+  const rails = Array.from(depthY.entries()).sort((a, b) => a[0] - b[0]);
+
+  // Root anchor for the ambient spine that anchors the whole cascade.
+  const root = branches.find((x) => !x.parentId) ?? branches[0];
+  const rootPos = root ? positions[root.id] : undefined;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.006))] backdrop-blur-xl">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_30%_0%,rgba(255,77,87,0.12),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_-8%,rgba(255,77,87,0.16),transparent_72%)]"
       />
-      <div className="bg-dot absolute inset-0 opacity-40" aria-hidden />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_15%_100%,rgba(120,140,255,0.07),transparent_70%)]"
+      />
+      <div className="bg-dot absolute inset-0 opacity-30" aria-hidden />
 
       <div className="relative flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
         <div className="flex items-center gap-3">
@@ -1060,6 +1150,9 @@ function TreeCanvas({
           <Badge variant="accent" dot>
             live
           </Badge>
+          <span className="hidden font-mono text-[10px] text-[var(--fg-subtle)] sm:inline">
+            {branches.length} nodes · {rails.length} gen
+          </span>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-[var(--fg-subtle)]">
           <Legend swatch="var(--success)" label="low risk" />
@@ -1068,67 +1161,126 @@ function TreeCanvas({
         </div>
       </div>
 
-      <div
-        className="relative max-h-[640px] overflow-auto"
-        style={{ minHeight: 380 }}
-      >
+      <div className="relative max-h-[680px] min-h-[560px] overflow-auto">
         <svg
-          viewBox={`0 0 ${width} ${Math.max(height, 360)}`}
+          viewBox={`0 0 ${width} ${h}`}
           width={width}
-          height={Math.max(height, 360)}
+          height={h}
           className="block"
           role="img"
           aria-label="Counterfactual branch tree"
         >
           <defs>
-            <linearGradient id="edge" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
-              <stop offset="100%" stopColor="rgba(255,77,87,0.55)" />
-            </linearGradient>
-            <linearGradient id="edge-active" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(255,77,87,0.4)" />
-              <stop offset="100%" stopColor="rgba(255,122,130,0.95)" />
-            </linearGradient>
-            <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <filter id="nodeGlow" x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur stdDeviation="6" result="b" />
               <feMerge>
                 <feMergeNode in="b" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <filter id="softBlur" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="9" />
+            </filter>
+            <linearGradient id="cardFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0.012)" />
+            </linearGradient>
+            <linearGradient id="spine" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(255,77,87,0.55)" />
+              <stop offset="100%" stopColor="rgba(255,77,87,0)" />
+            </linearGradient>
+            <radialGradient id="rootPulse" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(255,77,87,0.5)" />
+              <stop offset="100%" stopColor="rgba(255,77,87,0)" />
+            </radialGradient>
           </defs>
 
-          {/* Edges first */}
+          {/* Generation rails — horizontal guides + labels */}
+          {rails.map(([depth, y]) => (
+            <g key={`rail-${depth}`}>
+              <line
+                x1={28}
+                y1={y}
+                x2={width - 20}
+                y2={y}
+                stroke="rgba(255,255,255,0.05)"
+                strokeWidth={1}
+                strokeDasharray="2 8"
+              />
+              <text
+                x={28}
+                y={y - 12}
+                fontSize={9}
+                fontFamily="var(--font-mono), monospace"
+                fill="var(--fg-subtle)"
+                opacity={0.6}
+                style={{ letterSpacing: "0.22em", textTransform: "uppercase" }}
+              >
+                {depth === 0 ? "gen 0 · root" : `gen ${depth}`}
+              </text>
+            </g>
+          ))}
+
+          {/* Ambient spine descending from the root */}
+          {rootPos && (
+            <line
+              x1={rootPos.x}
+              y1={rootPos.y}
+              x2={rootPos.x}
+              y2={h - PAD_BOTTOM / 2}
+              stroke="url(#spine)"
+              strokeWidth={2}
+              opacity={0.4}
+            />
+          )}
+
+          {/* Edges — vertical bezier, tinted by the child's risk */}
           {branches.map((b) => {
             if (!b.parentId) return null;
             const a = positions[b.parentId];
             const c = positions[b.id];
             if (!a || !c) return null;
-            const px1 = a.x + NODE_W / 2;
-            const py1 = a.y;
-            const px2 = c.x - NODE_W / 2;
-            const py2 = c.y;
-            const midx = (px1 + px2) / 2;
-            const d = `M ${px1} ${py1} C ${midx} ${py1}, ${midx} ${py2}, ${px2} ${py2}`;
-            const onPath =
-              b.id === selectedId || b.parentId === selectedId;
+            const x1 = a.x;
+            const y1 = a.y + NODE_H / 2;
+            const x2 = c.x;
+            const y2 = c.y - NODE_H / 2;
+            const my = (y1 + y2) / 2;
+            const d = `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`;
+            const tone = riskTone(allScores[b.id].backfireScore);
+            const onPath = b.id === selectedId || b.parentId === selectedId;
             return (
               <g key={`e-${b.id}`}>
+                {/* soft colored underglow */}
                 <path
                   d={d}
                   fill="none"
-                  stroke={onPath ? "url(#edge-active)" : "url(#edge)"}
-                  strokeWidth={onPath ? 2.5 : 1.5}
+                  stroke={tone.color}
+                  strokeWidth={onPath ? 7 : 5}
                   strokeLinecap="round"
-                  opacity={onPath ? 1 : 0.75}
+                  opacity={onPath ? 0.28 : 0.12}
+                  filter="url(#softBlur)"
                 />
+                {/* flowing dashed conduit */}
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={tone.color}
+                  strokeWidth={onPath ? 2.4 : 1.6}
+                  strokeLinecap="round"
+                  strokeDasharray="5 11"
+                  opacity={onPath ? 1 : 0.7}
+                >
+                  <animate
+                    attributeName="stroke-dashoffset"
+                    from="32"
+                    to="0"
+                    dur={onPath ? "1s" : "1.8s"}
+                    repeatCount="indefinite"
+                  />
+                </path>
                 {onPath && (
-                  <circle r={3} fill="var(--accent)">
-                    <animateMotion
-                      dur="2.4s"
-                      repeatCount="indefinite"
-                      path={d}
-                    />
+                  <circle r={3.5} fill={tone.color} filter="url(#nodeGlow)">
+                    <animateMotion dur="2s" repeatCount="indefinite" path={d} />
                   </circle>
                 )}
               </g>
@@ -1142,23 +1294,47 @@ function TreeCanvas({
             const score = allScores[b.id];
             const tone = riskTone(score.backfireScore);
             const isSel = b.id === selectedId;
+            const isRoot = !b.parentId;
             const av = ai[b.id];
             const aiScored = av?.status === "done" && av.source === "ai";
             const aiLoading = av?.status === "loading";
             return (
               <g
                 key={b.id}
+                className="bt-node"
                 transform={`translate(${p.x - NODE_W / 2}, ${p.y - NODE_H / 2})`}
-                style={{ cursor: "pointer" }}
                 onClick={() => onSelect(b.id)}
               >
+                {/* colored aura */}
+                <rect
+                  x={-8}
+                  y={-8}
+                  width={NODE_W + 16}
+                  height={NODE_H + 16}
+                  rx={18}
+                  fill={tone.color}
+                  opacity={isSel ? 0.22 : 0.1}
+                  filter="url(#softBlur)"
+                />
+                {/* root pulse halo */}
+                {isRoot && (
+                  <circle cx={NODE_W / 2} cy={NODE_H / 2} r={NODE_H * 0.78} fill="url(#rootPulse)">
+                    <animate
+                      attributeName="opacity"
+                      values="0.25;0.6;0.25"
+                      dur="3.2s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                )}
+                {/* selected pulsing ring */}
                 {isSel && (
                   <rect
                     x={-4}
                     y={-4}
                     width={NODE_W + 8}
                     height={NODE_H + 8}
-                    rx={14}
+                    rx={15}
                     fill="none"
                     stroke="var(--accent)"
                     strokeWidth={1.5}
@@ -1167,29 +1343,38 @@ function TreeCanvas({
                   >
                     <animate
                       attributeName="opacity"
-                      values="0.35;0.85;0.35"
+                      values="0.35;0.9;0.35"
                       dur="2.4s"
                       repeatCount="indefinite"
                     />
                   </rect>
                 )}
+                {/* card */}
                 <rect
+                  className="bt-card"
                   width={NODE_W}
                   height={NODE_H}
-                  rx={12}
+                  rx={13}
                   fill="var(--bg-elev-2)"
                   stroke={isSel ? "var(--accent)" : "rgba(255,255,255,0.12)"}
                   strokeWidth={isSel ? 1.5 : 1}
                 />
-                {/* tone bar */}
                 <rect
-                  x={0}
-                  y={0}
-                  width={4}
+                  width={NODE_W}
                   height={NODE_H}
-                  rx={2}
-                  fill={tone.color}
+                  rx={13}
+                  fill="url(#cardFill)"
+                  pointerEvents="none"
                 />
+                {/* tone bar */}
+                <rect x={0} y={0} width={4} height={NODE_H} rx={2} fill={tone.color}>
+                  <animate
+                    attributeName="opacity"
+                    values="0.7;1;0.7"
+                    dur="2.6s"
+                    repeatCount="indefinite"
+                  />
+                </rect>
                 <text
                   x={16}
                   y={22}
@@ -1269,6 +1454,11 @@ function TreeCanvas({
               </g>
             );
           })}
+          <style>{`
+            .bt-node { cursor: pointer; }
+            .bt-node .bt-card { transition: stroke 0.18s ease, filter 0.18s ease; }
+            .bt-node:hover .bt-card { stroke: var(--accent); filter: brightness(1.12); }
+          `}</style>
         </svg>
       </div>
     </div>
@@ -1813,7 +2003,7 @@ function ScoreCell({
     <div
       className="relative overflow-hidden rounded-xl border px-3 py-2.5"
       style={{
-        borderColor: isAi ? "var(--accent)" : "var(--border)",
+        borderColor: "var(--border)",
         background: `linear-gradient(180deg, ${tone.soft}, transparent 75%)`,
       }}
     >
@@ -2114,11 +2304,15 @@ function DiffRow({ label, a, b }: { label: string; a: string; b: string }) {
    Activity log
    ────────────────────────────────────────────────────────────────── */
 
-function ActivityLog({
-  log,
-}: {
-  log: { id: string; ts: number; text: string; tone: "fork" | "edit" | "delta" }[];
-}) {
+const EVENT_COLOR: Record<BranchEventType, string> = {
+  fork: "var(--accent)",
+  score: "var(--warning)",
+  edit: "var(--info)",
+  prune: "var(--danger)",
+  baseline: "var(--success)",
+};
+
+function ActivityLog({ log }: { log: BranchEvent[] }) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
@@ -2135,7 +2329,7 @@ function ActivityLog({
       <ul className="max-h-[260px] space-y-0.5 overflow-auto p-2">
         {log.length === 0 ? (
           <li className="px-4 py-6 text-center text-[13px] text-[var(--fg-muted)]">
-            No commits yet — try forking a branch.
+            No commits yet — fork, edit, or score a branch.
           </li>
         ) : (
           log.map((entry) => (
@@ -2145,25 +2339,21 @@ function ActivityLog({
             >
               <span
                 className="mt-1.5 inline-flex h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{
-                  backgroundColor:
-                    entry.tone === "fork"
-                      ? "var(--accent)"
-                      : entry.tone === "delta"
-                      ? "var(--warning)"
-                      : "var(--info)",
-                }}
+                style={{ backgroundColor: EVENT_COLOR[entry.type] }}
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13px] text-[var(--fg)]">
-                  {entry.text}
+                  {entry.message}
                 </p>
                 <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
                   {timeAgo(entry.ts)}
                 </p>
               </div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
-                {entry.tone}
+              <span
+                className="font-mono text-[10px] uppercase tracking-wider"
+                style={{ color: EVENT_COLOR[entry.type] }}
+              >
+                {entry.type}
               </span>
             </li>
           ))

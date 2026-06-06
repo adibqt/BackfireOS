@@ -208,10 +208,11 @@ flowchart LR
 
 ### Database
 - **Primary:** Supabase Postgres + `pgvector` (768-dim embeddings, IVFFlat index)
-- **Schema:** `supabase/schema.sql` (+ migrations: `migrate-auth.sql`, `migrate-brands.sql`, `migrate-cultural-stress-map.sql`, `migrate-768.sql`, `migrate-delete-runs.sql`, `migrate-branches-tree.sql`, `migrate-branches-campaign.sql`)
+- **Schema:** `supabase/schema.sql` (+ migrations: `migrate-auth.sql`, `migrate-brands.sql`, `migrate-cultural-stress-map.sql`, `migrate-768.sql`, `migrate-delete-runs.sql`, `migrate-branches-tree.sql`, `migrate-branches-campaign.sql`, `migrate-branch-events.sql`)
 - **RLS:** per-user row-level security (`supabase/migrate-auth.sql`)
 - **Storage:** Supabase Storage bucket for campaign images
 - **Branch tree:** `campaign_branches` adjacency list (`parent_id` self-ref, `ON DELETE CASCADE` for subtree prune), scoped per campaign via `campaign_id` — a real campaign's tree root is seeded from its copy + actual verdict; `campaign_id NULL` is the standalone demo tree — `lib/db/branches.ts`, `lib/branches/store.ts`
+- **Commit history:** `branch_events` append-only log (fork / edit / prune / score / baseline), scoped per user+campaign, recorded on every mutation and reloaded with the tree — `lib/db/branch-events.ts`, `app/api/branch-events`
 - **Fallback:** in-memory store (`lib/store.ts`, `lib/branches/store.ts`) when Supabase keys absent
 
 ### AI Stack
@@ -595,7 +596,7 @@ When Supabase auth keys are set, sign-in is required and all simulations/memes a
 ```powershell
 # 1. Run supabase/schema.sql in Supabase SQL Editor
 # 2. Run supabase/migrate-auth.sql for RLS + storage buckets
-# 3. Run supabase/migrate-brands.sql, migrate-cultural-stress-map.sql, migrate-branches-tree.sql, migrate-branches-campaign.sql
+# 3. Run supabase/migrate-brands.sql, migrate-cultural-stress-map.sql, migrate-branches-tree.sql, migrate-branches-campaign.sql, migrate-branch-events.sql
 # 4. If History shows "permission denied", run supabase/fix-grants.sql
 # 5. Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local
 # 6. (Optional) SUPABASE_SERVICE_ROLE_KEY for RAG seeding

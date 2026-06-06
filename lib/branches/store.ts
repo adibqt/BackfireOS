@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   branchContentKey,
+  type BranchEvent,
   type CampaignSeed,
   type PersistedAi,
   type StoredBranch,
@@ -16,6 +17,11 @@ import {
   type BranchCreate,
   type BranchFields,
 } from "@/lib/db/branches";
+import {
+  dbInsertEvent,
+  dbListEvents,
+  type EventCreate,
+} from "@/lib/db/branch-events";
 
 /**
  * Branch persistence facade. Mirrors lib/store.ts: when a Supabase admin client
@@ -31,6 +37,9 @@ import {
 declare global {
   var __backfireBranchStore:
     | Map<string, Map<string, StoredBranch>>
+    | undefined;
+  var __backfireEventStore:
+    | Map<string, (BranchEvent & { campaignId: string | null })[]>
     | undefined;
 }
 
@@ -249,4 +258,62 @@ export async function deleteBranchSubtree(
   }
   for (const sid of subtree) bucket.delete(sid);
   return subtree;
+}
+
+/* ── Commit history (branch_events) ──────────────────────────────── */
+
+function memEventBucket(
+  userId: string | null
+): (BranchEvent & { campaignId: string | null })[] {
+  const key = ownerKey(userId);
+  const store = (globalThis.__backfireEventStore ??= new Map());
+  let bucket = store.get(key);
+  if (!bucket) {
+    bucket = [];
+    store.set(key, bucket);
+  }
+  return bucket;
+}
+
+/** Lists a campaign's commit history, newest first. */
+export async function listEvents(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  campaignId: string | null,
+  limit = 100
+): Promise<BranchEvent[]> {
+  if (supabase && userId) {
+    return dbListEvents(supabase, userId, campaignId, limit);
+  }
+  return memEventBucket(userId)
+    .filter((e) => e.campaignId === campaignId)
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, limit)
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      message: e.message,
+      ts: e.ts,
+      branchId: e.branchId,
+    }));
+}
+
+/** Appends a single commit to the history. */
+export async function appendEvent(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  event: EventCreate
+): Promise<BranchEvent> {
+  if (supabase && userId) {
+    return dbInsertEvent(supabase, userId, event);
+  }
+  const stored: BranchEvent = {
+    id: event.id,
+    type: event.type,
+    message: event.message,
+    ts: event.ts,
+    branchId: event.branchId,
+  };
+  memEventBucket(userId).push({ ...stored, campaignId: event.campaignId });
+  return stored;
 }
