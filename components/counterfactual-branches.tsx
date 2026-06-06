@@ -465,12 +465,32 @@ export function CounterfactualBranches() {
   }, []);
 
   // On mount: fetch the campaign list for the picker, then load the initial
-  // tree (deep-linkable via ?campaign=<id>).
+  // tree (deep-linkable via ?campaign=<id> or ?runId=<id> from run-aware nav).
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const params = new URLSearchParams(window.location.search);
-      const initial = params.get("campaign");
+      let initial = params.get("campaign");
+      const runId = params.get("runId");
+
+      // Header nav from /runs/[id] passes runId; trees are keyed by campaign.
+      if (!initial && runId) {
+        try {
+          const res = await fetch(`/api/campaigns?runId=${encodeURIComponent(runId)}`);
+          if (res.ok) {
+            const run = (await res.json()) as { campaignId?: string };
+            if (run.campaignId) {
+              initial = run.campaignId;
+              const url = new URL(window.location.href);
+              url.searchParams.set("campaign", run.campaignId);
+              window.history.replaceState(null, "", url.toString());
+            }
+          }
+        } catch {
+          /* fall through to demo tree */
+        }
+      }
+
       const list = await listCampaigns();
       if (cancelled) return;
       setCampaigns(list);
