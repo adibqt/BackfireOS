@@ -1639,6 +1639,7 @@ function Inspector({
             aiValue={aiPrimary?.memeability}
             base={baseline?.memeability}
             parent={parentScores?.memeability}
+            invert
           />
           <ScoreCell
             label="Brand drift"
