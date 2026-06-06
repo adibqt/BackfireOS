@@ -9,6 +9,7 @@ import {
 import { PageShell } from "@/components/page-shell";
 import { SectionHeader } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { useLanguage } from "@/components/language-provider";
 import { highestRiskRegion } from "@/lib/cultural-stress-map";
 import { t } from "@/lib/i18n";
@@ -29,10 +30,11 @@ function RunPicker({
 
   return (
     <div className="space-y-2">
-      <select
+      <Select
         value={selectedId}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] px-4 py-2.5 text-[14px] text-[var(--fg)] outline-none ring-[var(--accent)]/30 focus:ring-2"
+        fieldSize="lg"
+        className="max-w-lg"
       >
         <option value="">Select a simulation…</option>
         {completed.map((run) => (
@@ -41,7 +43,7 @@ function RunPicker({
             {new Date(run.createdAt).toLocaleDateString()}
           </option>
         ))}
-      </select>
+      </Select>
       {emptyMessage && (
         <p className="text-[13px] text-[var(--fg-muted)]">{emptyMessage}</p>
       )}

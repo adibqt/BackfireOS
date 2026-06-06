@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { SectionHeader } from "@/components/ui/card";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/language-provider";
 import { t } from "@/lib/i18n";
@@ -686,10 +687,11 @@ function RunPicker({
   const completed = runs.filter((r) => r.status === "complete");
   return (
     <div className="space-y-2">
-      <select
+      <Select
         value={selectedId}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] px-4 py-2.5 text-[14px] text-[var(--fg)] outline-none ring-[var(--accent)]/30 focus:ring-2"
+        fieldSize="lg"
+        className="max-w-lg"
       >
         <option value="">Select a campaign…</option>
         {completed.map((run) => (
@@ -698,7 +700,7 @@ function RunPicker({
             {new Date(run.createdAt).toLocaleDateString()}
           </option>
         ))}
-      </select>
+      </Select>
       {emptyMessage && <p className="text-[13px] text-[var(--fg-muted)]">{emptyMessage}</p>}
     </div>
   );
@@ -725,19 +727,20 @@ function SloganVariantPicker({
       <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
         Slogan version
       </label>
-      <select
+      <Select
         value={selectedId}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         title="Debate the original slogan or any counterfactual variant"
-        className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] px-4 py-2.5 text-[14px] text-[var(--fg)] outline-none ring-[var(--accent)]/30 focus:ring-2 disabled:opacity-50 sm:max-w-xs"
+        fieldSize="lg"
+        className="sm:max-w-xs"
       >
         {variants.map((v) => (
           <option key={v.id} value={v.id}>
             {v.id === ORIGINAL_VARIANT_ID ? "Original" : `⎇ ${v.label}`} — {truncate(v.slogan, 40)}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

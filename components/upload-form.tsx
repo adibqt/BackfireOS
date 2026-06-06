@@ -9,6 +9,7 @@ import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Input, Textarea, FileInput } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Badge, RiskBadge, Kbd } from "@/components/ui/badge";
 import { riskLevel } from "@/lib/scoring";
 import { cn } from "@/lib/utils";
@@ -446,23 +447,17 @@ function BrandSelector({
           Manage brands
         </Link>
       </div>
-      <select
+      <Select
         id="brand-id"
         value={brandId}
         onChange={(e) => onChange(e.target.value)}
-        className={cn(
-          "h-11 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elev-1)] px-3 text-[15px] text-[var(--fg)]",
-          "transition-[border-color,box-shadow,background-color] duration-200",
-          "hover:border-[var(--border-bright)]",
-          "focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] focus:bg-[var(--bg-elev-2)]"
-        )}
       >
         {brands.map((b) => (
           <option key={b.id} value={b.id}>
             {b.name}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

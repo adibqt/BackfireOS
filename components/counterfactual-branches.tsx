@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { scoreBranch } from "@/lib/branches/heuristic";
 import { branchContentKey } from "@/lib/branches/types";
@@ -993,11 +994,11 @@ function CampaignPicker({
       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
         ⎇ tree for
       </span>
-      <div className="relative">
-        <select
+      <Select
           value={campaignId ?? ""}
           onChange={(e) => onPick(e.target.value || null)}
-          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--bg-elev-2)] py-1.5 pl-3 pr-8 text-[13px] text-[var(--fg)] outline-none transition-colors hover:border-[var(--border-bright)] focus:border-[var(--accent)]"
+          fieldSize="sm"
+          wrapperClassName="min-w-[200px]"
         >
           <option value="">Demo tree (bKash)</option>
           {campaigns.map((c) => (
@@ -1006,8 +1007,7 @@ function CampaignPicker({
               {c.backfireScore != null ? ` · bf ${c.backfireScore}` : ""}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
 
       {campaignId === null ? (
         <Badge variant="default">standalone demo</Badge>

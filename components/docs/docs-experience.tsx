@@ -16,6 +16,7 @@ import {
 import { docsToMarkdown } from "@/lib/docs/markdown";
 import type { DocsConfig, LiveStats } from "@/lib/docs/types";
 import { cn } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
 import { BlockRenderer } from "./blocks";
 import { TeamGrid } from "./team-grid";
 import { FeatureMatrix } from "./feature-matrix";
@@ -237,10 +238,11 @@ export function DocsExperience({
 
           {/* Mobile section jump */}
           <div className="no-print mt-6 lg:hidden">
-            <select
+            <Select
               value={activeId}
               onChange={(e) => jumpTo(e.target.value)}
-              className="h-10 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elev-1)] px-3 text-[14px] text-[var(--fg)] outline-none"
+              fieldSize="md"
+              className="h-10 text-[14px]"
             >
               <optgroup label="Pitch deck">
                 {PITCH_SECTIONS.map((s) => (
@@ -252,7 +254,7 @@ export function DocsExperience({
                   <option key={s.id} value={s.id}>{s.label}</option>
                 ))}
               </optgroup>
-            </select>
+            </Select>
           </div>
 
           <div className="mt-12 space-y-16">
