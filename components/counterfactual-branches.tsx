@@ -795,7 +795,7 @@ export function CounterfactualBranches() {
       )}
 
       {/* Main split: tree + inspector */}
-      <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
+      <div className="grid items-start gap-6 lg:grid-cols-[1.35fr_1fr]">
         <TreeCanvas
           branches={branches}
           positions={positions}
@@ -827,7 +827,7 @@ export function CounterfactualBranches() {
       </div>
 
       {/* Footer row */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.2fr]">
         <DiffPanel branch={selected} parent={parent} />
         <ActivityLog log={log} />
       </div>
@@ -2327,7 +2327,7 @@ function ActivityLog({ log }: { log: BranchEvent[] }) {
           most recent first
         </span>
       </div>
-      <ul className="max-h-[260px] space-y-0.5 overflow-auto p-2">
+      <ul className="max-h-[480px] space-y-0.5 overflow-auto p-2">
         {log.length === 0 ? (
           <li className="px-4 py-6 text-center text-[13px] text-[var(--fg-muted)]">
             No commits yet — fork, edit, or score a branch.
