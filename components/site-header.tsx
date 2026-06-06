@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { AuthButton } from "./auth-button";
+import { signOutUser, useAuthUser } from "./use-auth-user";
 import { useLanguage } from "./language-provider";
 import { LogoBadge } from "./logo";
 import { t } from "@/lib/i18n";
@@ -53,7 +54,9 @@ type Pill = { left: number; top: number; width: number; height: number };
 function SiteHeaderInner() {
   const { locale, setLocale } = useLanguage();
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, configured: authConfigured } = useAuthUser();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pill, setPill] = useState<Pill | null>(null);
@@ -238,6 +241,42 @@ function SiteHeaderInner() {
             >
               History
             </Link>
+
+            {authConfigured && (
+              <>
+                <div className="my-2 border-t border-[var(--border)]" />
+                {user ? (
+                  <>
+                    <p className="px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+                      Signed in as
+                    </p>
+                    <p className="truncate px-3 pb-1 text-[13px] text-[var(--fg-muted)]">
+                      {user.email}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setMobileOpen(false);
+                        await signOutUser();
+                        router.push("/login");
+                        router.refresh();
+                      }}
+                      className="w-full rounded-lg px-3 py-2.5 text-left text-sm text-[var(--danger)] transition-colors hover:bg-[var(--danger-soft)]"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-white/[0.04]"
+                  >
+                    Sign in
+                  </Link>
+                )}
+              </>
+            )}
           </div>
         </nav>
       )}
