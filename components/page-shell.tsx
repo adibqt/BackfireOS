@@ -5,11 +5,11 @@ import { Logo } from "@/components/logo";
 export function PageShell({
   children,
   footer = true,
-  wide = false,
   bare = false,
 }: {
   children: React.ReactNode;
   footer?: boolean;
+  /** @deprecated layout is now full-bleed; this prop is a no-op */
   wide?: boolean;
   bare?: boolean;
 }) {
@@ -20,7 +20,7 @@ export function PageShell({
         className={
           bare
             ? "flex-1"
-            : `mx-auto w-full ${wide ? "max-w-7xl" : "max-w-6xl"} flex-1 px-5 py-10 md:py-16`
+            : "w-full flex-1 px-5 py-10 md:px-8 md:py-16 lg:px-12"
         }
       >
         {children}
@@ -33,7 +33,7 @@ export function PageShell({
 function SiteFooter() {
   return (
     <footer className="relative mt-24 border-t border-[var(--border)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="grid gap-10 px-5 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:px-8 lg:px-12">
         <div>
           <Logo size="sm" tile glow={false} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-[var(--fg-muted)]">
@@ -67,7 +67,7 @@ function SiteFooter() {
         />
       </div>
       <div className="border-t border-[var(--border)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-5 text-xs text-[var(--fg-subtle)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-5 text-xs text-[var(--fg-subtle)] md:px-8 lg:px-12">
           <p>© {new Date().getFullYear()} Backfire OS · All rights reserved.</p>
           <p className="font-mono">v0.1 · prototype build</p>
         </div>
