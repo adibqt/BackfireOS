@@ -1,6 +1,6 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+    <linearGradient id="g" x1="5" y1="5" x2="27" y2="27" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#ff9aa0"/>
       <stop offset="46%" stop-color="#ff4d57"/>
       <stop offset="100%" stop-color="#c0212e"/>
@@ -9,8 +9,12 @@
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
       <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
+    <mask id="cut">
+      <rect width="32" height="32" fill="white"/>
+      <path d="M23.25 8.75 L23.25 23.25 L9.75 16 Z" fill="black"/>
+    </mask>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#g)"/>
   <rect width="32" height="32" rx="8" fill="url(#sheen)"/>
-  <path fill-rule="nonzero" fill="#ffffff" d="M9 6 H12.5 V26 H9 A2 2 0 0 1 7 24 V8 A2 2 0 0 1 9 6 Z M10 6 H20 A4 4 0 0 1 24 10 V11 A4 4 0 0 1 20 15 H10 Z M10 14 H20.5 A4.5 4.5 0 0 1 25 18.5 V21.5 A4.5 4.5 0 0 1 20.5 26 H10 Z M13 10.5 L19.5 12.5 L19.5 8.5 Z M13 20 L20 22.5 L20 17.5 Z"/>
+  <path fill-rule="nonzero" fill="#ffffff" mask="url(#cut)" d="M7 5 H12 V27 H7 A2 2 0 0 1 5 25 V7 A2 2 0 0 1 7 5 Z M10 5 H21 A5 5 0 0 1 26 10.5 V11.5 A5 5 0 0 1 21 16 H10 Z M10 16 H21.5 A5.5 5.5 0 0 1 27 21.5 V24.5 A5.5 5.5 0 0 1 21.5 27 H10 Z"/>
 </svg>

@@ -52,7 +52,7 @@ export default function SignupPage() {
         <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur-xl">
           <div className="px-8 pt-10 text-center">
             <div className="mx-auto inline-flex">
-              <LogoBadge size="xl" />
+              <LogoBadge size="xl" glow />
             </div>
             <h1 className="mt-5 font-display text-[26px] font-semibold tracking-tight text-[var(--fg)]">
               Create your account

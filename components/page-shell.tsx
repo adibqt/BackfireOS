@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
-import { LogoBadge } from "@/components/logo";
+import { Logo } from "@/components/logo";
 
 export function PageShell({
   children,
@@ -35,12 +35,7 @@ function SiteFooter() {
     <footer className="relative mt-24 border-t border-[var(--border)]">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
-          <div className="flex items-center gap-2.5">
-            <LogoBadge size="sm" glow={false} />
-            <span className="font-display text-sm font-semibold tracking-tight text-[var(--fg)]">
-              Backfire <span className="text-[var(--fg-muted)] font-medium">OS</span>
-            </span>
-          </div>
+          <Logo size="sm" tile glow={false} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-[var(--fg-muted)]">
             Adversarial brand simulation engine for emerging markets. Built for
             MarTech Track 2 · BuildFest 2026.

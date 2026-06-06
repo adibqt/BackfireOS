@@ -9,6 +9,8 @@ import type {
   RunScores,
   SimulationRun,
 } from "@/lib/agents/types";
+import type { CampaignSeed } from "@/lib/branches/types";
+import { runScoresToBranchScores } from "@/lib/branches/types";
 
 type DbCampaign = {
   id: string;
@@ -509,6 +511,76 @@ export async function dbListPastCampaigns(
       brief: row.brief ?? undefined,
       createdAt: row.created_at,
     }));
+}
+
+/**
+ * Gathers what's needed to seed a campaign's root branch: the campaign's own
+ * copy plus, if it has a completed simulation, that run's real scores and
+ * harshest critic — so opening a campaign's tree shows the actual verdict it
+ * earned, ready to fork counterfactuals from.
+ */
+export async function dbGetCampaignSeed(
+  supabase: SupabaseClient,
+  userId: string,
+  campaignId: string
+): Promise<CampaignSeed | null> {
+  const { data: campaign, error: cErr } = await supabase
+    .from("campaigns")
+    .select("slogan, brief")
+    .eq("id", campaignId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (cErr) throw new Error(cErr.message);
+  if (!campaign) return null;
+
+  const seed: CampaignSeed = {
+    slogan: (campaign as { slogan: string }).slogan,
+    brief: (campaign as { brief: string | null }).brief ?? undefined,
+  };
+
+  const { data: run, error: rErr } = await supabase
+    .from("simulation_runs")
+    .select(
+      "id, backfire_score, resonance, backfire_risk, memeability, brand_safety_drift, polarization_coefficient"
+    )
+    .eq("campaign_id", campaignId)
+    .eq("user_id", userId)
+    .eq("status", "complete")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (rErr) throw new Error(rErr.message);
+
+  if (run && (run as DbRun).backfire_score != null) {
+    const scores = mapScores(run as DbRun);
+    if (scores) {
+      seed.scores = runScoresToBranchScores(scores);
+
+      const { data: verdict, error: vErr } = await supabase
+        .from("agent_verdicts")
+        .select("agent_id, agent_name, severity, reasoning, sample_attack")
+        .eq("run_id", (run as { id: string }).id)
+        .order("severity", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (vErr) throw new Error(vErr.message);
+      if (verdict) {
+        const v = verdict as DbVerdict;
+        seed.topCritic = {
+          agentId: v.agent_id,
+          agentName: v.agent_name,
+          severity: v.severity,
+          reasoning: v.reasoning,
+          sampleAttack: v.sample_attack,
+        };
+      }
+    }
+  }
+
+  return seed;
 }
 
 export async function dbCreateBrand(

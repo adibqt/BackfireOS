@@ -1,31 +1,23 @@
 import { cn } from "@/lib/utils";
+import {
+  BACKFIRE_B_SOLID_PATH,
+  BACKFIRE_CHEVRON_PATH,
+  BACKFIRE_CROSSHAIR_H,
+  BACKFIRE_CROSSHAIR_V,
+  BACKFIRE_RING_INNER_PATH,
+  BACKFIRE_RING_PATH,
+  BACKFIRE_TARGET_RING,
+} from "@/lib/brand/mark-path";
 
 /**
- * Backfire OS · Brand system
- * ──────────────────────────────────────────────────────────────────────────
- * The mark is a geometric "B" monogram with a concept baked into its
- * negative space: the two counters are cut as backward-pointing arrowheads.
- * The outer silhouette reads instantly as a confident B; the carved arrows
- * read as recoil — the campaign's own force turned back on itself. Backfire.
+ * Backfire OS · Brand system (brandkit spec)
  *
- * Built on a strict 32-unit grid for pixel-true rendering. Stem + two squircle
- * bowls fuse into one silhouette via nonzero winding; the arrow counters are
- * wound in reverse so they punch clean holes at any size.
- *
- * Components
- *   <LogoMark />   — glyph only, currentColor. Favicon / monochrome / on-color.
- *   <LogoBadge />  — the standalone brand mark (coral gradient, optional tile).
- *   <Logo />       — full lockup: mark + wordmark (+ optional tagline).
- *
- * Surface notes
- *   • The gradient mark holds up on both dark and light backgrounds.
- *   • For pure monochrome lockups use <LogoMark /> and set color via text/fill.
- *   • Pass `tile` to <LogoBadge /> for the rounded app-icon treatment.
+ * Primary: coral-gradient B with central recoil chevron on dark surfaces.
+ * App icon: white mark on coral gradient tile (pass tile to LogoBadge).
  */
 
 type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
-/** Pixel size of the standalone mark per named size. */
 const MARK_PX: Record<Size, number> = {
   xs: 22,
   sm: 26,
@@ -34,43 +26,56 @@ const MARK_PX: Record<Size, number> = {
   xl: 52,
 };
 
-/**
- * The "B" letterform on a 32-unit grid, authored as filled subpaths:
- *   1. stem            — heavy left vertical, rounded outer corners
- *   2. top bowl        — squircle bowl, fused to the stem
- *   3. bottom bowl     — a hair wider + taller for a grounded stance
- *   4. top counter     — left-pointing arrowhead (carved)
- *   5. bottom counter  — left-pointing arrowhead (carved)
- * Subpaths 1–3 share winding (union); 4–5 reverse winding (holes).
- */
-const B_PATH = [
-  // stem
-  "M9 6 H12.5 V26 H9 A2 2 0 0 1 7 24 V8 A2 2 0 0 1 9 6 Z",
-  // top bowl
-  "M10 6 H20 A4 4 0 0 1 24 10 V11 A4 4 0 0 1 20 15 H10 Z",
-  // bottom bowl (a touch wider + taller)
-  "M10 14 H20.5 A4.5 4.5 0 0 1 25 18.5 V21.5 A4.5 4.5 0 0 1 20.5 26 H10 Z",
-  // top counter → backward arrowhead
-  "M13 10.5 L19.5 12.5 L19.5 8.5 Z",
-  // bottom counter → backward arrowhead
-  "M13 20 L20 22.5 L20 17.5 Z",
-].join(" ");
-
-function BGlyph({ fill }: { fill: string }) {
-  return <path d={B_PATH} fill={fill} fillRule="nonzero" />;
+function BGlyph({ fill, maskId }: { fill: string; maskId: string }) {
+  return (
+    <>
+      <defs>
+        <mask id={maskId}>
+          <rect width="32" height="32" fill="white" />
+          <path d={BACKFIRE_CHEVRON_PATH} fill="black" />
+        </mask>
+      </defs>
+      <path d={BACKFIRE_B_SOLID_PATH} fill={fill} fillRule="nonzero" mask={`url(#${maskId})`} />
+    </>
+  );
 }
 
-/** Shared coral gradient. `id` is parameterised so multiple marks coexist. */
+function RingGlyph({
+  stroke = "currentColor",
+  strokeWidth = 1.2,
+  opacity = 0.45,
+  d = BACKFIRE_RING_PATH,
+}: {
+  stroke?: string;
+  strokeWidth?: number;
+  opacity?: number;
+  d?: string;
+}) {
+  return (
+    <path
+      d={d}
+      fill="none"
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      opacity={opacity}
+    />
+  );
+}
+
+function CrosshairGlyph({ stroke = "currentColor", opacity = 0.22 }: { stroke?: string; opacity?: number }) {
+  return (
+    <g stroke={stroke} strokeWidth={0.75} opacity={opacity} strokeLinecap="round">
+      <path d={BACKFIRE_CROSSHAIR_H} />
+      <path d={BACKFIRE_CROSSHAIR_V} />
+      <path d={BACKFIRE_TARGET_RING} fill="none" strokeWidth={0.85} />
+    </g>
+  );
+}
+
 function BrandGradient({ id }: { id: string }) {
   return (
-    <linearGradient
-      id={id}
-      x1="7"
-      y1="6"
-      x2="25"
-      y2="26"
-      gradientUnits="userSpaceOnUse"
-    >
+    <linearGradient id={id} x1="5" y1="5" x2="27" y2="27" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stopColor="#ff9aa0" />
       <stop offset="46%" stopColor="#ff4d57" />
       <stop offset="100%" stopColor="#c0212e" />
@@ -78,8 +83,113 @@ function BrandGradient({ id }: { id: string }) {
   );
 }
 
+function TileSheen({ id }: { id: string }) {
+  return (
+    <linearGradient id={id} x1="16" y1="0" x2="16" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
+      <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
+    </linearGradient>
+  );
+}
+
+function MarkDefs({
+  gradId,
+  tile,
+  ring,
+  ringGradId,
+  sheenId,
+}: {
+  gradId: string;
+  tile: boolean;
+  ring: boolean;
+  ringGradId: string;
+  sheenId: string;
+}) {
+  return (
+    <defs>
+      <BrandGradient id={gradId} />
+      {tile && <TileSheen id={sheenId} />}
+      {ring && (
+        <linearGradient id={ringGradId} x1="5" y1="5" x2="27" y2="27" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ff7a82" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="#ff4d57" stopOpacity="0.15" />
+        </linearGradient>
+      )}
+    </defs>
+  );
+}
+
+function ScanOverlay({ ringGradId }: { ringGradId: string }) {
+  return (
+    <>
+      <CrosshairGlyph stroke={`url(#${ringGradId})`} opacity={0.35} />
+      <RingGlyph stroke={`url(#${ringGradId})`} opacity={0.55} strokeWidth={1.1} />
+      <RingGlyph d={BACKFIRE_RING_INNER_PATH} stroke={`url(#${ringGradId})`} opacity={0.35} strokeWidth={0.8} />
+    </>
+  );
+}
+
+function MarkBody({
+  gradId,
+  tile,
+  sheenId,
+  maskId,
+}: {
+  gradId: string;
+  tile: boolean;
+  sheenId: string;
+  maskId: string;
+}) {
+  if (tile) {
+    return (
+      <>
+        <rect x="0" y="0" width="32" height="32" rx="8" fill={`url(#${gradId})`} />
+        <rect x="0" y="0" width="32" height="32" rx="8" fill={`url(#${sheenId})`} />
+        <BGlyph fill="#ffffff" maskId={maskId} />
+      </>
+    );
+  }
+  return <BGlyph fill={`url(#${gradId})`} maskId={maskId} />;
+}
+
 export function LogoMark({
   size = 18,
+  className,
+  title = "Backfire OS",
+  ring = false,
+}: {
+  size?: number;
+  className?: string;
+  title?: string;
+  ring?: boolean;
+}) {
+  const maskId = `backfire-chevron-mask-mark-${size}`;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      role="img"
+      aria-label={title}
+    >
+      <title>{title}</title>
+      {ring && (
+        <>
+          <CrosshairGlyph />
+          <RingGlyph strokeWidth={1} opacity={0.4} />
+          <RingGlyph d={BACKFIRE_RING_INNER_PATH} strokeWidth={0.75} opacity={0.25} />
+        </>
+      )}
+      <BGlyph fill="currentColor" maskId={maskId} />
+    </svg>
+  );
+}
+
+export function LogoMarkRing({
+  size = 48,
   className,
   title = "Backfire OS",
 }: {
@@ -99,7 +209,13 @@ export function LogoMark({
       aria-label={title}
     >
       <title>{title}</title>
-      <BGlyph fill="currentColor" />
+      <defs>
+        <BrandGradient id="backfire-mark-ring-grad" />
+      </defs>
+      <CrosshairGlyph stroke="var(--accent)" opacity={0.3} />
+      <RingGlyph stroke="var(--accent)" opacity={0.5} strokeWidth={1.15} />
+      <RingGlyph d={BACKFIRE_RING_INNER_PATH} stroke="var(--accent)" opacity={0.3} strokeWidth={0.85} />
+      <BGlyph fill="url(#backfire-mark-ring-grad)" maskId="backfire-chevron-mask-ring" />
     </svg>
   );
 }
@@ -109,15 +225,22 @@ export function LogoBadge({
   className,
   glow = true,
   tile = false,
+  ring = false,
 }: {
   size?: Size;
   className?: string;
   glow?: boolean;
-  /** Render the rounded app-icon treatment: white mark on a gradient tile. */
+  /** App-icon treatment: white mark on coral tile. Use for favicons / browser chrome only. */
   tile?: boolean;
+  /** Radar crosshair + scan arcs (brandkit construction variant). */
+  ring?: boolean;
 }) {
   const px = MARK_PX[size];
   const gradId = tile ? "backfire-tile-grad" : "backfire-mark-grad";
+  const uid = `${gradId}-${size}`;
+  const ringGradId = `backfire-ring-grad-${size}`;
+  const sheenId = `backfire-tile-sheen-${size}`;
+  const maskId = `backfire-chevron-mask-${size}`;
 
   return (
     <svg
@@ -127,48 +250,14 @@ export function LogoBadge({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0", className)}
-      style={
-        glow
-          ? { filter: "drop-shadow(0 3px 10px var(--accent-glow))" }
-          : undefined
-      }
+      style={glow ? { filter: "drop-shadow(0 3px 10px var(--accent-glow))" } : undefined}
       role="img"
       aria-label="Backfire OS"
     >
       <title>Backfire OS</title>
-      <defs>
-        <BrandGradient id={gradId} />
-      </defs>
-      {tile ? (
-        <>
-          <rect x="0" y="0" width="32" height="32" rx="8" fill={`url(#${gradId})`} />
-          {/* subtle top-edge sheen for the app-icon read */}
-          <rect
-            x="0"
-            y="0"
-            width="32"
-            height="32"
-            rx="8"
-            fill="url(#backfire-tile-sheen)"
-          />
-          <defs>
-            <linearGradient
-              id="backfire-tile-sheen"
-              x1="16"
-              y1="0"
-              x2="16"
-              y2="32"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
-              <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <BGlyph fill="#ffffff" />
-        </>
-      ) : (
-        <BGlyph fill={`url(#${gradId})`} />
-      )}
+      <MarkDefs gradId={uid} tile={tile} ring={ring} ringGradId={ringGradId} sheenId={sheenId} />
+      {ring && <ScanOverlay ringGradId={ringGradId} />}
+      <MarkBody gradId={uid} tile={tile} sheenId={sheenId} maskId={maskId} />
     </svg>
   );
 }
@@ -179,29 +268,31 @@ export function Logo({
   showWordmark = true,
   showTagline = false,
   tile = false,
-  href,
+  ring = false,
+  glow = true,
 }: {
   size?: Size;
   className?: string;
   showWordmark?: boolean;
   showTagline?: boolean;
   tile?: boolean;
-  href?: string;
+  ring?: boolean;
+  glow?: boolean;
 }) {
   const wordSize =
     size === "xl"
       ? "text-[20px]"
       : size === "lg"
-      ? "text-[17px]"
-      : size === "sm"
-      ? "text-[14px]"
-      : size === "xs"
-      ? "text-[12px]"
-      : "text-[15px]";
+        ? "text-[17px]"
+        : size === "sm"
+          ? "text-[14px]"
+          : size === "xs"
+            ? "text-[12px]"
+            : "text-[15px]";
 
-  const content = (
+  return (
     <div className={cn("group inline-flex items-center gap-2.5", className)}>
-      <LogoBadge size={size} tile={tile} />
+      <LogoBadge size={size} tile={tile} ring={ring} glow={glow} />
       {showWordmark && (
         <div className="flex flex-col leading-none">
           <span
@@ -211,12 +302,12 @@ export function Logo({
             )}
           >
             Backfire
-            <span className="ml-1 font-mono text-[0.7em] font-medium tracking-[0.18em] text-[var(--fg-muted)] align-[0.08em]">
+            <span className="ml-1 align-[0.08em] font-mono text-[0.7em] font-medium tracking-[0.18em] text-[var(--fg-muted)]">
               OS
             </span>
           </span>
           {showTagline && (
-            <span className="mt-1.5 text-[11px] leading-none text-[var(--fg-subtle)]">
+            <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--fg-subtle)]">
               Adversarial brand sim
             </span>
           )}
@@ -224,10 +315,4 @@ export function Logo({
       )}
     </div>
   );
-
-  if (href) {
-    // Caller wraps in next/link — return the inner content
-    return content;
-  }
-  return content;
 }

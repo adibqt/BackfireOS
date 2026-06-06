@@ -122,7 +122,7 @@ export function DocsExperience({
       <header className="no-print sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
           <Link href="/" className="flex items-center gap-2.5 no-underline">
-            <LogoBadge size="sm" />
+            <LogoBadge size="sm" glow={false} />
             <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--fg)]">
               Docs
             </span>

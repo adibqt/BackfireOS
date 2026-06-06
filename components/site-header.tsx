@@ -28,9 +28,22 @@ const RUN_AWARE_PATHS = new Set(["/heatmap", "/branches", "/boardroom", "/post-m
 
 function HeaderLogo() {
   return (
-    <div className="relative">
-      <LogoBadge size="md" />
-      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--success)] ring-2 ring-[var(--bg)] pulse-dot" />
+    <div className="group inline-flex items-center gap-2.5">
+      <div className="relative shrink-0">
+        <LogoBadge size="sm" glow={false} />
+        <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--success)] ring-2 ring-[var(--bg)] pulse-dot" />
+      </div>
+      <div className="hidden flex-col leading-none sm:flex">
+        <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--fg)] transition-colors group-hover:text-[var(--accent-400)]">
+          Backfire
+          <span className="ml-1 align-[0.08em] font-mono text-[0.7em] font-medium tracking-[0.18em] text-[var(--fg-muted)]">
+            OS
+          </span>
+        </span>
+        <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--fg-subtle)]">
+          Adversarial brand sim
+        </span>
+      </div>
     </div>
   );
 }
@@ -102,16 +115,8 @@ function SiteHeaderInner() {
       )}
     >
       <div className="flex w-full items-center justify-between gap-4 px-5 py-3.5 md:px-8">
-        <Link href="/" className="group flex items-center gap-3 no-underline">
+        <Link href="/" className="group no-underline">
           <HeaderLogo />
-          <div className="flex flex-col">
-            <span className="font-display text-[15px] font-semibold leading-none tracking-tight text-[var(--fg)] transition-colors group-hover:text-[var(--accent-400)]">
-              Backfire OS
-            </span>
-            <span className="mt-1 hidden text-[11px] leading-none text-[var(--fg-subtle)] sm:block">
-              Adversarial brand sim
-            </span>
-          </div>
         </Link>
 
         <nav

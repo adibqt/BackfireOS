@@ -52,7 +52,7 @@ Legend: ✅ live (in `main`) · 🟡 in progress · ⏳ planned · 🧪 experime
 | Auth | Supabase email/password auth + RLS | ✅ | `middleware.ts`, `supabase/migrate-auth.sql` |
 | Persistence | Runs, verdicts, memes, brands persisted | ✅ | `lib/store.ts`, `lib/db/runs.ts` |
 | Insights | Polarization graph | ✅ | `components/polarization-graph.tsx` |
-| Insights | Counterfactual branches UI | ✅ | `components/counterfactual-branches.tsx` |
+| Insights | Counterfactual Branching ("Git for campaigns") — AI war-room scoring + persisted variant tree | ✅ | `components/counterfactual-branches.tsx`, `app/api/branch-score`, `app/api/branches`, `supabase/migrate-branches-tree.sql` |
 | Insights | Run history with selection | ✅ | `app/history` |
 | Workflow | Boardroom Mode (multi-agent live debate) | 🟡 | `app/boardroom` scaffold |
 | Workflow | Regulatory Pre-Mortem Generator | 🟡 | `app/post-mortem` scaffold |
@@ -208,10 +208,11 @@ flowchart LR
 
 ### Database
 - **Primary:** Supabase Postgres + `pgvector` (768-dim embeddings, IVFFlat index)
-- **Schema:** `supabase/schema.sql` (+ migrations: `migrate-auth.sql`, `migrate-brands.sql`, `migrate-cultural-stress-map.sql`, `migrate-768.sql`, `migrate-delete-runs.sql`)
+- **Schema:** `supabase/schema.sql` (+ migrations: `migrate-auth.sql`, `migrate-brands.sql`, `migrate-cultural-stress-map.sql`, `migrate-768.sql`, `migrate-delete-runs.sql`, `migrate-branches-tree.sql`, `migrate-branches-campaign.sql`)
 - **RLS:** per-user row-level security (`supabase/migrate-auth.sql`)
 - **Storage:** Supabase Storage bucket for campaign images
-- **Fallback:** in-memory store (`lib/store.ts`) when Supabase keys absent
+- **Branch tree:** `campaign_branches` adjacency list (`parent_id` self-ref, `ON DELETE CASCADE` for subtree prune), scoped per campaign via `campaign_id` — a real campaign's tree root is seeded from its copy + actual verdict; `campaign_id NULL` is the standalone demo tree — `lib/db/branches.ts`, `lib/branches/store.ts`
+- **Fallback:** in-memory store (`lib/store.ts`, `lib/branches/store.ts`) when Supabase keys absent
 
 ### AI Stack
 - **LLM:** Google Gemini 3.5 Flash via `@google/genai` and `@google/generative-ai`
@@ -594,7 +595,7 @@ When Supabase auth keys are set, sign-in is required and all simulations/memes a
 ```powershell
 # 1. Run supabase/schema.sql in Supabase SQL Editor
 # 2. Run supabase/migrate-auth.sql for RLS + storage buckets
-# 3. Run supabase/migrate-brands.sql, migrate-cultural-stress-map.sql
+# 3. Run supabase/migrate-brands.sql, migrate-cultural-stress-map.sql, migrate-branches-tree.sql, migrate-branches-campaign.sql
 # 4. If History shows "permission denied", run supabase/fix-grants.sql
 # 5. Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local
 # 6. (Optional) SUPABASE_SERVICE_ROLE_KEY for RAG seeding

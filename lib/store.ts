@@ -17,6 +17,7 @@ import {
   dbDeleteBrand,
   dbDeleteRun,
   dbGetBrand,
+  dbGetCampaignSeed,
   dbGetRun,
   dbListBrands,
   dbListPastCampaigns,
@@ -27,9 +28,12 @@ import {
   dbSaveVerdicts,
   uploadCampaignImage,
 } from "./db/runs";
+import {
+  runScoresToBranchScores,
+  type CampaignSeed,
+} from "./branches/types";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __backfireStore: {
     runs: Map<string, SimulationRun>;
     campaigns: Map<string, CampaignInput & { id: string; imageUrl?: string; createdAt: string }>;
@@ -374,6 +378,52 @@ export async function markRunFailed(
     return;
   }
   memoryUpdateRun(runId, { status: "failed" });
+}
+
+/**
+ * Seed data for a campaign's root branch (its copy + real verdict if it has a
+ * completed run). Used by the per-campaign branch tree. Returns null if the
+ * campaign does not exist or is not the caller's.
+ */
+export async function getCampaignSeed(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  campaignId: string
+): Promise<CampaignSeed | null> {
+  if (supabase && userId) {
+    return dbGetCampaignSeed(supabase, userId, campaignId);
+  }
+
+  const campaign = memoryGetCampaign(campaignId);
+  if (!campaign) return null;
+
+  const seed: CampaignSeed = {
+    slogan: campaign.slogan,
+    brief: campaign.brief,
+  };
+
+  const run = Array.from(getMemoryStore().runs.values())
+    .filter((r) => r.campaignId === campaignId && r.status === "complete")
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
+
+  if (run?.scores) {
+    seed.scores = runScoresToBranchScores(run.scores);
+    let worst: AgentVerdict | null = null;
+    for (const v of run.verdicts ?? []) {
+      if (!worst || v.severity > worst.severity) worst = v;
+    }
+    if (worst) {
+      seed.topCritic = {
+        agentId: worst.agentId,
+        agentName: worst.agentName,
+        severity: worst.severity,
+        reasoning: worst.reasoning,
+        sampleAttack: worst.sampleAttack,
+      };
+    }
+  }
+
+  return seed;
 }
 
 export function attachImageBase64(

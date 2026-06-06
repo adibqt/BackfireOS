@@ -1,279 +1,68 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { scoreBranch } from "@/lib/branches/heuristic";
+import { branchContentKey } from "@/lib/branches/types";
+import { seedBranches } from "@/lib/branches/seed";
+import {
+  apiCreateBranch,
+  apiDeleteBranch,
+  apiPatchBranch,
+  listCampaigns,
+  loadBranches,
+  type CampaignOption,
+} from "@/lib/branches/client";
+import type {
+  Branch,
+  BranchScores as Scores,
+  BranchScoreResponse,
+  Lang,
+  ScoreSource,
+  Tone,
+  TopCritic,
+} from "@/lib/branches/types";
 
 /* ──────────────────────────────────────────────────────────────────
    Counterfactual Branching — "Git for campaigns"
-   Pure-frontend demo. Tweak any element of a branch and watch the
-   Resonance and Backfire scores propagate in real time across a
-   visual tree of campaign variants.
+   Tweak any element of a branch and watch the Resonance and Backfire
+   scores propagate in real time across a visual tree of campaign
+   variants. The instant estimate is a deterministic heuristic
+   (lib/branches/heuristic); the authoritative score comes from the AI
+   red-team panel via POST /api/branch-score, with content-hash caching
+   so an unedited fork — or reverted copy — never pays for a second call.
    ────────────────────────────────────────────────────────────────── */
-
-type Tone = "playful" | "formal" | "aggressive" | "warm";
-type Lang = "en" | "bn" | "mixed";
-
-type Branch = {
-  id: string;
-  parentId: string | null;
-  label: string;
-  author: string;
-  slogan: string;
-  cast: string;
-  tagline: string;
-  cta: string;
-  riskyLine: string;
-  tone: Tone;
-  language: Lang;
-  createdAt: number;
-};
-
-type Scores = {
-  resonance: number;
-  backfireRisk: number;
-  backfireScore: number;
-  memeability: number;
-  polarization: number;
-  drift: number;
-};
-
-const clamp = (lo: number, hi: number, v: number) =>
-  Math.max(lo, Math.min(hi, v));
 
 /* ──────────────────────────────────────────────────────────────────
-   Scoring — deterministic, semantic, keystroke-responsive
+   AI scoring — per-branch authoritative verdict from the war room
    ────────────────────────────────────────────────────────────────── */
 
-const KW = {
-  risky: [
-    "cheap", "poor", "rich", "beat", "destroy", "crush", "better than",
-    "fake", "loser", "kill", "war",
-  ],
-  local: [
-    "desh", "amader", "bangla", "gorbo", "shobai", "apnar", "apni",
-    "ami", "taka", "boli", "bhai", "didi", "bondhu",
-  ],
-  memeable: [
-    "vibe", "crazy", "big", "win", "level", "mood", "cash", "wifi",
-    "drop", "energy", "rizz", "lit",
-  ],
-  polarizing: ["only", "pure", "true", "real", "we", "they", "us", "them"],
-  family: ["family", "mother", "father", "parents", "baba", "ma", "amma"],
-  premium: ["premium", "elite", "exclusive", "luxury", "platinum"],
-  trust: ["trusted", "safe", "secure", "halal", "blessed", "reliable"],
+/** What we keep client-side for each branch that has been AI-scored. */
+type AiState = {
+  status: "idle" | "loading" | "done" | "error";
+  scores?: Scores;
+  source?: ScoreSource;
+  topCritic?: TopCritic | null;
+  cached?: boolean;
+  /**
+   * The content key (see branchContentKey) the stored verdict belongs to. When
+   * the branch's live content key drifts from this, the AI verdict is stale and
+   * the UI offers a re-run (or auto-rescores when that mode is on).
+   */
+  contentKey?: string;
+  error?: string;
 };
 
-function countHits(text: string, words: string[]): number {
-  let n = 0;
-  for (const w of words) {
-    let idx = 0;
-    while ((idx = text.indexOf(w, idx)) !== -1) {
-      n++;
-      idx += w.length;
-    }
-  }
-  return n;
-}
-
-function scoreBranch(b: Branch): Scores {
-  const text = `${b.slogan} ${b.tagline} ${b.cta} ${b.riskyLine}`.toLowerCase();
-  const cast = b.cast.toLowerCase();
-
-  let resonance = 52;
-  let backfireRisk = 32;
-  let memeability = 38;
-  let polarization = 24;
-  let drift = 20;
-
-  const toneMap: Record<Tone, [number, number, number, number, number]> = {
-    playful:    [ 10,   6,  22,   2,  10],
-    formal:     [ -2,  -8, -10,  -4,  -6],
-    aggressive: [ -8,  24,  14,  20,  18],
-    warm:       [ 14,  -8,   2,  -8,  -4],
-  };
-  const [r, bf, mm, pl, dr] = toneMap[b.tone];
-  resonance += r;
-  backfireRisk += bf;
-  memeability += mm;
-  polarization += pl;
-  drift += dr;
-
-  const langMap: Record<Lang, [number, number, number, number, number]> = {
-    en:    [ -6,   2,  -2,   0,   6],
-    bn:    [ 16,  -4,   2,   2,  -2],
-    mixed: [ 10,   2,  10,   6,   4],
-  };
-  const [lr, lb, lm, lp, ld] = langMap[b.language];
-  resonance += lr;
-  backfireRisk += lb;
-  memeability += lm;
-  polarization += lp;
-  drift += ld;
-
-  const riskyHits = countHits(text, KW.risky);
-  const localHits = countHits(text, KW.local);
-  const memeHits = countHits(text, KW.memeable);
-  const polHits = countHits(text, KW.polarizing);
-  const familyHits = countHits(text, KW.family);
-  const premiumHits = countHits(text, KW.premium);
-  const trustHits = countHits(text, KW.trust);
-
-  backfireRisk += riskyHits * 9;
-  polarization += riskyHits * 6;
-  drift += riskyHits * 4;
-
-  resonance += localHits * 4;
-  memeability += localHits * 2;
-
-  memeability += memeHits * 6;
-  drift += memeHits * 2;
-
-  polarization += polHits * 6;
-  backfireRisk += polHits * 2;
-
-  resonance += familyHits * 8;
-  backfireRisk -= familyHits * 3;
-
-  resonance -= premiumHits * 5;
-  polarization += premiumHits * 4;
-
-  resonance += trustHits * 6;
-  backfireRisk -= trustHits * 4;
-
-  if (/celebrity|shakib|tahsan|nusrat|momtaz/.test(cast)) {
-    memeability += 14;
-    polarization += 10;
-    resonance += 5;
-  }
-  if (/family|mother|father|grand/.test(cast)) {
-    resonance += 12;
-    backfireRisk -= 4;
-  }
-  if (/young|gen ?z|student|teen/.test(cast)) {
-    memeability += 10;
-    drift += 6;
-    resonance += 5;
-  }
-  if (/elder|grandma|nani|dadu/.test(cast)) {
-    resonance += 9;
-    backfireRisk -= 4;
-  }
-  if (/influencer|tiktok|reel/.test(cast)) {
-    memeability += 12;
-    drift += 8;
-    polarization += 4;
-  }
-
-  if (b.riskyLine.trim().length > 4) {
-    backfireRisk += 16;
-    polarization += 12;
-    memeability += 8;
-    drift += 6;
-  }
-
-  if (b.slogan.length > 90) drift += 8;
-  if (b.slogan.trim().length < 6) backfireRisk += 5;
-
-  resonance = clamp(0, 100, resonance);
-  backfireRisk = clamp(0, 100, backfireRisk);
-  memeability = clamp(0, 100, memeability);
-  polarization = clamp(0, 100, polarization);
-  drift = clamp(0, 100, drift);
-
-  const backfireScore = clamp(
-    0,
-    100,
-    Math.round(backfireRisk * 0.5 + polarization * 0.3 + drift * 0.2)
-  );
-
-  return {
-    resonance: Math.round(resonance),
-    backfireRisk: Math.round(backfireRisk),
-    backfireScore,
-    memeability: Math.round(memeability),
-    polarization: Math.round(polarization),
-    drift: Math.round(drift),
-  };
-}
-
 /* ──────────────────────────────────────────────────────────────────
-   Seed tree — believable bKash-flavoured starter branches
+   Seed tree — believable bKash-flavoured starter branches.
+   Shared with the persistence layer (lib/branches/seed); used here as the
+   local-only fallback when /api/branches is unavailable (logged out or no
+   Supabase configured).
    ────────────────────────────────────────────────────────────────── */
 
-const SEED: Branch[] = [
-  {
-    id: "main",
-    parentId: null,
-    label: "v1.0 · main",
-    author: "Brand Lead",
-    slogan: "Ekdike cash, onkdike bKash",
-    cast: "Working professional, mid-20s",
-    tagline: "Move money. Move forward.",
-    cta: "Download bKash",
-    riskyLine: "",
-    tone: "playful",
-    language: "mixed",
-    createdAt: Date.now() - 1000 * 60 * 60 * 12,
-  },
-  {
-    id: "fork-formal",
-    parentId: "main",
-    label: "v1.1 · formal-bn",
-    author: "Strategy",
-    slogan: "Apnar taka, apnar haath e",
-    cast: "Family, multi-generational",
-    tagline: "Bishshwasta. Shohoj. Apnar bKash.",
-    cta: "Akhoni shuru korun",
-    riskyLine: "",
-    tone: "warm",
-    language: "bn",
-    createdAt: Date.now() - 1000 * 60 * 60 * 8,
-  },
-  {
-    id: "fork-celeb",
-    parentId: "main",
-    label: "v1.2 · celebrity",
-    author: "Creative",
-    slogan: "Shakib bhai er pocket-e bKash",
-    cast: "Celebrity, Shakib Khan",
-    tagline: "Big stars. Bigger transfers.",
-    cta: "Join the movement",
-    riskyLine: "",
-    tone: "playful",
-    language: "mixed",
-    createdAt: Date.now() - 1000 * 60 * 60 * 6,
-  },
-  {
-    id: "fork-edge",
-    parentId: "fork-celeb",
-    label: "v1.3 · edge-push",
-    author: "Performance",
-    slogan: "Cash is poor, bKash is power",
-    cast: "Young influencer, TikTok",
-    tagline: "Real money moves real fast.",
-    cta: "Switch now or stay broke",
-    riskyLine: "Only losers carry cash in 2026",
-    tone: "aggressive",
-    language: "en",
-    createdAt: Date.now() - 1000 * 60 * 60 * 3,
-  },
-  {
-    id: "fork-warm",
-    parentId: "main",
-    label: "v1.4 · warm-family",
-    author: "Brand Lead",
-    slogan: "Ma er kaache taka pathate, ek tap",
-    cast: "Mother and son, Sylhet",
-    tagline: "Trusted by every family.",
-    cta: "Send love. Send bKash.",
-    riskyLine: "",
-    tone: "warm",
-    language: "bn",
-    createdAt: Date.now() - 1000 * 60 * 60 * 1,
-  },
-];
+const SEED: Branch[] = seedBranches();
 
 /* ──────────────────────────────────────────────────────────────────
    Tree layout — left-to-right tidy tree (git log --graph feel)
@@ -517,6 +306,117 @@ export function CounterfactualBranches() {
     return out;
   });
 
+  // Authoritative AI verdicts, keyed by branch id. Populated on demand.
+  const [ai, setAi] = useState<Record<string, AiState>>({});
+  // When on, editing an already-AI-scored branch re-runs the panel (debounced).
+  const [autoAi, setAutoAi] = useState(false);
+
+  // Persistence: true once the server tree has loaded and mutations should
+  // sync. Stays false in local-only mode (logged out / no Supabase), where the
+  // tree behaves exactly like the original client-only demo.
+  const [persisted, setPersisted] = useState(false);
+  // Which campaign's tree is shown. null = the standalone demo tree.
+  const [campaignId, setCampaignId] = useState<string | null>(null);
+  const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
+  const [treeLoading, setTreeLoading] = useState(false);
+  // Guards against out-of-order responses when the user switches trees quickly.
+  const loadSeq = useRef(0);
+  // Debounced field-save: coalesce keystrokes into one PATCH per branch.
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const pendingPatch = useRef<Record<string, Partial<Branch>>>({});
+  // In-flight create promises, so a debounced edit to a just-forked branch
+  // waits for its POST to land before PATCHing (avoids a 404 race).
+  const creating = useRef<Record<string, Promise<void> | undefined>>({});
+
+  // Loads (and on first visit, seeds) a campaign's tree, replacing all derived
+  // state. On failure for the demo tree we silently keep the local SEED — the
+  // public demo never breaks.
+  const loadTree = useCallback(async (cid: string | null) => {
+    const seq = ++loadSeq.current;
+    setTreeLoading(true);
+    const stored = await loadBranches(cid);
+    if (seq !== loadSeq.current) return; // a newer load superseded this one
+    setTreeLoading(false);
+
+    if (!stored || stored.length === 0) {
+      if (stored === null && cid === null) setPersisted(false); // local demo
+      return;
+    }
+
+    const branchList: Branch[] = stored.map((s) => ({
+      id: s.id,
+      parentId: s.parentId,
+      label: s.label,
+      author: s.author,
+      slogan: s.slogan,
+      cast: s.cast,
+      tagline: s.tagline,
+      cta: s.cta,
+      riskyLine: s.riskyLine,
+      tone: s.tone,
+      language: s.language,
+      createdAt: s.createdAt,
+    }));
+
+    const base: Record<string, Scores> = {};
+    const hist: Record<string, number[]> = {};
+    const aiHydrated: Record<string, AiState> = {};
+    for (const s of stored) {
+      const score = scoreBranch(s);
+      base[s.id] = score;
+      hist[s.id] = [score.backfireScore];
+      if (s.ai) {
+        aiHydrated[s.id] = {
+          status: "done",
+          source: s.ai.source,
+          scores: s.ai.scores,
+          topCritic: s.ai.topCritic,
+          contentKey: s.ai.contentKey,
+          cached: true,
+        };
+      }
+    }
+
+    const root = branchList.find((b) => b.parentId === null) ?? branchList[0];
+    setBranches(branchList);
+    setBaselines(base);
+    setHistory(hist);
+    setAi(aiHydrated);
+    setSelectedId(root.id);
+    setCampaignId(cid);
+    setPersisted(true);
+  }, []);
+
+  // On mount: fetch the campaign list for the picker, then load the initial
+  // tree (deep-linkable via ?campaign=<id>).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const initial = params.get("campaign");
+      const list = await listCampaigns();
+      if (cancelled) return;
+      setCampaigns(list);
+      await loadTree(initial || null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadTree]);
+
+  // Switch the visible tree and reflect it in the URL for shareable deep links.
+  const pickCampaign = useCallback(
+    (cid: string | null) => {
+      if (cid === campaignId) return;
+      const url = new URL(window.location.href);
+      if (cid) url.searchParams.set("campaign", cid);
+      else url.searchParams.delete("campaign");
+      window.history.replaceState(null, "", url.toString());
+      void loadTree(cid);
+    },
+    [campaignId, loadTree]
+  );
+
   const selected = useMemo(
     () => branches.find((b) => b.id === selectedId) ?? branches[0],
     [branches, selectedId]
@@ -557,12 +457,129 @@ export function CounterfactualBranches() {
 
   const { positions, width, height } = useMemo(() => layoutTree(branches), [branches]);
 
+  // ─── AI war room ─────────────────────────────────────────────────
+  // Fetch the authoritative red-team verdict for a branch snapshot. The server
+  // memoizes by content hash, so re-scoring unchanged content is effectively
+  // free; we still guard against firing a duplicate request for content that is
+  // already in flight.
+  const scoreWithAI = useCallback(async (branch: Branch) => {
+    const key = branchContentKey(branch);
+    let skip = false;
+    setAi((prev) => {
+      const cur = prev[branch.id];
+      if (cur?.status === "loading" && cur.contentKey === key) {
+        skip = true;
+        return prev;
+      }
+      return {
+        ...prev,
+        [branch.id]: { ...cur, status: "loading", contentKey: key },
+      };
+    });
+    if (skip) return;
+
+    try {
+      const res = await fetch("/api/branch-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ branch }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as BranchScoreResponse;
+      setAi((prev) => ({
+        ...prev,
+        [branch.id]: {
+          status: "done",
+          scores: data.scores,
+          source: data.source,
+          topCritic: data.topCritic,
+          cached: data.cached,
+          contentKey: key,
+        },
+      }));
+      // Persist the verdict so a reload rehydrates it without replaying the panel.
+      if (persisted) {
+        void apiPatchBranch(branch.id, {
+          ai: {
+            source: data.source,
+            scores: data.scores,
+            topCritic: data.topCritic,
+            contentKey: key,
+            scoredAt: new Date().toISOString(),
+          },
+        });
+      }
+      const srcLabel =
+        data.source === "ai"
+          ? data.cached
+            ? "AI war room (cached)"
+            : "AI war room"
+          : data.source === "mock"
+          ? "engine fallback"
+          : "heuristic (no model key)";
+      setLog((l) => [
+        {
+          id: `ai-${branch.id}-${Date.now()}`,
+          ts: Date.now(),
+          text: `${branch.label} scored by ${srcLabel} — backfire ${data.scores.backfireScore}, resonance ${data.scores.resonance}`,
+          tone: "delta",
+        },
+        ...l,
+      ]);
+    } catch (e) {
+      setAi((prev) => ({
+        ...prev,
+        [branch.id]: {
+          ...prev[branch.id],
+          status: "error",
+          error: e instanceof Error ? e.message : "Scoring failed",
+        },
+      }));
+    }
+  }, [persisted]);
+
+  // Auto-rescore: when enabled, edits to a branch that already carries an AI
+  // verdict re-run the panel after a short idle window. Only the selected
+  // branch is watched, so background variants never burn quota silently.
+  const selKey = branchContentKey(selected);
+  const selAi = ai[selected.id];
+  useEffect(() => {
+    if (!autoAi) return;
+    if (!selAi || selAi.status === "loading") return;
+    if (selAi.contentKey === selKey) return; // already fresh
+    const t = setTimeout(() => {
+      void scoreWithAI(selected);
+    }, 1500);
+    return () => clearTimeout(t);
+    // selected is intentionally read at fire time; selKey captures its content.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAi, selKey, selAi?.status, selAi?.contentKey, selected.id]);
+
+  // Debounced server save for field edits — coalesce keystrokes into one PATCH.
+  function schedulePatch(id: string, patch: Partial<Branch>) {
+    if (!persisted) return;
+    pendingPatch.current[id] = { ...pendingPatch.current[id], ...patch };
+    clearTimeout(saveTimers.current[id]);
+    saveTimers.current[id] = setTimeout(async () => {
+      const queued = pendingPatch.current[id];
+      delete pendingPatch.current[id];
+      if (!queued) return;
+      // If the branch is still being created, wait for that POST first.
+      await creating.current[id];
+      await apiPatchBranch(id, queued);
+    }, 700);
+  }
+
   function patchSelected(patch: Partial<Branch>) {
     setBranches((bs) => bs.map((b) => (b.id === selected.id ? { ...b, ...patch } : b)));
+    schedulePatch(selected.id, patch);
   }
 
   function forkSelected() {
-    const id = `fork-${Math.random().toString(36).slice(2, 8)}`;
+    const id =
+      persisted && typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `fork-${Math.random().toString(36).slice(2, 8)}`;
     const sib = branches.filter((b) => b.parentId === selected.id).length;
     const parentLabel = selected.label.split(" ")[0].replace("v", "");
     const [maj, min] = parentLabel.split(".").map((n) => parseInt(n, 10));
@@ -581,6 +598,14 @@ export function CounterfactualBranches() {
     setBranches((bs) => [...bs, newBranch]);
     setBaselines((b) => ({ ...b, [id]: s }));
     setHistory((h) => ({ ...h, [id]: [s.backfireScore] }));
+    // A fresh fork is byte-identical to its parent, so it shares the parent's
+    // content key — inherit any AI verdict so the new node shows the real score
+    // immediately, no extra model call. (The server cache would return the same
+    // thing if asked.) Edits then mark it stale and trigger a re-score.
+    const parentAi = ai[selected.id];
+    if (parentAi?.status === "done" && parentAi.scores) {
+      setAi((a) => ({ ...a, [id]: { ...parentAi, cached: true } }));
+    }
     setSelectedId(id);
     setLog((l) => [
       {
@@ -591,6 +616,40 @@ export function CounterfactualBranches() {
       },
       ...l,
     ]);
+
+    if (persisted) {
+      const createPromise = apiCreateBranch({
+        id,
+        parentId: newBranch.parentId,
+        campaignId,
+        createdAt: newBranch.createdAt,
+        label: newBranch.label,
+        author: newBranch.author,
+        slogan: newBranch.slogan,
+        cast: newBranch.cast,
+        tagline: newBranch.tagline,
+        cta: newBranch.cta,
+        riskyLine: newBranch.riskyLine,
+        tone: newBranch.tone,
+        language: newBranch.language,
+      }).finally(() => {
+        delete creating.current[id];
+      });
+      creating.current[id] = createPromise;
+      // Persist the inherited parent verdict onto the new node too, so a reload
+      // shows it without re-running the panel. Chain off the create so it can't
+      // race ahead of the POST (which would 404).
+      if (parentAi?.status === "done" && parentAi.scores && parentAi.source && parentAi.contentKey) {
+        const inherited = {
+          source: parentAi.source,
+          scores: parentAi.scores,
+          topCritic: parentAi.topCritic ?? null,
+          contentKey: parentAi.contentKey,
+          scoredAt: new Date().toISOString(),
+        };
+        void createPromise.then(() => apiPatchBranch(id, { ai: inherited }));
+      }
+    }
   }
 
   function resetToBaseline() {
@@ -632,6 +691,8 @@ export function CounterfactualBranches() {
       },
       ...l,
     ]);
+    // Server cascades the subtree from the root id we delete.
+    if (persisted) void apiDeleteBranch(selected.id);
   }
 
   // ─── render ────────────────────────────────────────────────────
@@ -645,7 +706,17 @@ export function CounterfactualBranches() {
         scores={selScores}
         parentScores={parentScores}
         baseline={baseline}
+        persisted={persisted}
       />
+
+      {campaigns.length > 0 && (
+        <CampaignPicker
+          campaigns={campaigns}
+          campaignId={campaignId}
+          loading={treeLoading}
+          onPick={pickCampaign}
+        />
+      )}
 
       {/* Main split: tree + inspector */}
       <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
@@ -656,6 +727,7 @@ export function CounterfactualBranches() {
           height={height}
           selectedId={selected.id}
           allScores={allScores}
+          ai={ai}
           onSelect={setSelectedId}
         />
 
@@ -666,6 +738,11 @@ export function CounterfactualBranches() {
           parentScores={parentScores}
           baseline={baseline}
           history={history[selected.id] ?? []}
+          ai={selAi}
+          aiStale={selAi?.status === "done" && selAi.contentKey !== selKey}
+          autoAi={autoAi}
+          onToggleAuto={() => setAutoAi((v) => !v)}
+          onScoreAI={() => void scoreWithAI(selected)}
           onPatch={patchSelected}
           onFork={forkSelected}
           onReset={resetToBaseline}
@@ -692,12 +769,14 @@ function Header({
   scores,
   parentScores,
   baseline,
+  persisted,
 }: {
   branches: Branch[];
   selected: Branch;
   scores: Scores;
   parentScores: Scores | null;
   baseline: Scores | undefined;
+  persisted: boolean;
 }) {
   const baseRef = baseline ?? scores;
   const deltaBackfire = scores.backfireScore - baseRef.backfireScore;
@@ -713,9 +792,31 @@ function Header({
 
       <div className="relative flex flex-wrap items-end justify-between gap-6">
         <div className="max-w-xl">
-          <Badge variant="accent" dot className="mb-4">
-            Live demo · counterfactual engine
-          </Badge>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Badge variant="accent" dot>
+              Live demo · counterfactual engine
+            </Badge>
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider"
+              style={{
+                borderColor: "var(--border)",
+                color: persisted ? "var(--success)" : "var(--fg-subtle)",
+              }}
+              title={
+                persisted
+                  ? "Your tree is saved — forks, edits and verdicts persist across reloads"
+                  : "Not signed in — changes live only in this session"
+              }
+            >
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{
+                  backgroundColor: persisted ? "var(--success)" : "var(--fg-subtle)",
+                }}
+              />
+              {persisted ? "synced" : "local only"}
+            </span>
+          </div>
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
             Git for campaigns
           </p>
@@ -771,6 +872,67 @@ function Header({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Campaign picker — choose which campaign's variant tree to branch
+   ────────────────────────────────────────────────────────────────── */
+
+function CampaignPicker({
+  campaigns,
+  campaignId,
+  loading,
+  onPick,
+}: {
+  campaigns: CampaignOption[];
+  campaignId: string | null;
+  loading: boolean;
+  onPick: (id: string | null) => void;
+}) {
+  const active = campaigns.find((c) => c.campaignId === campaignId);
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/50 px-4 py-3">
+      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
+        ⎇ tree for
+      </span>
+      <div className="relative">
+        <select
+          value={campaignId ?? ""}
+          onChange={(e) => onPick(e.target.value || null)}
+          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--bg-elev-2)] py-1.5 pl-3 pr-8 text-[13px] text-[var(--fg)] outline-none transition-colors hover:border-[var(--border-bright)] focus:border-[var(--accent)]"
+        >
+          <option value="">Demo tree (bKash)</option>
+          {campaigns.map((c) => (
+            <option key={c.campaignId} value={c.campaignId}>
+              {truncate(c.slogan, 48)}
+              {c.backfireScore != null ? ` · bf ${c.backfireScore}` : ""}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {campaignId === null ? (
+        <Badge variant="default">standalone demo</Badge>
+      ) : (
+        <Badge variant="accent" dot>
+          {active ? "real campaign" : "campaign"}
+        </Badge>
+      )}
+
+      {active?.createdAt && (
+        <span className="font-mono text-[11px] text-[var(--fg-subtle)]">
+          run {new Date(active.createdAt).toISOString().split("T")[0]}
+        </span>
+      )}
+
+      {loading && (
+        <span className="ml-auto inline-flex items-center gap-2 font-mono text-[11px] text-[var(--fg-subtle)]">
+          <span className="inline-flex h-1.5 w-1.5 animate-ping rounded-full bg-[var(--accent)]" />
+          loading tree…
+        </span>
+      )}
     </div>
   );
 }
@@ -867,6 +1029,7 @@ function TreeCanvas({
   height,
   selectedId,
   allScores,
+  ai,
   onSelect,
 }: {
   branches: Branch[];
@@ -875,6 +1038,7 @@ function TreeCanvas({
   height: number;
   selectedId: string;
   allScores: Record<string, Scores>;
+  ai: Record<string, AiState>;
   onSelect: (id: string) => void;
 }) {
   const NODE_W = 212;
@@ -978,6 +1142,9 @@ function TreeCanvas({
             const score = allScores[b.id];
             const tone = riskTone(score.backfireScore);
             const isSel = b.id === selectedId;
+            const av = ai[b.id];
+            const aiScored = av?.status === "done" && av.source === "ai";
+            const aiLoading = av?.status === "loading";
             return (
               <g
                 key={b.id}
@@ -1070,6 +1237,35 @@ function TreeCanvas({
                 >
                   {b.author === "You" ? "● you" : truncate(b.author, 14)}
                 </text>
+                {/* AI verdict marker — top right */}
+                {(aiScored || aiLoading) && (
+                  <g transform={`translate(${NODE_W - 14}, 18)`}>
+                    <circle
+                      r={3}
+                      fill={aiLoading ? "var(--warning)" : "var(--accent)"}
+                    >
+                      {aiLoading && (
+                        <animate
+                          attributeName="opacity"
+                          values="0.3;1;0.3"
+                          dur="1s"
+                          repeatCount="indefinite"
+                        />
+                      )}
+                    </circle>
+                    <text
+                      x={-7}
+                      y={3}
+                      fontSize={8}
+                      textAnchor="end"
+                      fontFamily="var(--font-mono), monospace"
+                      fill={aiLoading ? "var(--warning)" : "var(--accent)"}
+                      style={{ letterSpacing: "0.12em" }}
+                    >
+                      {aiLoading ? "…" : "AI"}
+                    </text>
+                  </g>
+                )}
               </g>
             );
           })}
@@ -1144,6 +1340,11 @@ function Inspector({
   parentScores,
   baseline,
   history,
+  ai,
+  aiStale,
+  autoAi,
+  onToggleAuto,
+  onScoreAI,
   onPatch,
   onFork,
   onReset,
@@ -1155,11 +1356,23 @@ function Inspector({
   parentScores: Scores | null;
   baseline: Scores | undefined;
   history: number[];
+  ai: AiState | undefined;
+  aiStale: boolean;
+  autoAi: boolean;
+  onToggleAuto: () => void;
+  onScoreAI: () => void;
   onPatch: (p: Partial<Branch>) => void;
   onFork: () => void;
   onReset: () => void;
   onDelete: () => void;
 }) {
+  // Promote the authoritative verdict into the headline grid, but only when it's
+  // a real model verdict that still matches the current content. The moment the
+  // branch is edited (stale) we fall back to the live estimate so the grid keeps
+  // moving, and the war-room panel prompts a re-score.
+  const aiPrimary =
+    ai?.status === "done" && ai.source === "ai" && !aiStale ? ai.scores : undefined;
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
       <div
@@ -1195,10 +1408,21 @@ function Inspector({
 
       <div className="relative space-y-5 p-5">
         {/* Score grid */}
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+            {aiPrimary ? "scores · AI verdict" : "scores · live estimate"}
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--fg-subtle)]">
+            {aiPrimary
+              ? "authoritative · est shown small"
+              : "heuristic · run war room for AI"}
+          </span>
+        </div>
         <div className="grid grid-cols-3 gap-2">
           <ScoreCell
             label="Backfire"
             value={scores.backfireScore}
+            aiValue={aiPrimary?.backfireScore}
             base={baseline?.backfireScore}
             parent={parentScores?.backfireScore}
             invert
@@ -1207,12 +1431,14 @@ function Inspector({
           <ScoreCell
             label="Resonance"
             value={scores.resonance}
+            aiValue={aiPrimary?.resonance}
             base={baseline?.resonance}
             parent={parentScores?.resonance}
           />
           <ScoreCell
             label="Polarization"
             value={scores.polarization}
+            aiValue={aiPrimary?.polarization}
             base={baseline?.polarization}
             parent={parentScores?.polarization}
             invert
@@ -1220,12 +1446,14 @@ function Inspector({
           <ScoreCell
             label="Memeability"
             value={scores.memeability}
+            aiValue={aiPrimary?.memeability}
             base={baseline?.memeability}
             parent={parentScores?.memeability}
           />
           <ScoreCell
             label="Brand drift"
             value={scores.drift}
+            aiValue={aiPrimary?.drift}
             base={baseline?.drift}
             parent={parentScores?.drift}
             invert
@@ -1233,11 +1461,22 @@ function Inspector({
           <ScoreCell
             label="Backfire risk"
             value={scores.backfireRisk}
+            aiValue={aiPrimary?.backfireRisk}
             base={baseline?.backfireRisk}
             parent={parentScores?.backfireRisk}
             invert
           />
         </div>
+
+        {/* AI war room — authoritative verdict from the red-team panel */}
+        <AiVerdictPanel
+          estimate={scores}
+          ai={ai}
+          stale={aiStale}
+          autoAi={autoAi}
+          onToggleAuto={onToggleAuto}
+          onScoreAI={onScoreAI}
+        />
 
         {/* Fields */}
         <div className="grid gap-3">
@@ -1314,6 +1553,224 @@ function Inspector({
   );
 }
 
+/* ──────────────────────────────────────────────────────────────────
+   AI war room verdict — authoritative panel score + harshest critic
+   ────────────────────────────────────────────────────────────────── */
+
+const AI_METRICS = [
+  { key: "backfireScore", label: "Backfire", invert: true },
+  { key: "resonance", label: "Resonance", invert: false },
+  { key: "polarization", label: "Polarization", invert: true },
+  { key: "memeability", label: "Memeability", invert: false },
+  { key: "drift", label: "Brand drift", invert: true },
+  { key: "backfireRisk", label: "Backfire risk", invert: true },
+] as const;
+
+function aiSourceBadge(source: ScoreSource | undefined, cached: boolean | undefined) {
+  if (source === "ai")
+    return {
+      label: cached ? "AI verdict · cached" : "AI verdict",
+      color: "var(--accent)",
+      soft: "var(--accent-soft)",
+    };
+  if (source === "mock")
+    return {
+      label: "engine fallback",
+      color: "var(--warning)",
+      soft: "var(--warning-soft)",
+    };
+  return {
+    label: "heuristic · no model key",
+    color: "var(--fg-subtle)",
+    soft: "rgba(255,255,255,0.04)",
+  };
+}
+
+function AiVerdictPanel({
+  estimate,
+  ai,
+  stale,
+  autoAi,
+  onToggleAuto,
+  onScoreAI,
+}: {
+  estimate: Scores;
+  ai: AiState | undefined;
+  stale: boolean;
+  autoAi: boolean;
+  onToggleAuto: () => void;
+  onScoreAI: () => void;
+}) {
+  const status = ai?.status ?? "idle";
+  const loading = status === "loading";
+  const done = status === "done" && ai?.scores;
+  const badge = aiSourceBadge(ai?.source, ai?.cached);
+  // When a fresh real verdict is promoted into the headline grid, the panel's
+  // own metric chips would just duplicate it — so only show them otherwise
+  // (stale verdict, or a heuristic/mock fallback that isn't promoted).
+  const promoted = Boolean(done && ai?.source === "ai" && !stale);
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl border"
+      style={{
+        borderColor: done && ai?.source === "ai" ? "var(--accent)" : "var(--border)",
+        background:
+          "linear-gradient(180deg, rgba(255,77,87,0.06), transparent 70%)",
+      }}
+    >
+      {/* Control bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-2.5">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
+            ⚔ AI war room
+          </span>
+          {done && (
+            <span
+              className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
+              style={{ color: badge.color, backgroundColor: badge.soft }}
+            >
+              {badge.label}
+            </span>
+          )}
+          {done && stale && (
+            <span
+              className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
+              style={{ color: "var(--warning)", backgroundColor: "var(--warning-soft)" }}
+            >
+              stale · edited
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleAuto}
+            className={cn(
+              "rounded-md px-2 py-1 font-mono text-[9px] uppercase tracking-wider transition-colors",
+              autoAi
+                ? "bg-[var(--accent)] text-white"
+                : "border border-[var(--border)] text-[var(--fg-subtle)] hover:text-[var(--fg)]"
+            )}
+            title="Re-score automatically a moment after you stop editing"
+          >
+            auto {autoAi ? "on" : "off"}
+          </button>
+          <Button size="xs" variant={done ? "outline" : "primary"} onClick={onScoreAI} disabled={loading}>
+            {loading ? "Convening…" : done ? (stale ? "↻ Re-score" : "↻ Re-run") : "⚔ Run war room"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="p-4">
+        {status === "idle" && (
+          <p className="text-[12px] leading-relaxed text-[var(--fg-muted)]">
+            The grid above is an instant <span className="text-[var(--fg)]">estimate</span>.
+            Run the six-critic red-team panel for an authoritative{" "}
+            <span className="text-[var(--fg)]">Resonance</span> /{" "}
+            <span className="text-[var(--fg)]">Backfire</span> verdict on this
+            variant — identical or unedited forks are served from cache for free.
+          </p>
+        )}
+
+        {loading && (
+          <div className="flex items-center gap-3 py-1">
+            <span className="inline-flex h-2 w-2 animate-ping rounded-full bg-[var(--accent)]" />
+            <p className="text-[12px] text-[var(--fg-muted)]">
+              Convening six Bangladeshi critics — meme engineer, regional
+              outsider, journalist, rival brand, regulator, brand purist…
+            </p>
+          </div>
+        )}
+
+        {status === "error" && (
+          <p className="text-[12px] text-[var(--danger)]">
+            {ai?.error ?? "Scoring failed."} — try again.
+          </p>
+        )}
+
+        {done && ai?.scores && (
+          <div className="space-y-4">
+            {promoted && (
+              <p className="text-[12px] leading-relaxed text-[var(--fg-muted)]">
+                Authoritative verdict shown in the grid above (with the live
+                estimate in small text). The harshest critic:
+              </p>
+            )}
+            {/* AI vs estimate metric chips — hidden once promoted to the grid */}
+            {!promoted && (
+            <div className="grid grid-cols-3 gap-2">
+              {AI_METRICS.map((m) => {
+                const aiVal = ai.scores![m.key];
+                const estVal = estimate[m.key];
+                const d = aiVal - estVal;
+                const tone = m.invert ? riskTone(aiVal) : resonanceTone(aiVal);
+                return (
+                  <div
+                    key={m.key}
+                    className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)]/50 px-2.5 py-2"
+                  >
+                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--fg-subtle)]">
+                      {m.label}
+                    </p>
+                    <div className="mt-0.5 flex items-baseline gap-1.5">
+                      <span
+                        className="font-display text-xl font-semibold tabular-nums"
+                        style={{ color: tone.color }}
+                      >
+                        <AnimatedNumber value={aiVal} />
+                      </span>
+                      <span className="font-mono text-[9px] text-[var(--fg-subtle)]">
+                        est {estVal}
+                        {d !== 0 && (
+                          <span className="ml-0.5">
+                            {d > 0 ? "▲" : "▼"}
+                            {Math.abs(d)}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            )}
+
+            {/* Harshest critic callout */}
+            {ai.topCritic && (
+              <div
+                className="rounded-xl border px-4 py-3"
+                style={{
+                  borderColor: "var(--border)",
+                  background: "linear-gradient(180deg, var(--danger-soft), transparent 80%)",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+                    harshest critic
+                  </span>
+                  <span className="font-mono text-[10px] text-[var(--fg-subtle)]">
+                    {ai.topCritic.agentName} ·{" "}
+                    <span style={{ color: riskTone(ai.topCritic.severity).color }}>
+                      {ai.topCritic.severity}/100
+                    </span>
+                  </span>
+                </div>
+                <p className="mt-2 font-mono text-[13px] italic leading-relaxed text-[var(--fg)]">
+                  “{ai.topCritic.sampleAttack}”
+                </p>
+                <p className="mt-2 text-[12px] leading-relaxed text-[var(--fg-muted)]">
+                  {ai.topCritic.reasoning}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ScoreCell({
   label,
   value,
@@ -1321,6 +1778,7 @@ function ScoreCell({
   parent,
   invert = false,
   spark,
+  aiValue,
 }: {
   label: string;
   value: number;
@@ -1328,8 +1786,19 @@ function ScoreCell({
   parent: number | undefined;
   invert?: boolean;
   spark?: number[];
+  /**
+   * When set, this authoritative AI score becomes the primary number and the
+   * heuristic `value` is demoted to an "est" subtext. Promoted only for a
+   * fresh, real AI verdict (see Inspector).
+   */
+  aiValue?: number;
 }) {
-  const tone = invert ? riskTone(value) : resonanceTone(value);
+  const isAi = aiValue !== undefined;
+  const shown = isAi ? aiValue : value;
+  const tone = invert ? riskTone(shown) : resonanceTone(shown);
+
+  // Estimate-vs-AI gap (AI mode) or baseline delta "since fork" (estimate mode).
+  const dEst = isAi ? aiValue - value : 0;
   const dBase = base !== undefined ? value - base : 0;
   const dParent = parent !== undefined ? value - parent : 0;
   const deltaIsBad = invert ? dBase > 0 : dBase < 0;
@@ -1344,32 +1813,54 @@ function ScoreCell({
     <div
       className="relative overflow-hidden rounded-xl border px-3 py-2.5"
       style={{
-        borderColor: "var(--border)",
+        borderColor: isAi ? "var(--accent)" : "var(--border)",
         background: `linear-gradient(180deg, ${tone.soft}, transparent 75%)`,
       }}
     >
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
-        {label}
-      </p>
+      <div className="flex items-center justify-between gap-1">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+          {label}
+        </p>
+        {isAi && (
+          <span
+            className="rounded-full px-1.5 py-px font-mono text-[8px] uppercase tracking-wider"
+            style={{ color: "var(--accent)", backgroundColor: "var(--accent-soft)" }}
+          >
+            AI
+          </span>
+        )}
+      </div>
       <div className="mt-1 flex items-end justify-between">
         <div className="flex items-baseline gap-1">
           <span
             className="font-display text-2xl font-semibold tabular-nums tracking-tight"
             style={{ color: tone.color }}
           >
-            <AnimatedNumber value={value} />
+            <AnimatedNumber value={shown} />
           </span>
-          {base !== undefined && (
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: deltaColor }}
-            >
-              {dBase > 0 ? "▲" : dBase < 0 ? "▼" : "—"}
-              {Math.abs(dBase)}
+          {isAi ? (
+            <span className="font-mono text-[10px] text-[var(--fg-subtle)]">
+              est {value}
+              {dEst !== 0 && (
+                <span className="ml-0.5">
+                  {dEst > 0 ? "▲" : "▼"}
+                  {Math.abs(dEst)}
+                </span>
+              )}
             </span>
+          ) : (
+            base !== undefined && (
+              <span
+                className="font-mono text-[10px]"
+                style={{ color: deltaColor }}
+              >
+                {dBase > 0 ? "▲" : dBase < 0 ? "▼" : "—"}
+                {Math.abs(dBase)}
+              </span>
+            )
           )}
         </div>
-        {spark && spark.length > 1 && (
+        {!isAi && spark && spark.length > 1 && (
           <Sparkline values={spark} color={tone.color} />
         )}
       </div>
@@ -1377,13 +1868,13 @@ function ScoreCell({
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
-            width: `${value}%`,
+            width: `${shown}%`,
             backgroundColor: tone.color,
             boxShadow: `0 0 8px ${tone.color}`,
           }}
         />
       </div>
-      {parent !== undefined && (
+      {!isAi && parent !== undefined && (
         <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-[var(--fg-subtle)]">
           parent {parent} ·{" "}
           <span

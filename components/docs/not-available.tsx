@@ -70,7 +70,7 @@ export function NotAvailable({
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center text-center">
       <div className="relative">
-        <LogoBadge size="lg" />
+        <LogoBadge size="lg" ring glow={false} />
       </div>
       <span className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[var(--warning)]/25 bg-[var(--warning-soft)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--warning)]">
         403 · Not available

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { ScoreRadar } from "@/components/score-radar";
-import { LogoMark } from "@/components/logo";
+import { LogoBadge } from "@/components/logo";
 import type { RunScores } from "@/lib/agents/types";
 
 const AGENTS = [
@@ -114,7 +114,7 @@ export function LandingPage() {
           <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] shadow-[0_40px_120px_-32px_rgba(0,0,0,0.7)] backdrop-blur-xl">
             {/* App chrome: frames a real component, not a fake one */}
             <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
-              <LogoMark size={16} className="text-[var(--accent)]" />
+              <LogoBadge size="xs" tile glow={false} />
               <div className="flex h-6 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
                 backfire.os/runs/sample
                 <span className="ml-auto inline-flex items-center gap-1.5 text-[var(--success)]">

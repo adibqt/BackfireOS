@@ -1,4 +1,4 @@
-import { Logo, LogoBadge, LogoMark } from "@/components/logo";
+import { Logo, LogoBadge, LogoMark, LogoMarkRing } from "@/components/logo";
 
 export default function BrandPreview() {
   return (
@@ -36,6 +36,14 @@ export default function BrandPreview() {
           <LogoMark size={16} />
           <span style={{ color: "var(--fg-subtle)", fontSize: 12 }}>monochrome (currentColor)</span>
         </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 40, color: "var(--accent)" }}>
+          <LogoMarkRing size={72} className="text-[var(--accent)]" />
+          <LogoMarkRing size={48} className="text-[var(--accent)]" />
+          <LogoBadge size="xl" ring glow={false} />
+          <LogoBadge size="lg" ring glow={false} />
+          <span style={{ color: "var(--fg-subtle)", fontSize: 12 }}>radar arc variant</span>
+        </div>
       </section>
 
       {/* LIGHT */}
@@ -44,8 +52,8 @@ export default function BrandPreview() {
           On light
         </h2>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 40, flexWrap: "wrap" }}>
-          <LogoBadge size="xl" glow={false} />
-          <LogoBadge size="md" glow={false} />
+          <LogoBadge size="xl" tile={false} glow={false} />
+          <LogoBadge size="md" tile={false} glow={false} />
           <LogoBadge size="xl" tile glow={false} />
           <span style={{ display: "flex", alignItems: "center", gap: 8, color: "#0a0809" }}>
             <LogoMark size={40} />
