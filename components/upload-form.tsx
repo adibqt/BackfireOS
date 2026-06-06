@@ -9,7 +9,7 @@ import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Input, Textarea, FileInput } from "@/components/ui/input";
-import { Badge, RiskBadge } from "@/components/ui/badge";
+import { Badge, RiskBadge, Kbd } from "@/components/ui/badge";
 import { riskLevel } from "@/lib/scoring";
 import { cn } from "@/lib/utils";
 
@@ -69,6 +69,15 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
   const handleClearImage = () => {
     setImagePreviewUrl(undefined);
     setImageBase64(undefined);
+  };
+
+  const ready = !brandsLoading && !!brandId && !!slogan.trim();
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && ready && !loading) {
+      e.preventDefault();
+      runSimulation();
+    }
   };
 
   const runSimulation = async () => {
@@ -158,7 +167,17 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
         className="pointer-events-none absolute -inset-x-4 -top-4 -bottom-2 -z-10 rounded-[28px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(255,77,87,0.18),transparent_70%)] blur-2xl"
       />
 
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl">
+      <div
+        onKeyDown={handleKeyDown}
+        className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl"
+      >
+        {/* Indeterminate progress while a simulation streams */}
+        {loading && (
+          <div className="absolute inset-x-0 top-0 z-20 h-[2px] overflow-hidden bg-[var(--accent-soft)]">
+            <div className="progress-indeterminate h-full w-1/3 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent" />
+          </div>
+        )}
+
         {/* Card chrome */}
         <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-5 py-4">
           <div className="flex items-center gap-3">
@@ -182,70 +201,125 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
         </div>
 
         <div className="space-y-4 p-5">
-          <BrandSelector
-            brands={brands}
-            brandsLoading={brandsLoading}
-            brandId={brandId}
-            onChange={handleBrandChange}
-          />
-          <Input
-            label={t(locale, "slogan")}
-            value={slogan}
-            onChange={(e) => setSlogan(e.target.value)}
-            placeholder={t(locale, "sloganPlaceholder")}
-          />
-          <Textarea
-            label={t(locale, "brandValues")}
-            value={brandValues}
-            onChange={(e) => setBrandValues(e.target.value)}
-            placeholder={t(locale, "brandValuesPlaceholder")}
-            rows={2}
-          />
-          <Textarea
-            label={t(locale, "brief")}
-            value={brief}
-            onChange={(e) => setBrief(e.target.value)}
-            placeholder={t(locale, "briefPlaceholder")}
-            rows={3}
-          />
-          <FileInput
-            label={t(locale, "imageUpload")}
-            accept="image/*"
-            previewUrl={imagePreviewUrl}
-            onFileChange={handleImage}
-            onClear={handleClearImage}
-          />
+          <Reveal index={0}>
+            <BrandSelector
+              brands={brands}
+              brandsLoading={brandsLoading}
+              brandId={brandId}
+              onChange={handleBrandChange}
+            />
+          </Reveal>
+          <Reveal index={1}>
+            <Input
+              label={t(locale, "slogan")}
+              value={slogan}
+              onChange={(e) => setSlogan(e.target.value)}
+              placeholder={t(locale, "sloganPlaceholder")}
+            />
+          </Reveal>
+          <Reveal index={2}>
+            <Textarea
+              label={t(locale, "brandValues")}
+              value={brandValues}
+              onChange={(e) => setBrandValues(e.target.value)}
+              placeholder={t(locale, "brandValuesPlaceholder")}
+              rows={2}
+            />
+          </Reveal>
 
-          <Button
-            type="button"
-            size="lg"
-            disabled={loading || !slogan.trim() || !brandId}
-            onClick={runSimulation}
-            className="w-full"
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                  <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                {status || t(locale, "analyzing")}
+          {/* Required core above · optional context below */}
+          <Reveal index={3}>
+            <div className="flex items-center gap-3 pt-0.5" aria-hidden>
+              <span className="h-px flex-1 bg-[var(--border)]" />
+              <span className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[var(--fg-subtle)]">
+                Optional context
               </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                {t(locale, "runSimulation")}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </span>
-            )}
-          </Button>
+              <span className="h-px flex-1 bg-[var(--border)]" />
+            </div>
+          </Reveal>
+
+          <Reveal index={4}>
+            <Textarea
+              label={t(locale, "brief")}
+              value={brief}
+              onChange={(e) => setBrief(e.target.value)}
+              placeholder={t(locale, "briefPlaceholder")}
+              rows={3}
+            />
+          </Reveal>
+          <Reveal index={5}>
+            <FileInput
+              label={t(locale, "imageUpload")}
+              accept="image/*"
+              previewUrl={imagePreviewUrl}
+              onFileChange={handleImage}
+              onClear={handleClearImage}
+            />
+          </Reveal>
+
+          <Reveal index={6}>
+            <Button
+              type="button"
+              size="lg"
+              disabled={loading || !ready}
+              onClick={runSimulation}
+              className="group relative w-full overflow-hidden"
+            >
+              {/* Hover sheen sweep */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-full"
+              />
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                    <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {status || t(locale, "analyzing")}
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  {t(locale, "runSimulation")}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    aria-hidden
+                    className="transition-transform duration-300 group-hover:translate-x-0.5"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </span>
+              )}
+            </Button>
+          </Reveal>
 
           {!loading && (
-            <p className="text-center text-[12px] text-[var(--fg-subtle)]">
-              {t(locale, liveAi ? "liveMode" : "demoMode")}
-            </p>
+            <Reveal index={7}>
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-1.5 text-[12px] text-[var(--fg-subtle)]">
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full transition-colors duration-300",
+                      ready ? "bg-[var(--success)] pulse-dot" : "bg-[var(--fg-faint)]"
+                    )}
+                  />
+                  {ready ? "Ready for adversarial review" : t(locale, liveAi ? "liveMode" : "demoMode")}
+                </span>
+                {ready && (
+                  <span className="flex shrink-0 items-center gap-1 text-[var(--fg-subtle)]">
+                    <Kbd>Ctrl</Kbd>
+                    <span className="text-[11px]">+</span>
+                    <Kbd>Enter</Kbd>
+                  </span>
+                )}
+              </div>
+            </Reveal>
           )}
 
           {error && (
@@ -298,6 +372,15 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Staggered fade-up wrapper — sequential waterfall reveal on mount. */
+function Reveal({ index, children }: { index: number; children: React.ReactNode }) {
+  return (
+    <div className="fade-up" style={{ animationDelay: `${index * 60}ms` }}>
+      {children}
     </div>
   );
 }
