@@ -230,6 +230,38 @@ export async function generateText(
   return result.response.text();
 }
 
+/**
+ * Streams a text completion token-by-token, invoking `onToken` for each chunk
+ * and resolving with the full text. Used as the Boardroom debate fallback when
+ * GROQ_API_KEY is absent but a Gemini key is configured — so the live transcript
+ * still types out instead of dropping straight to the scripted mock.
+ */
+export async function generateTextStream(
+  prompt: string,
+  onToken: (token: string) => void,
+  systemInstruction?: string,
+  model = TEXT_MODEL
+): Promise<string> {
+  const genAI = getTextClient();
+  const generativeModel = genAI.getGenerativeModel(
+    systemInstruction ? { model, systemInstruction } : { model }
+  );
+
+  const result = await withTextRetry(() =>
+    generativeModel.generateContentStream(prompt)
+  );
+
+  let full = "";
+  for await (const chunk of result.stream) {
+    const token = chunk.text();
+    if (token) {
+      full += token;
+      onToken(token);
+    }
+  }
+  return full;
+}
+
 export async function describeImage(
   prompt: string,
   base64: string,

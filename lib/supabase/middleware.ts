@@ -22,6 +22,7 @@ function isProtectedPath(pathname: string) {
   if (pathname.startsWith("/api/campaigns")) return true;
   if (pathname.startsWith("/api/simulate")) return true;
   if (pathname.startsWith("/api/memes")) return true;
+  if (pathname.startsWith("/api/boardroom")) return true;
   return false;
 }
 

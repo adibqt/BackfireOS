@@ -32,6 +32,8 @@ import {
   runScoresToBranchScores,
   type CampaignSeed,
 } from "./branches/types";
+import type { BoardroomTranscript } from "./boardroom/types";
+import { dbGetDebate, dbListDebates, dbSaveDebate } from "./db/boardroom";
 
 declare global {
   var __backfireStore: {
@@ -39,6 +41,8 @@ declare global {
     campaigns: Map<string, CampaignInput & { id: string; imageUrl?: string; createdAt: string }>;
     imageBase64: Map<string, string>;
     brands: Map<string, Brand>;
+    // Every convened debate is retained (one entry per iteration), keyed by run.
+    debates: Map<string, BoardroomTranscript[]>;
   } | undefined;
 }
 
@@ -49,6 +53,7 @@ function getMemoryStore() {
       campaigns: new Map(),
       imageBase64: new Map(),
       brands: new Map(),
+      debates: new Map(),
     };
   }
   return globalThis.__backfireStore;
@@ -424,6 +429,51 @@ export async function getCampaignSeed(
   }
 
   return seed;
+}
+
+/**
+ * Persists a run's boardroom debate as a new iteration (history is never
+ * overwritten). Falls back to the in-memory store (keyed by run id) when
+ * Supabase is not configured, so the feature works end-to-end in demo mode.
+ * Returns the saved transcript with its iteration number assigned.
+ */
+export async function saveDebate(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  transcript: BoardroomTranscript
+): Promise<BoardroomTranscript> {
+  if (supabase && userId) {
+    return dbSaveDebate(supabase, userId, transcript);
+  }
+  const list = getMemoryStore().debates.get(transcript.runId) ?? [];
+  const persisted: BoardroomTranscript = { ...transcript, iteration: list.length + 1 };
+  // Newest first, mirroring the DB ordering.
+  getMemoryStore().debates.set(transcript.runId, [persisted, ...list]);
+  return persisted;
+}
+
+/** The most recent debate iteration for a run. */
+export async function getDebate(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  runId: string
+): Promise<BoardroomTranscript | null> {
+  if (supabase && userId) {
+    return dbGetDebate(supabase, runId, userId);
+  }
+  return getMemoryStore().debates.get(runId)?.[0] ?? null;
+}
+
+/** Every saved debate iteration for a run, newest first. */
+export async function listDebates(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  runId: string
+): Promise<BoardroomTranscript[]> {
+  if (supabase && userId) {
+    return dbListDebates(supabase, runId, userId);
+  }
+  return getMemoryStore().debates.get(runId) ?? [];
 }
 
 export function attachImageBase64(

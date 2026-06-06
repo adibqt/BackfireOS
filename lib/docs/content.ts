@@ -62,7 +62,7 @@ export const FEATURE_MATRIX: FeatureRow[] = [
   { category: "Insights", feature: "Polarization graph", status: "live", notes: "components/polarization-graph.tsx" },
   { category: "Insights", feature: "Counterfactual branches", status: "live", notes: "components/counterfactual-branches.tsx" },
   { category: "Docs", feature: "Live /docs deck + access control", status: "live", notes: "app/docs" },
-  { category: "Workflow", feature: "Boardroom Mode (multi-agent debate)", status: "in_progress", notes: "app/boardroom" },
+  { category: "Workflow", feature: "Boardroom Mode (multi-agent debate)", status: "live", notes: "app/boardroom · Groq hybrid (scout + compound)" },
   { category: "Workflow", feature: "Regulatory Pre-Mortem Generator", status: "in_progress", notes: "app/post-mortem" },
   { category: "Data", feature: "Firecrawl live-news ingestion", status: "planned", notes: "Roadmap — mid term" },
   { category: "AI", feature: "GraphRAG over brand × backlash events", status: "planned", notes: "Roadmap — mid term" },
@@ -174,7 +174,7 @@ export const SECTIONS: DocSection[] = [
       { kind: "callout", tone: "info", title: "Under active development", text: "Three additional surfaces are shipping by June 10, 2026 — expanding Backfire OS from a verdict engine into a full pre-launch war room." },
       { kind: "cards", items: [
         { title: "Counterfactual Branching", body: "Git for campaigns — fork the slogan, tweak a value, and watch how the Backfire Score shifts in real time.", tag: "In Progress" },
-        { title: "Boardroom Mode", body: "Synthetic C-suite personas debate the campaign live; produces a structured go / no-go with dissenting views.", tag: "In Progress" },
+        { title: "Boardroom Mode", body: "Synthetic personas debate the campaign live; produces a structured greenlight / revise / kill call with dissenting views.", tag: "Live" },
         { title: "Regulatory Pre-Mortem", body: "Auto-drafts the apology the brand would publish after a regulatory misfire — before it happens.", tag: "In Progress" },
       ] },
     ],
