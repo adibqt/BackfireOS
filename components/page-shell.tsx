@@ -14,13 +14,13 @@ export function PageShell({
   bare?: boolean;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
       <SiteHeader />
       <main
         className={
           bare
-            ? "flex-1"
-            : "w-full flex-1 px-5 py-10 md:px-8 md:py-16 lg:px-12"
+            ? "min-w-0 flex-1 overflow-x-clip"
+            : "w-full min-w-0 flex-1 overflow-x-clip px-5 py-10 md:px-8 md:py-16 lg:px-12"
         }
       >
         {children}

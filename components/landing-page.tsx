@@ -60,17 +60,17 @@ export function LandingPage() {
   return (
     <>
       {/* ── Hero ── */}
-      <section className="relative pb-20 pt-6 text-center md:pb-24 md:pt-14">
+      <section className="relative overflow-x-clip pb-20 pt-6 text-center md:pb-24 md:pt-14">
         {/* Aurora */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[640px] w-[1100px] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.28),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[640px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.28),transparent_70%)] blur-3xl"
         />
         {/* Faded grid */}
         <div className="bg-grid absolute inset-x-0 top-0 -z-10 h-[640px] opacity-60" aria-hidden />
 
         <div className="mx-auto max-w-3xl">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-1 pr-3 text-[12px] backdrop-blur fade-up">
+          <div className="mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-1 pr-3 text-[12px] backdrop-blur fade-up">
             <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
               Preview
             </span>
@@ -79,7 +79,10 @@ export function LandingPage() {
             </span>
           </div>
 
-          <h1 className="mt-8 font-display text-[44px] font-semibold leading-[1.02] tracking-tight text-[var(--fg)] md:text-[64px] lg:text-[76px] fade-up" style={{ animationDelay: "60ms" }}>
+          <h1
+            className="mt-8 font-display font-semibold leading-[1.02] tracking-tight text-[var(--fg)] fade-up"
+            style={{ animationDelay: "60ms", fontSize: "clamp(2.25rem, 8vw, 4.75rem)", textWrap: "balance" }}
+          >
             <span className="text-gradient">Penetration testing</span>
             <br />
             <span className="text-gradient-accent">for marketing campaigns.</span>
@@ -106,7 +109,7 @@ export function LandingPage() {
         </div>
 
         {/* Real product preview: the actual ScoreRadar from a sample run */}
-        <div className="relative mx-auto mt-16 max-w-5xl px-4 text-left fade-up" style={{ animationDelay: "260ms" }}>
+        <div className="relative mx-auto mt-16 max-w-5xl overflow-hidden px-4 text-left fade-up" style={{ animationDelay: "260ms" }}>
           <div
             aria-hidden
             className="pointer-events-none absolute -inset-x-8 -bottom-8 -top-4 -z-10 rounded-[40px] bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(255,77,87,0.18),transparent_70%)] blur-3xl"
@@ -115,9 +118,9 @@ export function LandingPage() {
             {/* App chrome: frames a real component, not a fake one */}
             <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
               <LogoBadge size="xs" tile glow={false} />
-              <div className="flex h-6 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
-                backfire.os/runs/sample
-                <span className="ml-auto inline-flex items-center gap-1.5 text-[var(--success)]">
+              <div className="flex h-6 min-w-0 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
+                <span className="truncate">backfire.os/runs/sample</span>
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[var(--success)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] pulse-dot" />
                   live
                 </span>
@@ -131,7 +134,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Trust strip ── */}
-      <section className="relative -mx-5 mb-24 border-y border-[var(--border)] bg-[var(--bg-elev-1)]/40 px-5 py-6 backdrop-blur md:mb-32">
+      <section className="relative -mx-5 mb-24 max-w-[100vw] border-y border-[var(--border)] bg-[var(--bg-elev-1)]/40 px-5 py-6 backdrop-blur md:mb-32">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
           <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
             The red team

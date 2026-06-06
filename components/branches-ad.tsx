@@ -220,7 +220,7 @@ function LiveTree() {
   const done = frame.highlight;
 
   return (
-    <div className="relative mx-auto mt-14 max-w-4xl px-1 text-left md:mt-16">
+    <div className="relative mx-auto mt-14 max-w-4xl overflow-hidden px-1 text-left md:mt-16">
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,rgba(255,77,87,0.20),transparent_70%)] blur-3xl"
@@ -234,9 +234,9 @@ function LiveTree() {
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--warning)]/60" />
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--success)]/60" />
           </div>
-          <div className="flex h-6 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
-            backfire.os/branches
-            <span className={cn("ml-auto inline-flex items-center gap-1.5", done ? "text-[var(--success)]" : "text-[var(--accent)]")}>
+          <div className="flex h-6 min-w-0 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
+            <span className="truncate">backfire.os/branches</span>
+            <span className={cn("ml-auto inline-flex shrink-0 items-center gap-1.5", done ? "text-[var(--success)]" : "text-[var(--accent)]")}>
               <span className="relative flex h-2 w-2">
                 {!done && (
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
@@ -249,8 +249,8 @@ function LiveTree() {
         </div>
 
         {/* Tree canvas (scrolls horizontally on narrow screens, like the live tree) */}
-        <div className="overflow-x-auto p-4 sm:p-5">
-          <div className="relative mx-auto" style={{ width: CANVAS_W, height: CANVAS_H }}>
+        <div className="max-w-full overflow-x-auto p-4 sm:p-5">
+          <div className="relative mx-auto max-w-full" style={{ width: CANVAS_W, height: CANVAS_H }}>
             {/* Generation rails + connectors */}
             <svg
               className="absolute inset-0"
@@ -407,15 +407,15 @@ export function BranchesAd() {
   return (
     <PageShell>
       {/* ── Hero ── */}
-      <section className="relative pb-10 pt-4 text-center md:pt-10">
+      <section className="relative overflow-x-clip pb-10 pt-4 text-center md:pt-10">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[1100px] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.26),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.26),transparent_70%)] blur-3xl"
         />
         <div className="bg-grid absolute inset-x-0 top-0 -z-10 h-[620px] opacity-60" aria-hidden />
 
         <div className="mx-auto max-w-3xl">
-          <div className="fade-up mx-auto inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-2.5 pr-3 text-[12px] backdrop-blur">
+          <div className="fade-up mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-2.5 pr-3 text-[12px] backdrop-blur">
             <LockIcon className="h-3.5 w-3.5 text-[var(--accent)]" />
             <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
               Counterfactual Branching

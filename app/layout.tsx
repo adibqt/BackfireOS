@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
 import { LanguageProvider } from "@/components/language-provider";
 import "./globals.css";
@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   title: "Backfire OS — Adversarial Brand Simulation",
   description:
     "Penetration testing for marketing campaigns in emerging markets. Infinity AI BuildFest 2026.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

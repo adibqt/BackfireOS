@@ -224,7 +224,7 @@ function LiveSession() {
   const shown = SCRIPT.slice(0, frame.revealed);
 
   return (
-    <div className="relative mx-auto mt-14 max-w-5xl px-1 text-left md:mt-16">
+    <div className="relative mx-auto mt-14 max-w-5xl overflow-hidden px-1 text-left md:mt-16">
       {/* Ambient glow under the frame */}
       <div
         aria-hidden
@@ -239,9 +239,9 @@ function LiveSession() {
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--warning)]/60" />
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--success)]/60" />
           </div>
-          <div className="flex h-6 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
-            backfire.os/boardroom
-            <span className="ml-auto inline-flex items-center gap-1.5 text-[var(--accent)]">
+          <div className="flex h-6 min-w-0 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
+            <span className="truncate">backfire.os/boardroom</span>
+            <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[var(--accent)]">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
@@ -253,12 +253,12 @@ function LiveSession() {
 
         <div className="grid gap-0 md:grid-cols-[15rem_minmax(0,1fr)]">
           {/* Left: the campaign on trial + roster */}
-          <aside className="border-b border-[var(--border)] bg-[var(--bg-elev-1)]/30 p-4 md:border-b-0 md:border-r">
+          <aside className="order-2 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/30 p-4 md:order-none md:border-b-0 md:border-r">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--accent)]">
               Campaign on trial
             </p>
             <blockquote className="mt-2.5 rounded-xl border border-[var(--border)] bg-white/[0.02] px-3.5 py-3">
-              <p className="font-display text-[16px] font-semibold leading-snug tracking-tight text-[var(--fg)]">
+              <p className="font-display text-[14px] font-semibold leading-snug tracking-tight text-[var(--fg)] sm:text-[16px]">
                 “{TRIAL_SLOGAN}”
               </p>
               <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
@@ -298,7 +298,7 @@ function LiveSession() {
           {/* Right: the live transcript */}
           <div
             ref={scrollerRef}
-            className="flex h-[420px] flex-col gap-4 overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-4 sm:p-5"
+            className="order-1 flex h-[min(420px,55vh)] min-h-[280px] flex-col gap-4 overflow-x-clip overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-4 sm:h-[420px] sm:overflow-hidden sm:p-5 md:order-none"
           >
             <div className="flex items-center justify-center gap-3 pt-0.5">
               <span className="h-px w-8 bg-[var(--border)]" />
@@ -317,16 +317,26 @@ function LiveSession() {
                   className={cn("slide-in-right flex items-end gap-2.5", right && "flex-row-reverse")}
                 >
                   <Avatar persona={persona} />
-                  <div className={cn("flex min-w-0 max-w-[86%] flex-col", right ? "items-end" : "items-start")}>
-                    <div className={cn("mb-1 flex items-center gap-2 px-1", right && "flex-row-reverse")}>
-                      <span className="font-display text-[12.5px] font-semibold tracking-tight text-[var(--fg)]">
+                  <div
+                    className={cn(
+                      "flex min-w-0 max-w-[calc(100%-2.75rem)] flex-col sm:max-w-[86%]",
+                      right ? "items-end" : "items-start"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "mb-1 flex max-w-full flex-wrap items-center gap-2 px-1",
+                        right && "justify-end"
+                      )}
+                    >
+                      <span className="font-display text-[12px] font-semibold tracking-tight text-[var(--fg)] sm:text-[12.5px]">
                         {persona.name}
                       </span>
                       <StanceChip persona={persona} />
                     </div>
                     <div
                       className={cn(
-                        "rounded-2xl border px-3.5 py-2.5 text-[13.5px] leading-relaxed text-[var(--fg)] backdrop-blur-xl",
+                        "w-full rounded-2xl border px-3 py-2.5 text-[13px] leading-relaxed text-[var(--fg)] backdrop-blur-xl sm:px-3.5 sm:text-[13.5px]",
                         persona.bubble,
                         right ? "rounded-br-sm" : "rounded-bl-sm"
                       )}
@@ -354,16 +364,16 @@ function LiveSession() {
                 <Avatar persona={PERSONAS[frame.active]} active />
                 <div
                   className={cn(
-                    "flex min-w-0 flex-col",
+                    "flex min-w-0 max-w-[calc(100%-2.75rem)] flex-col sm:max-w-[86%]",
                     PERSONAS[frame.active].side === "right" ? "items-end" : "items-start"
                   )}
                 >
-                  <span className="mb-1 px-1 font-display text-[12.5px] font-semibold tracking-tight text-[var(--fg)]">
+                  <span className="mb-1 px-1 font-display text-[12px] font-semibold tracking-tight text-[var(--fg)] sm:text-[12.5px]">
                     {PERSONAS[frame.active].name}
                   </span>
                   <div
                     className={cn(
-                      "rounded-2xl border px-3.5 py-2.5 backdrop-blur-xl",
+                      "w-full rounded-2xl border px-3 py-2.5 backdrop-blur-xl sm:px-3.5",
                       PERSONAS[frame.active].bubble,
                       PERSONAS[frame.active].side === "right" ? "rounded-br-sm" : "rounded-bl-sm"
                     )}
@@ -386,8 +396,8 @@ function LiveSession() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
                     Boardroom recommendation
                   </p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-3">
-                    <span className="font-display text-[30px] font-semibold leading-none tracking-tight text-[var(--warning)]">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span className="font-display text-[26px] font-semibold leading-none tracking-tight text-[var(--warning)] sm:text-[30px]">
                       {VERDICT.label}
                     </span>
                     <Badge variant="warning" dot>
@@ -495,16 +505,16 @@ export function BoardroomAd() {
   return (
     <PageShell>
       {/* ── Hero ── */}
-      <section className="relative pb-10 pt-4 text-center md:pt-10">
+      <section className="relative overflow-x-clip pb-10 pt-4 text-center md:pt-10">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[1100px] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.26),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.26),transparent_70%)] blur-3xl"
         />
         <div className="bg-grid absolute inset-x-0 top-0 -z-10 h-[620px] opacity-60" aria-hidden />
 
         <div className="mx-auto max-w-3xl">
           <div
-            className="fade-up mx-auto inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-2.5 pr-3 text-[12px] backdrop-blur"
+            className="fade-up mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-2.5 pr-3 text-[12px] backdrop-blur"
           >
             <LockIcon className="h-3.5 w-3.5 text-[var(--accent)]" />
             <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">

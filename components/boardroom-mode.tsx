@@ -354,7 +354,7 @@ function CampaignBriefPanel({
           </div>
         )}
 
-        <div className="space-y-5 p-5">
+        <div className="space-y-5 p-4 sm:p-5">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">
@@ -385,7 +385,7 @@ function CampaignBriefPanel({
                 )}
                 aria-hidden
               />
-              <p className="font-display text-[17px] font-semibold leading-snug tracking-tight text-[var(--fg)]">
+              <p className="font-display text-[15px] font-semibold leading-snug tracking-tight text-[var(--fg)] sm:text-[17px]">
                 “{slogan}”
               </p>
               {isVariant && (
@@ -486,7 +486,7 @@ function PersonaRoster({
   verdicts: AgentVerdict[] | undefined;
 }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
+    <div className="grid gap-2 md:grid-cols-2">
       {personas.map((p) => {
         const tone = PERSONA_TONE[p.id];
         const active = activeId === p.id;
@@ -494,25 +494,30 @@ function PersonaRoster({
           <div
             key={p.id}
             className={cn(
-              "flex items-center gap-2.5 rounded-xl border px-2.5 py-2 transition-all duration-200",
+              "flex flex-col gap-2 rounded-xl border px-2.5 py-2 transition-all duration-200 sm:flex-row sm:items-center",
               active
                 ? "border-[var(--border-bright)] bg-white/[0.05]"
                 : "border-[var(--border)] bg-[var(--bg-elev-1)]/50"
             )}
           >
-            <Avatar initials={p.initials} tone={tone} size="sm" active={active} />
-            <div className="min-w-0 flex-1 leading-tight">
-              <p className="flex items-center gap-1.5 truncate text-[13px] font-medium text-[var(--fg)]">
-                {p.name}
-                {active && (
-                  <span className={cn("inline-block h-1.5 w-1.5 animate-pulse rounded-full", tone.dot)} />
-                )}
-              </p>
-              <p className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
-                {active && thinking ? "thinking…" : tone.stance}
-              </p>
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+              <Avatar initials={p.initials} tone={tone} size="sm" active={active} />
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="flex items-center gap-1.5 truncate text-[13px] font-medium text-[var(--fg)]">
+                  {p.name}
+                  {active && (
+                    <span className={cn("inline-block h-1.5 w-1.5 animate-pulse rounded-full", tone.dot)} />
+                  )}
+                </p>
+                <p className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+                  {active && thinking ? "thinking…" : tone.stance}
+                </p>
+              </div>
             </div>
-            <ConfidenceSignal personaId={p.id} severity={personaSeverity(p.id, verdicts)} />
+            <ConfidenceSignal
+              personaId={p.id}
+              severity={personaSeverity(p.id, verdicts)}
+            />
           </div>
         );
       })}
@@ -542,15 +547,20 @@ function ChatBubble({
         size="sm"
         active={message.streaming}
       />
-      <div className={cn("flex min-w-0 max-w-[82%] flex-col", right ? "items-end" : "items-start")}>
+      <div
+        className={cn(
+          "flex min-w-0 max-w-[calc(100%-2.75rem)] flex-col sm:max-w-[82%]",
+          right ? "items-end" : "items-start"
+        )}
+      >
         {/* Name / signal line above the bubble, like a group chat. */}
         <div
           className={cn(
-            "mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 px-1",
-            right && "flex-row-reverse"
+            "mb-1 flex max-w-full flex-wrap items-center gap-x-2 gap-y-1 px-1",
+            right && "justify-end"
           )}
         >
-          <span className="font-display text-[13px] font-semibold tracking-tight text-[var(--fg)]">
+          <span className="font-display text-[12.5px] font-semibold tracking-tight text-[var(--fg)] sm:text-[13px]">
             {message.speakerName}
           </span>
           <ConfidenceSignal personaId={message.speakerId} severity={severity} />
@@ -565,7 +575,7 @@ function ChatBubble({
             to form a chat "tail". */}
         <div
           className={cn(
-            "rounded-2xl border px-4 py-2.5 text-[14px] leading-relaxed text-[var(--fg)] backdrop-blur-xl",
+            "w-full rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-[var(--fg)] backdrop-blur-xl sm:px-4 sm:text-[14px]",
             tone.bubble,
             right ? "rounded-br-sm" : "rounded-bl-sm"
           )}
@@ -597,7 +607,7 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
   const tone = DECISION_TONE[transcript.synthesis.decision];
   return (
     <section
-      className="fade-up relative mt-6 overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-6 py-7 backdrop-blur-xl md:px-8"
+      className="fade-up relative mt-6 overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-4 py-5 backdrop-blur-xl sm:rounded-3xl sm:px-6 sm:py-7 md:px-8"
     >
       <div
         aria-hidden
@@ -610,10 +620,10 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
               Boardroom recommendation
             </p>
-            <div className="mt-2 flex items-center gap-3">
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
               <span
                 className={cn(
-                  "font-display text-[34px] font-semibold leading-none tracking-tight",
+                  "font-display text-[28px] font-semibold leading-none tracking-tight sm:text-[34px]",
                   tone.text
                 )}
               >
@@ -720,7 +730,7 @@ function SloganVariantPicker({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         title="Debate the original slogan or any counterfactual variant"
-        className="w-full max-w-xs rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] px-4 py-2.5 text-[14px] text-[var(--fg)] outline-none ring-[var(--accent)]/30 focus:ring-2 disabled:opacity-50"
+        className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] px-4 py-2.5 text-[14px] text-[var(--fg)] outline-none ring-[var(--accent)]/30 focus:ring-2 disabled:opacity-50 sm:max-w-xs"
       >
         {variants.map((v) => (
           <option key={v.id} value={v.id}>
@@ -756,7 +766,7 @@ function IterationTimeline({
         </p>
         <Badge variant="outline">{iterations.length} saved</Badge>
       </div>
-      <ul className="max-h-[420px] divide-y divide-[var(--border)] overflow-y-auto">
+      <ul className="max-h-[min(420px,50vh)] divide-y divide-[var(--border)] overflow-y-auto sm:max-h-[420px]">
         {iterations.map((it) => {
           const tone = DECISION_TONE[it.synthesis.decision];
           const active = it.id === currentId;
@@ -771,8 +781,8 @@ function IterationTimeline({
                   active ? "bg-white/[0.05]" : "hover:bg-white/[0.025]"
                 )}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2">
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="flex min-w-0 flex-wrap items-center gap-2">
                     <span className="font-mono text-[11px] text-[var(--fg-subtle)]">
                       #{it.iteration}
                     </span>
@@ -1225,10 +1235,11 @@ function BoardroomInner() {
         eyebrow={t(locale, "boardroom")}
         title="Watch the room argue your campaign"
         description="Four synthetic personas debate the campaign live — the Activist argues with the Brand Manager while the Cynical Journalist cross-examines the slogan. Read the exchange, then the room's greenlight call."
+        className="mb-6 sm:mb-8"
       />
 
-      <div className="mb-8 flex flex-wrap items-end gap-3">
-        <div className="flex-1">
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="min-w-0 w-full flex-1">
           <RunPicker
             runs={runs}
             selectedId={activeId}
@@ -1253,7 +1264,7 @@ function BoardroomInner() {
           />
         )}
         {activeId && (
-          <Button type="button" size="lg" onClick={startDebate} disabled={debating}>
+          <Button type="button" size="lg" className="w-full sm:w-auto" onClick={startDebate} disabled={debating}>
             {debating ? (
               <span className="flex items-center gap-2">
                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -1303,7 +1314,7 @@ function BoardroomInner() {
       {activeId && selectedRun?.campaign && (hasDebate || debating) && (
         <div className="grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_20rem]">
           {/* Left: static campaign brief — the artefact on trial. */}
-          <aside>
+          <aside className="order-2 min-w-0 lg:order-none">
             <CampaignBriefPanel
               run={selectedRun}
               criticalActive={criticalActive}
@@ -1313,9 +1324,9 @@ function BoardroomInner() {
           </aside>
 
           {/* Center: the live audit trail. */}
-          <div className="min-w-0">
+          <div className="order-1 min-w-0 lg:order-none">
             {/* Blue informational banner — sets expectations for the agentic run. */}
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[var(--info)]/25 bg-[var(--info-soft)] px-4 py-2.5 text-[13px] text-[var(--info)]">
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[var(--info)]/25 bg-[var(--info-soft)] px-3.5 py-2.5 text-[12.5px] text-[var(--info)] sm:px-4 sm:text-[13px]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0" aria-hidden>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="16" x2="12" y2="12" />
@@ -1355,7 +1366,7 @@ function BoardroomInner() {
             )}
 
             {/* Auto-scrolling chat thread. */}
-            <div className="flex max-h-[68vh] min-h-[40vh] flex-col gap-4 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-3 sm:p-5">
+            <div className="flex max-h-[min(68vh,560px)] min-h-[min(40vh,320px)] flex-col gap-4 overflow-y-auto overflow-x-clip rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-3 sm:max-h-[68vh] sm:min-h-[40vh] sm:p-5">
               {renderMessages.length === 0 && (
                 <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
                   <ThinkingIndicator />
@@ -1394,7 +1405,7 @@ function BoardroomInner() {
           {/* Right: browsable history of every debate iteration for this run.
               Drops to a full-width row below the debate on narrower screens. */}
           {iterations.length > 0 && (
-            <aside className="lg:col-span-2 xl:col-span-1 xl:sticky xl:top-24 xl:self-start">
+            <aside className="order-3 min-w-0 lg:col-span-2 lg:order-none xl:col-span-1 xl:sticky xl:top-24 xl:self-start">
               <IterationTimeline
                 iterations={iterations}
                 currentId={transcript?.id ?? null}

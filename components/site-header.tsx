@@ -108,13 +108,13 @@ function SiteHeaderInner() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-[background-color,border-color,backdrop-filter] duration-200",
+        "sticky top-0 z-40 overflow-x-clip transition-[background-color,border-color,backdrop-filter] duration-200",
         scrolled
           ? "border-b border-[var(--border)] bg-[var(--bg)]/75 backdrop-blur-xl"
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="flex w-full items-center justify-between gap-4 px-5 py-3.5 md:px-8">
+      <div className="flex w-full min-w-0 items-center justify-between gap-4 px-5 py-3.5 md:px-8">
         <Link href="/" className="group no-underline">
           <HeaderLogo />
         </Link>
