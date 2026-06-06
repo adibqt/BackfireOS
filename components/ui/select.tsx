@@ -66,12 +66,14 @@ function parseSelectChildren(children: ReactNode): ParsedGroup[] {
     if (!isValidElement(child)) return;
 
     if (child.type === "option") {
-      const props = child.props as React.OptionHTMLAttributes<HTMLOptionElement>;
+      const props = child.props as React.OptionHTMLAttributes<HTMLOptionElement> & {
+        children?: ReactNode;
+      };
       const rawValue = props.value ?? "";
       const value = Array.isArray(rawValue) ? rawValue.join(",") : String(rawValue);
       pushOption(undefined, {
         value,
-        label: childText(child.props.children) || value,
+        label: childText(props.children) || value,
         disabled: props.disabled,
         placeholder: value === "",
       });
@@ -79,15 +81,19 @@ function parseSelectChildren(children: ReactNode): ParsedGroup[] {
     }
 
     if (child.type === "optgroup") {
-      const props = child.props as React.OptgroupHTMLAttributes<HTMLOptionElement>;
+      const props = child.props as React.OptgroupHTMLAttributes<HTMLOptionElement> & {
+        children?: ReactNode;
+      };
       Children.forEach(props.children, (optChild) => {
         if (!isValidElement(optChild) || optChild.type !== "option") return;
-        const optProps = optChild.props as React.OptionHTMLAttributes<HTMLOptionElement>;
+        const optProps = optChild.props as React.OptionHTMLAttributes<HTMLOptionElement> & {
+          children?: ReactNode;
+        };
         const rawValue = optProps.value ?? "";
         const value = Array.isArray(rawValue) ? rawValue.join(",") : String(rawValue);
         pushOption(props.label, {
           value,
-          label: childText(optChild.props.children) || value,
+          label: childText(optProps.children) || value,
           disabled: optProps.disabled,
           placeholder: value === "",
         });
