@@ -448,6 +448,20 @@ body > * {
   animation: float 4s ease-in-out infinite;
 }
 
+/* Heat-map scan sweep — a bright bar passes across the grid while markets
+   "compute" their severity (Cultural Heat Map advertisement). */
+@keyframes scan-sweep {
+  0% { transform: translateX(-40%); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateX(340%); opacity: 0; }
+}
+
+.scan-sweep {
+  animation: scan-sweep 3s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  will-change: transform;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
