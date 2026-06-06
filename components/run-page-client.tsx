@@ -144,6 +144,15 @@ export default function RunPageClient({ id }: { id: string }) {
               <ButtonLink href="/history" variant="secondary" size="md">
                 Back to history
               </ButtonLink>
+              {run.campaignId && (
+                <ButtonLink
+                  href={`/branches?campaign=${run.campaignId}`}
+                  variant="secondary"
+                  size="md"
+                >
+                  Counterfactual Branching →
+                </ButtonLink>
+              )}
             </div>
           </div>
 
