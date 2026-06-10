@@ -285,13 +285,59 @@ function isDecision(value: unknown): value is DebateDecision {
   return value === "greenlight" || value === "revise" || value === "kill";
 }
 
-function buildSynthesisPrompt(ctx: DebateContext): string {
+/**
+ * The decision the raw red-team severity alone would imply — the same thresholds
+ * the heuristic fallback uses. Lets us sanity-check the AI chair against the
+ * numbers without forcing it to agree with them.
+ */
+function severityImpliedDecision(worstSeverity: number): DebateDecision {
+  if (worstSeverity >= 75) return "kill";
+  if (worstSeverity >= 45) return "revise";
+  return "greenlight";
+}
+
+/** Decisions ranked on a launch-risk axis so we can measure how far apart two are. */
+const DECISION_RANK: Record<DebateDecision, number> = {
+  greenlight: 0,
+  revise: 1,
+  kill: 2,
+};
+
+/**
+ * Reconciles the chair's self-reported confidence with the quantitative red-team
+ * severity. The chair may legitimately disagree with the raw score — the debate
+ * can surface risks the score missed, or defuse ones it flagged — so we never
+ * override its decision. But the further that verdict drifts from what the
+ * numbers imply, the less certain we let it claim to be. This stops a clear-cut,
+ * low-backfire campaign from being stamped with a falsely shaky number, and a
+ * contrarian verdict from being over-sold.
+ */
+function boundConfidence(
+  decision: DebateDecision,
+  confidence: number,
+  worstSeverity: number
+): number {
+  const distance = Math.abs(
+    DECISION_RANK[decision] -
+      DECISION_RANK[severityImpliedDecision(worstSeverity)]
+  );
+  // Agreement with the score: a clear-cut call should not read as a coin flip.
+  if (distance === 0) return Math.max(confidence, 65);
+  // One step off (e.g. score says "revise", room says "ship"): cap the certainty.
+  if (distance === 1) return Math.min(confidence, 72);
+  // Direct contradiction (greenlight vs. kill): the room is overriding the data — cap hard.
+  return Math.min(confidence, 50);
+}
+
+function buildSynthesisPrompt(ctx: DebateContext, worstSeverity: number): string {
   return `${buildGroundingBlock(ctx)}
 
 FULL DEBATE TRANSCRIPT:
 ${renderTranscript(ctx)}
 
 You are the neutral chair of this boardroom. Read the debate and decide whether the campaign should launch. Weigh the Activist's harm/regulatory concerns and the Journalist's exposure risk heavily — a brand crisis costs more than a delayed launch.
+
+The harshest red-team severity on record for this campaign is ${worstSeverity}/100 (0 = harmless, 100 = certain crisis). Let it steer your decision: a low score should lean "greenlight" unless the debate surfaced something the score missed; a high score should lean "revise" or "kill" unless the room genuinely defused it.
 
 Return ONLY a JSON object:
 {
@@ -300,9 +346,8 @@ Return ONLY a JSON object:
   "summary": "<2-4 sentences: where the room landed and why>",
   "conditions": ["<concrete change required before launch>", "..."]
 }
-- "greenlight": ship as-is (conditions may be empty).
-- "revise": ship only after the listed fixes.
-- "kill": the risk is not fixable by tweaks.`;
+- "decision": "greenlight" = ship as-is (conditions may be empty); "revise" = ship only after the listed fixes; "kill" = the risk is not fixable by tweaks.
+- "confidence" is your certainty in THIS recommendation — NOT the campaign's safety. Be most confident (80-95) when the debate clearly resolved one way; be least confident (40-60) when the room stayed genuinely split. A verdict that contradicts the ${worstSeverity}/100 severity should carry lower confidence.`;
 }
 
 interface RawSynthesis {
@@ -322,7 +367,7 @@ async function synthesize(
     return mockSynthesis(worstSeverity);
   }
 
-  const prompt = buildSynthesisPrompt(ctx);
+  const prompt = buildSynthesisPrompt(ctx, worstSeverity);
   try {
     let raw: RawSynthesis;
 
@@ -344,10 +389,13 @@ async function synthesize(
     }
 
     const decision = isDecision(raw.decision) ? raw.decision : "revise";
-    const confidence =
+    const rawConfidence =
       typeof raw.confidence === "number" && Number.isFinite(raw.confidence)
         ? Math.max(0, Math.min(100, Math.round(raw.confidence)))
         : 60;
+    // Anchor the chair's certainty to the red-team severity so it can't claim a
+    // confident verdict that the numbers flatly contradict (or under-sell a clear one).
+    const confidence = boundConfidence(decision, rawConfidence, worstSeverity);
     const summary =
       typeof raw.summary === "string" && raw.summary.trim().length > 0
         ? raw.summary.trim()

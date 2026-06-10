@@ -1,18 +1,18 @@
-"use client";
+import { PreMortemGenerator } from "@/components/premortem-generator";
+import { PreMortemAd } from "@/components/premortem-ad";
+import { getUser } from "@/lib/supabase/server";
+import { isSupabaseAuthConfigured } from "@/lib/supabase/client";
 
-import { PlaceholderFeature } from "@/components/placeholder-feature";
-import { PageShell } from "@/components/page-shell";
-import { useLanguage } from "@/components/language-provider";
-
-export default function PostMortemPage() {
-  const { locale } = useLanguage();
-  return (
-    <PageShell footer={false}>
-      <PlaceholderFeature
-        locale={locale}
-        titleKey="postMortem"
-        description="Auto-generates the apology post-mortem your brand would publish six months later — cross-referencing Essential Commodities Act 2025 and Digital Commerce Guidelines."
-      />
-    </PageShell>
-  );
+/**
+ * The Pre-Mortem Generator is a member surface. When auth is configured and the
+ * visitor is logged out, show the advertisement / sign-in wall instead of the
+ * live generator. With no auth backend (local / demo builds) it stays open so
+ * the feature remains reachable.
+ */
+export default async function PostMortemPage() {
+  if (isSupabaseAuthConfigured()) {
+    const user = await getUser();
+    if (!user) return <PreMortemAd />;
+  }
+  return <PreMortemGenerator />;
 }

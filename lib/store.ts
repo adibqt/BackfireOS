@@ -34,6 +34,8 @@ import {
 } from "./branches/types";
 import type { BoardroomTranscript } from "./boardroom/types";
 import { dbGetDebate, dbListDebates, dbSaveDebate } from "./db/boardroom";
+import type { PreMortemReport } from "./premortem/types";
+import { dbListPreMortems, dbSavePreMortem } from "./db/premortem";
 
 declare global {
   var __backfireStore: {
@@ -43,6 +45,8 @@ declare global {
     brands: Map<string, Brand>;
     // Every convened debate is retained (one entry per iteration), keyed by run.
     debates: Map<string, BoardroomTranscript[]>;
+    // Every generated pre-mortem is retained (one per iteration), keyed by run.
+    premortems: Map<string, PreMortemReport[]>;
   } | undefined;
 }
 
@@ -54,6 +58,7 @@ function getMemoryStore() {
       imageBase64: new Map(),
       brands: new Map(),
       debates: new Map(),
+      premortems: new Map(),
     };
   }
   return globalThis.__backfireStore;
@@ -474,6 +479,39 @@ export async function listDebates(
     return dbListDebates(supabase, runId, userId);
   }
   return getMemoryStore().debates.get(runId) ?? [];
+}
+
+/**
+ * Persists a generated pre-mortem as a new iteration (history is never
+ * overwritten). Falls back to the in-memory store (keyed by run id) when
+ * Supabase is not configured, so the feature works end-to-end in demo mode.
+ * Returns the saved report with its iteration number assigned.
+ */
+export async function savePreMortem(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  report: PreMortemReport
+): Promise<PreMortemReport> {
+  if (supabase && userId) {
+    return dbSavePreMortem(supabase, userId, report);
+  }
+  const list = getMemoryStore().premortems.get(report.runId) ?? [];
+  const persisted: PreMortemReport = { ...report, iteration: list.length + 1 };
+  // Newest first, mirroring the DB ordering.
+  getMemoryStore().premortems.set(report.runId, [persisted, ...list]);
+  return persisted;
+}
+
+/** Every saved pre-mortem iteration for a run, newest first. */
+export async function listPreMortems(
+  supabase: SupabaseClient | null,
+  userId: string | null,
+  runId: string
+): Promise<PreMortemReport[]> {
+  if (supabase && userId) {
+    return dbListPreMortems(supabase, runId, userId);
+  }
+  return getMemoryStore().premortems.get(runId) ?? [];
 }
 
 export function attachImageBase64(

@@ -153,6 +153,13 @@ export default function RunPageClient({ id }: { id: string }) {
                   Counterfactual Branching →
                 </ButtonLink>
               )}
+              <ButtonLink
+                href={`/post-mortem?runId=${id}`}
+                variant="secondary"
+                size="md"
+              >
+                {t(locale, "postMortem")} →
+              </ButtonLink>
             </div>
           </div>
 
