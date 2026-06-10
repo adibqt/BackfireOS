@@ -631,7 +631,7 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
                 {tone.label}
               </span>
               <Badge variant={tone.chip} dot>
-                {transcript.synthesis.confidence}% confidence
+                {transcript.synthesis.confidence}% confidence in verdict
               </Badge>
             </div>
           </div>
@@ -811,7 +811,7 @@ function IterationTimeline({
                   “{it.campaignSlogan}”
                 </p>
                 <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
-                  {it.synthesis.confidence}% confidence · {it.rounds} rounds
+                  {it.synthesis.confidence}% verdict confidence · {it.rounds} rounds
                   {it.converged ? " · converged" : ""}
                   {it.degraded ? " · degraded" : ""}
                 </p>
@@ -865,7 +865,10 @@ function BoardroomInner() {
   const drainingRef = useRef(false);
   const genRef = useRef(0);
 
-  const activeId = runIdParam || selectedRunId;
+  // runIdParam seeds the initial selection (selectedRunId is initialized from
+  // it above); once the user picks from the dropdown their choice must win,
+  // otherwise the URL param would pin the value and re-selecting does nothing.
+  const activeId = selectedRunId || runIdParam;
 
   // Reset the debate view when the selected campaign changes. This is the
   // React-endorsed "adjust state during render" pattern — synchronous setState

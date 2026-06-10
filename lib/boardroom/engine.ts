@@ -12,8 +12,9 @@
  * Provider routing (degrades gracefully, never hard-fails the stream):
  *   Groq (streaming, preferred) → Gemini (streaming) → scripted mock.
  */
-import type { AgentVerdict } from "@/lib/agents/types";
+import type { AgentVerdict, CulturalStressMap } from "@/lib/agents/types";
 import type { PersistedAi } from "@/lib/branches/types";
+import { getMarket } from "@/lib/markets/catalog";
 import {
   COMPOUND_MODEL,
   SCOUT_MODEL,
@@ -112,6 +113,29 @@ export function buildBranchRedTeamSummary(ai: PersistedAi): string {
 /** Worst-case severity from a branch's own verdict — feeds the mock synthesis. */
 export function branchWorstSeverity(ai: PersistedAi): number {
   return ai.topCritic?.severity ?? ai.scores?.backfireScore ?? 0;
+}
+
+/**
+ * Distils the cultural-stress map into a few grounding lines so the room can
+ * argue how the slogan actually lands per market (Dhaka vs. Sylhet vs. rural)
+ * instead of reacting to one global severity number. Sorted hardest-hit first,
+ * capped so the prompt stays compact. Returns "" when no map is available.
+ */
+export function buildMarketSummary(
+  stressMap: CulturalStressMap | undefined,
+  limit = 4
+): string {
+  if (!stressMap?.markets?.length) return "";
+  return [...stressMap.markets]
+    .sort((a, b) => b.severity - a.severity)
+    .slice(0, limit)
+    .map((m) => {
+      const label = getMarket(m.marketId)?.label ?? m.marketId;
+      const trigger = m.triggers[0]?.text?.trim();
+      const triggerNote = trigger ? ` — flagged line: "${trigger}"` : "";
+      return `- ${label} (stress ${m.severity}/100): ${m.summary.trim()}${triggerNote}`;
+    })
+    .join("\n");
 }
 
 /* ──────────────────────────────────────────────────────────────────
@@ -310,7 +334,9 @@ const DECISION_RANK: Record<DebateDecision, number> = {
  * override its decision. But the further that verdict drifts from what the
  * numbers imply, the less certain we let it claim to be. This stops a clear-cut,
  * low-backfire campaign from being stamped with a falsely shaky number, and a
- * contrarian verdict from being over-sold.
+ * contrarian verdict from being over-sold. The caps stay deliberately loose: the
+ * chair is now instructed to override an unsubstantiated score on the slogan's
+ * merits, and a well-reasoned override should not read as a coin flip.
  */
 function boundConfidence(
   decision: DebateDecision,
@@ -323,10 +349,11 @@ function boundConfidence(
   );
   // Agreement with the score: a clear-cut call should not read as a coin flip.
   if (distance === 0) return Math.max(confidence, 65);
-  // One step off (e.g. score says "revise", room says "ship"): cap the certainty.
-  if (distance === 1) return Math.min(confidence, 72);
-  // Direct contradiction (greenlight vs. kill): the room is overriding the data — cap hard.
-  return Math.min(confidence, 50);
+  // One step off (e.g. score says "revise", room says "ship"): trim the certainty.
+  if (distance === 1) return Math.min(confidence, 78);
+  // Direct contradiction (greenlight vs. kill): a deliberate override of the data.
+  // Still cap it — an override carries more doubt — but don't force a coin flip.
+  return Math.min(confidence, 62);
 }
 
 function buildSynthesisPrompt(ctx: DebateContext, worstSeverity: number): string {
@@ -337,7 +364,9 @@ ${renderTranscript(ctx)}
 
 You are the neutral chair of this boardroom. Read the debate and decide whether the campaign should launch. Weigh the Activist's harm/regulatory concerns and the Journalist's exposure risk heavily — a brand crisis costs more than a delayed launch.
 
-The harshest red-team severity on record for this campaign is ${worstSeverity}/100 (0 = harmless, 100 = certain crisis). Let it steer your decision: a low score should lean "greenlight" unless the debate surfaced something the score missed; a high score should lean "revise" or "kill" unless the room genuinely defused it.
+Judge the ACTUAL slogan above, on its own words: what it claims, the audience it targets, and how it reads in ${ctx.region || "Bangladesh"} across the markets listed. Decide from the substance of the debate, not from a number.
+
+The harshest red-team severity on record is ${worstSeverity}/100 (0 = harmless, 100 = certain crisis). Treat this as ONE critic's claim to be tested, not a verdict to obey. Ask: did the debate name a concrete, slogan-specific risk that justifies that score? If yes, let it pull you toward "revise" or "kill". If the score is high but no one could point to an actual problem in THIS slogan for THIS audience — e.g. a warm, generic, inoffensive message — then greenlight and say plainly that the severity was not substantiated. Never kill a slogan you cannot fault in concrete terms.
 
 Return ONLY a JSON object:
 {
@@ -419,27 +448,34 @@ async function synthesize(
 /** Heuristic decision derived from the worst red-team severity. */
 function mockSynthesis(worstSeverity: number): DebateSynthesis {
   let decision: DebateDecision;
+  let confidence: number;
   let summary: string;
   const conditions: string[] = [];
 
   if (worstSeverity >= 75) {
     decision = "kill";
+    // The further past the kill line, the surer the call.
+    confidence = Math.min(92, 78 + Math.round((worstSeverity - 75) / 25 * 14));
     summary =
       "The room could not resolve a serious, named risk in the campaign. The Activist's and Journalist's objections outweighed the commercial upside.";
     conditions.push("Reframe the core claim — the current angle is not salvageable by tweaks.");
   } else if (worstSeverity >= 45) {
     decision = "revise";
+    // Mid-band: a genuine judgement call, so the heuristic stays modest.
+    confidence = 58;
     summary =
       "The campaign has a workable core but carries real risks the room wants addressed before launch.";
     conditions.push("Tighten the slogan so it makes no claim the brand cannot back up.");
     conditions.push("Add a compliance review for any price/scarcity or sensitivity language.");
   } else {
     decision = "greenlight";
+    // The lower the severity, the cleaner the greenlight.
+    confidence = Math.min(90, 70 + Math.round((45 - worstSeverity) / 45 * 20));
     summary =
       "No nameable crisis-level risk surfaced. The room is comfortable launching, with normal monitoring.";
   }
 
-  return { decision, confidence: 55, summary, conditions, source: "mock" };
+  return { decision, confidence, summary, conditions, source: "mock" };
 }
 
 /* ──────────────────────────────────────────────────────────────────

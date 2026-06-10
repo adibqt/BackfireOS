@@ -119,10 +119,22 @@ export interface BoardroomIterationSummary {
 export interface DebateContext {
   slogan: string;
   brandValues: string;
+  /** Brief copy — carries the target audience, channels, and launch context. */
   brief: string;
   imageDescription: string;
   /** Brand name for the Brand Manager / Purist to defend, if any. */
   brandName: string;
+  /**
+   * Primary market the campaign is launching into (e.g. "Bangladesh"). Lets the
+   * room reason about regional fit rather than judging the slogan in a vacuum.
+   */
+  region: string;
+  /**
+   * Per-market cultural-stress summary distilled from the simulation, so the room
+   * argues how the slogan actually lands across Dhaka/Sylhet/Chittagong/rural —
+   * not just against a single global severity number. Empty when unavailable.
+   */
+  marketSummary: string;
   /** Compact summary of the red-team verdicts, used to ground the arguments. */
   redTeamSummary: string;
   messages: DebateMessage[];

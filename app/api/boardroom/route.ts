@@ -6,6 +6,7 @@ import { toIterationSummary } from "@/lib/db/boardroom";
 import {
   branchWorstSeverity,
   buildBranchRedTeamSummary,
+  buildMarketSummary,
   buildRedTeamSummary,
   maxSeverity,
   runDebate,
@@ -134,12 +135,18 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Per-market cultural-stress grounding so the room argues regional fit
+  // (Dhaka vs. Sylhet vs. rural), not just the single worst severity number.
+  const marketSummary = buildMarketSummary(run.culturalStressMap);
+
   const debateContext: DebateContext = {
     slogan: debatedSlogan,
     brandValues: run.campaign.brandValues ?? "",
     brief: run.campaign.brief ?? "",
     imageDescription: run.campaign.imageDescription ?? "",
     brandName: brand?.name ?? "",
+    region: "Bangladesh",
+    marketSummary,
     redTeamSummary,
     messages: [],
   };

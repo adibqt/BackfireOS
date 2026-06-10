@@ -104,13 +104,19 @@ export function modelLabel(model: DebateModel): string {
 export function buildGroundingBlock(ctx: DebateContext): string {
   return `CAMPAIGN UNDER DEBATE
 Brand: ${ctx.brandName || "(unspecified)"}
-Slogan: ${ctx.slogan}
+Slogan: "${ctx.slogan}"
 Brand values: ${ctx.brandValues || "(not specified)"}
-Brief: ${ctx.brief || "(not specified)"}
+Brief / target audience & context: ${ctx.brief || "(not specified)"}
 Visual: ${ctx.imageDescription || "(no visual provided)"}
+Primary market / region: ${ctx.region || "Bangladesh"}
+
+HOW THE SLOGAN LANDS BY MARKET (from the simulation — argue regional fit, not a single number):
+${ctx.marketSummary || "(no per-market analysis available)"}
 
 RED-TEAM FINDINGS (already gathered — use them as ammunition or rebut them):
-${ctx.redTeamSummary || "(no prior red-team analysis available)"}`;
+${ctx.redTeamSummary || "(no prior red-team analysis available)"}
+
+Read the actual slogan above and judge IT — its words, the audience it targets, and how it reads in ${ctx.region || "Bangladesh"}. Do not assume the red-team severity is correct; a number is only as good as the specific risk behind it.`;
 }
 
 /**
