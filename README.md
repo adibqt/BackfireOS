@@ -13,6 +13,8 @@ Backfire OS is a pre-launch failure-prediction layer for brand campaigns. Where 
 
 Each campaign is fanned out to six adversarial AI personas in parallel. Verdicts stream back over Server-Sent Events, are aggregated into six composite risk metrics, and are rendered as a "Backfire Dashboard" with mutated parody memes, a cultural stress heatmap, counterfactual branches, and a polarization graph.
 
+On top of the verdict engine sits a **pre-launch war room**: a live **Boardroom Mode** where four synthetic personas debate the campaign turn-by-turn (a hybrid Groq architecture, grounded in the per-market stress map) and end on a greenlight / revise / kill call, and a **Regulatory Pre-Mortem Generator** that writes the forward-dated incident report — headline, blast radius, and public apology — the brand would be forced to publish after the misfire.
+
 ### Target users
 - **Brand managers & CMOs** at Bangladeshi consumer brands (FMCG, F-commerce, telco, fintech)
 - **Agency creative directors** running pre-launch reviews on client work
@@ -54,8 +56,11 @@ Legend: ✅ live (in `main`) · 🟡 in progress · ⏳ planned · 🧪 experime
 | Insights | Polarization graph | ✅ | `components/polarization-graph.tsx` |
 | Insights | Counterfactual Branching ("Git for campaigns") — AI war-room scoring + persisted variant tree | ✅ | `components/counterfactual-branches.tsx`, `app/api/branch-score`, `app/api/branches`, `supabase/migrate-branches-tree.sql` |
 | Insights | Run history with selection | ✅ | `app/history` |
-| Workflow | Boardroom Mode (multi-agent live debate) | 🟡 | `app/boardroom` scaffold |
-| Workflow | Regulatory Pre-Mortem Generator | 🟡 | `app/post-mortem` scaffold |
+| Workflow | Boardroom Mode (multi-agent live debate) | ✅ | `app/boardroom`, `lib/boardroom/*`, `app/api/boardroom`, `supabase/migrate-boardroom.sql` |
+| Workflow | Hybrid Groq debate engine (scout + compound) | ✅ | `lib/groq.ts`, `lib/boardroom/engine.ts` |
+| Workflow | Per-market region grounding (Boardroom) | ✅ | Dhaka/Sylhet/Chittagong/rural stress summary — `lib/boardroom/engine.ts` |
+| Workflow | Regulatory Pre-Mortem Generator | ✅ | `app/post-mortem`, `lib/premortem/*`, `app/api/premortem`, `supabase/migrate-premortem.sql` |
+| Workflow | Failure-class strategy engine (5 classes) | ✅ | `lib/premortem/strategies.ts` |
 | Data | Firecrawl live-news headline ingestion | ⏳ | Roadmap §9 |
 | AI | LoResLM fine-tune on full BnSentMix | ⏳ | Roadmap §9 |
 | AI | GraphRAG over brand × campaign × backlash events | ⏳ | Roadmap §9 |
@@ -75,19 +80,25 @@ flowchart TD
     subgraph API_Layer["API Layer (Node runtime)"]
         C[POST /api/campaigns]
         S[POST /api/simulate<br/>SSE stream]
+        BR[GET/POST /api/boardroom<br/>SSE token stream]
+        PM[GET/POST /api/premortem<br/>SSE token stream]
         M[POST /api/memes]
         B[GET/POST /api/brands]
         A[/api/auth/signout/]
     end
 
-    API --> C & S & M & B & A
+    API --> C & S & BR & PM & M & B & A
 
     C --> ORCH
     S --> ORCH
     M --> MEME
+    BR --> BOARD
+    PM --> PREM
 
     subgraph Services["Service Layer (lib/)"]
         ORCH[Orchestrator<br/>parallel agent fan-out]
+        BOARD[Boardroom engine<br/>framework-free state machine]
+        PREM[Pre-Mortem engine<br/>strategy lookup map]
         RAG[Banglish RAG<br/>lib/rag.ts]
         VIS[Vision Parser<br/>lib/gemini.ts]
         MEME[Meme Mutator<br/>lib/memes.ts]
@@ -113,6 +124,18 @@ flowchart TD
 
     A1 & A2 & A3 & A4 & A5 & A6 --> LLM[Gemini 3.5 Flash<br/>structured JSON verdicts]
 
+    subgraph Boardroom["Boardroom (4 personas · hybrid)"]
+        BPM[Brand Manager · scout]
+        BAC[Activist · compound]
+        BCJ[Journalist · scout]
+        BBP[Brand Purist · scout]
+    end
+
+    BOARD --> BPM & BAC & BCJ & BBP
+    BPM & BAC & BCJ & BBP --> GROQ[Groq<br/>llama-4-scout + groq/compound]
+    BOARD -.fallback.-> LLM
+    PREM --> LLM
+
     MEME --> LLM
     MEME --> IMG[Pollinations / Flux Schnell<br/>image generation]
 
@@ -120,6 +143,8 @@ flowchart TD
     SCORE --> DB
     STRESS --> DB
     MEME --> DB
+    BOARD --> DB
+    PREM --> DB
 
     subgraph DB_Layer["Persistence"]
         DB[(Supabase Postgres + pgvector<br/>RLS per user)]
@@ -170,6 +195,11 @@ flowchart LR
         O6[Counterfactual branches]
     end
 
+    subgraph WARROOM[Pre-Launch War Room]
+        W1[Boardroom debate<br/>4 personas · per-market grounding<br/>greenlight / revise / kill]
+        W2[Pre-Mortem report<br/>forward-dated incident + apology]
+    end
+
     subgraph FEEDBACK[Feedback Loop]
         F1[User edits slogan]
         F2[Fork as counterfactual branch]
@@ -184,6 +214,7 @@ flowchart LR
     AI4 --> O3
     AI5 --> O4
     AI3 --> O5 & O6
+    O2 --> W1 & W2
     O2 --> F1 --> INPUT
     O6 --> F2 --> INPUT
     P1 --> F3
@@ -208,7 +239,7 @@ flowchart LR
 
 ### Database
 - **Primary:** Supabase Postgres + `pgvector` (768-dim embeddings, IVFFlat index)
-- **Schema:** `supabase/schema.sql` (+ migrations: `migrate-auth.sql`, `migrate-brands.sql`, `migrate-cultural-stress-map.sql`, `migrate-768.sql`, `migrate-delete-runs.sql`, `migrate-branches-tree.sql`, `migrate-branches-campaign.sql`, `migrate-branch-events.sql`)
+- **Schema:** `supabase/schema.sql` (+ migrations: `migrate-auth.sql`, `migrate-brands.sql`, `migrate-cultural-stress-map.sql`, `migrate-768.sql`, `migrate-delete-runs.sql`, `migrate-branches-tree.sql`, `migrate-branches-campaign.sql`, `migrate-branch-events.sql`, `migrate-boardroom.sql`, `migrate-premortem.sql`)
 - **RLS:** per-user row-level security (`supabase/migrate-auth.sql`)
 - **Storage:** Supabase Storage bucket for campaign images
 - **Branch tree:** `campaign_branches` adjacency list (`parent_id` self-ref, `ON DELETE CASCADE` for subtree prune), scoped per campaign via `campaign_id` — a real campaign's tree root is seeded from its copy + actual verdict; `campaign_id NULL` is the standalone demo tree — `lib/db/branches.ts`, `lib/branches/store.ts`
@@ -217,10 +248,16 @@ flowchart LR
 
 ### AI Stack
 - **LLM:** Google Gemini 3.5 Flash via `@google/genai` and `@google/generative-ai`
+- **Debate LLM:** Groq OpenAI-compatible chat completions — `meta-llama/llama-4-scout-17b-16e-instruct` (fast default) + `groq/compound` (agentic, reserved for the Activist) via `lib/groq.ts`, token-streamed
 - **Vision:** Gemini 3.5 Flash (multimodal — same model)
 - **Embeddings:** Gemini `text-embedding-004` (768 dim)
 - **Image generation:** Pollinations.ai (Flux) primary, Gemini image fallback
 - **RAG corpus:** BnSentMix (~20K Banglish samples) — see `scripts/download-bnsentmix.ts`, `scripts/seed-bnsentmix.ts`
+
+### Agent Engines (framework-free)
+Both war-room engines are deliberately hand-rolled state machines — **no LangChain / agent SDK**. Agent frameworks make hidden, redundant model calls that would blow free-tier request budgets; instead each engine makes exactly the calls it needs and streams every token over SSE.
+- **Boardroom debate** (`lib/boardroom/engine.ts`) — fixed speaking order across hard-capped rounds (`BOARDROOM_MAX_ROUNDS`, default 2) with an early-convergence halt; **hybrid model assignment** (Activist → `groq/compound`, others → `scout`); one model call per turn. Graceful degradation: Groq turn → Gemini token-stream fallback → scripted mock.
+- **Pre-Mortem generator** (`lib/premortem/engine.ts`) — classifies the run's worst failure into one of five classes and selects a prompt-framing function from a `Record<FailureType, fn>` strategy map (`lib/premortem/strategies.ts`); Gemini stream → scripted mock fallback.
 
 ### Infrastructure
 - **Hosting:** Vercel (preview + prod)
@@ -265,6 +302,20 @@ Run the 6-agent simulation. Streams Server-Sent Events.
 - `complete` — `{ verdicts, imageDescription, culturalStressMap }`
 - `error` — `{ message }`
 
+#### `GET /api/boardroom?runId=<uuid>` · `POST /api/boardroom`
+List saved debate iterations for a run, or convene a new **live multi-agent debate**. Streams Server-Sent Events token-by-token so the transcript types out.
+
+**Body:** `{ runId, branchId?, branchLabel?, slogan? }` (a counterfactual variant can be debated instead of the original slogan)
+**Stream events:** `debate_start` → (`speaker_start` → `token`× → `speaker_end`)× → `round_end`× → `synthesis` → `complete` · `error`
+**Persisted:** one append-only row per iteration in `boardroom_debates`; synthesis is a `{ greenlight | revise | kill }` decision with confidence + conditions.
+
+#### `GET /api/premortem?runId=<uuid>` · `POST /api/premortem`
+List saved reports for a run, or generate a new **forward-dated pre-mortem** (the incident report the brand would publish ~6 months after the misfire). SSE token stream.
+
+**Body:** `{ runId, branchId?, branchLabel?, slogan? }`
+**Stream events:** `premortem_start` → `token`× → `complete` · `error`
+**Persisted:** one append-only row per iteration in `premortem_reports`; classified into one of five failure classes (regulatory · cultural · reputational · competitive · brand).
+
 #### `POST /api/memes`
 Generate 4 parody memes + Memeability scores. Body: `{ runId }`.
 
@@ -280,7 +331,8 @@ Clear Supabase session cookies.
 ### APIs consumed (outbound)
 | Service | Used for | File |
 |---|---|---|
-| Google Gemini `gemini-3.5-flash` | Agent verdicts, vision, meme captions | `lib/gemini.ts` |
+| Google Gemini `gemini-3.5-flash` | Agent verdicts, vision, meme captions, war-room fallback | `lib/gemini.ts` |
+| Groq `llama-4-scout` + `groq/compound` | Boardroom debate turns (token-streamed) | `lib/groq.ts` |
 | Google Gemini `text-embedding-004` | RAG query + seed embeddings | `lib/rag.ts`, `scripts/seed-bnsentmix.ts` |
 | Pollinations.ai (Flux) | Meme image generation | `lib/pollinations.ts` |
 | Gemini image generation | Meme image fallback | `lib/meme-fallback.ts` |
@@ -312,6 +364,8 @@ Clear Supabase session cookies.
   - `bnsentmix_samples` — `vector(768)` embeddings
   - `brands` + brand history (`migrate-brands.sql`)
   - `cultural_stress_maps` (`migrate-cultural-stress-map.sql`)
+  - `boardroom_debates` — full debate transcript + synthesis as JSON, append-only per run iteration, indexed `(run_id, created_at desc)` (`migrate-boardroom.sql`)
+  - `premortem_reports` — generated report (headline + dek + apology + sections) as JSON, append-only per run iteration (`migrate-premortem.sql`)
 - **Object storage:** Supabase Storage bucket `campaign-images` (RLS-scoped)
 - **Fallback:** when Supabase keys are unset, `lib/store.ts` keeps an in-memory map (per Node process, lost on reload)
 
@@ -333,8 +387,19 @@ Clear Supabase session cookies.
 | Vision (campaign image → description) | `gemini-3.5-flash` (multimodal) | Google AI |
 | Embeddings | `text-embedding-004` (768 dim) | Google AI |
 | Meme captions | `gemini-3.5-flash` | Google AI |
+| Boardroom debate (3 personas) | `llama-4-scout-17b` | Groq |
+| Boardroom Activist (agentic) | `groq/compound` | Groq |
+| Boardroom fallback | `gemini-3.5-flash` stream → scripted mock | Google AI |
+| Pre-Mortem report | `gemini-3.5-flash` → scripted mock | Google AI |
 | Meme images (primary) | Flux Schnell via Pollinations | Pollinations.ai |
 | Meme images (fallback) | Gemini image generation | Google AI |
+
+### War-room engines (Boardroom + Pre-Mortem)
+- **Hybrid debate:** only the adversarial **Activist** runs on the agentic `groq/compound` model — it's the showcase adversary. The other three personas (Brand Manager, Journalist, Brand Purist) stay on the fast `llama-4-scout` model so a full debate stays well inside Groq's free-tier budget (30 RPM / 250 req-day). One model call per turn, streamed token-by-token.
+- **Per-market grounding:** each debate is pinned to the run's own red-team findings **plus a per-market cultural-stress summary** (Dhaka / Sylhet / Chittagong / rural), so personas argue regional fit instead of a single global severity number.
+- **Convergence + round cap:** a heuristic halts the debate early when the room converges; rounds are hard-capped (`BOARDROOM_MAX_ROUNDS`, default 2) as the primary 429 protection.
+- **Failure-class strategy:** the Pre-Mortem maps the harshest critic to one of five failure classes (regulatory · cultural · reputational · competitive · brand) and pulls its prompt framing from a strategy lookup map, so a regulatory blow-up reads nothing like a cultural one.
+- **Graceful degradation:** Groq turn → Gemini token-stream fallback → scripted mock. Synthesis and the full report fall back the same way, so the war room runs end-to-end even with zero API keys (demo mode).
 
 ### RAG
 - **Corpus:** BnSentMix (~20K rows in `bnsentmix_samples`); fallback of 50 hand-curated rows in `lib/bnsentmix-data.ts`
@@ -361,10 +426,12 @@ Clear Supabase session cookies.
 
 ## 9. Product Roadmap
 
-### Short term (next 4 weeks — by 2026-06-24)
-- Finish **Boardroom Mode** — multi-agent live debate with cross-examination turns (`app/boardroom`)
-- Finish **Regulatory Pre-Mortem Generator** — structured legal/compliance report (`app/post-mortem`)
-- Replace placeholder pages on `/heatmap`, `/branches`, `/post-mortem`, `/boardroom` with full UIs
+### Short term — now shipped ✅
+- **Boardroom Mode** — multi-agent live debate on a framework-free state machine with the hybrid Groq architecture (`llama-4-scout` + `groq/compound`), per-market grounding, convergence + round caps (`app/boardroom`, `lib/boardroom/*`)
+- **Regulatory Pre-Mortem Generator** — forward-dated incident report driven by a five-class failure strategy engine (`app/post-mortem`, `lib/premortem/*`)
+- Full UIs shipped on `/heatmap`, `/branches`, `/post-mortem`, `/boardroom`
+
+### Short term (next — by 2026-06-24)
 - Add per-run shareable public URLs (with brand owner opt-in)
 - Improve meme image quality (style controls, brand colors)
 
@@ -546,8 +613,8 @@ The header nav and the home *Modes* grid link to deeper surfaces. Once you're on
 
 - **Cultural Heat Map** (`/heatmap`) — ✅ live. Full city-by-city severity overlay.
 - **Counterfactual Branching** (`/branches`) — ✅ live. "Git for campaigns" — fork the slogan / target / channel and watch the scores shift, then re-run a variant.
-- **Boardroom Mode** (`/boardroom`) — 🟡 preview. Watch the personas debate the campaign live.
-- **Regulatory Pre-Mortem** (`/post-mortem`) — 🟡 preview. Auto-drafts the apology/compliance note the brand would otherwise have to publish later.
+- **Boardroom Mode** (`/boardroom`) — ✅ live. Four personas (Brand Manager, Activist, Journalist, Brand Purist) debate the campaign live, streamed turn by turn and grounded in the per-market stress map, ending in a structured **greenlight / revise / kill** call with conditions. Every run is saved as a browsable iteration.
+- **Regulatory Pre-Mortem** (`/post-mortem`) — ✅ live. Takes the harshest red-team verdict and writes the forward-dated incident report — headline, blowback timeline, blast radius, regulatory exposure, and the apology the brand would be forced to publish.
 
 ### 13.8 Step 6 — Review history
 
@@ -580,7 +647,9 @@ See [.env.example](./.env.example).
 
 | Key | Required? | Purpose |
 |---|---|---|
-| `GEMINI_API_KEY` | Recommended | Agents, meme captions, vision, RAG embeddings |
+| `GEMINI_API_KEY` | Recommended | Agents, meme captions, vision, RAG embeddings, war-room fallback |
+| `GROQ_API_KEY` | Recommended | Boardroom debate turns (`llama-4-scout` + `groq/compound`); falls back to Gemini, then mock, if absent |
+| `BOARDROOM_MAX_ROUNDS` | Optional | Hard cap on debate rounds (default `2`, max `4`) — primary 429 protection |
 | `POLLINATIONS_API_KEY` | Recommended | Meme images via Pollinations (Flux) |
 | `GEMINI_IMAGE_API_KEY` | Optional | Fallback meme images if Pollinations fails |
 | `NEXT_PUBLIC_SUPABASE_URL` | For auth + persistence | Supabase project URL |
@@ -596,7 +665,7 @@ When Supabase auth keys are set, sign-in is required and all simulations/memes a
 ```powershell
 # 1. Run supabase/schema.sql in Supabase SQL Editor
 # 2. Run supabase/migrate-auth.sql for RLS + storage buckets
-# 3. Run supabase/migrate-brands.sql, migrate-cultural-stress-map.sql, migrate-branches-tree.sql, migrate-branches-campaign.sql, migrate-branch-events.sql
+# 3. Run supabase/migrate-brands.sql, migrate-cultural-stress-map.sql, migrate-branches-tree.sql, migrate-branches-campaign.sql, migrate-branch-events.sql, migrate-boardroom.sql, migrate-premortem.sql
 # 4. If History shows "permission denied", run supabase/fix-grants.sql
 # 5. Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local
 # 6. (Optional) SUPABASE_SERVICE_ROLE_KEY for RAG seeding
