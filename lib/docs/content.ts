@@ -62,8 +62,11 @@ export const FEATURE_MATRIX: FeatureRow[] = [
   { category: "Insights", feature: "Polarization graph", status: "live", notes: "components/polarization-graph.tsx" },
   { category: "Insights", feature: "Counterfactual branches", status: "live", notes: "components/counterfactual-branches.tsx" },
   { category: "Docs", feature: "Live /docs deck + access control", status: "live", notes: "app/docs" },
-  { category: "Workflow", feature: "Boardroom Mode (multi-agent debate)", status: "live", notes: "app/boardroom · Groq hybrid (scout + compound)" },
-  { category: "Workflow", feature: "Regulatory Pre-Mortem Generator", status: "in_progress", notes: "app/post-mortem" },
+  { category: "Workflow", feature: "Boardroom Mode (multi-agent live debate)", status: "live", notes: "app/boardroom · framework-free state machine" },
+  { category: "Workflow", feature: "Hybrid Groq debate engine (scout + compound)", status: "live", notes: "lib/groq.ts · token-streamed turns" },
+  { category: "Workflow", feature: "Per-market region grounding (Boardroom)", status: "live", notes: "Dhaka/Sylhet/Chittagong/rural stress summary" },
+  { category: "Workflow", feature: "Regulatory Pre-Mortem Generator", status: "live", notes: "app/post-mortem · lib/premortem" },
+  { category: "Workflow", feature: "Failure-class strategy engine (5 classes)", status: "live", notes: "lib/premortem/strategies.ts" },
   { category: "Data", feature: "Firecrawl live-news ingestion", status: "planned", notes: "Roadmap — mid term" },
   { category: "AI", feature: "GraphRAG over brand × backlash events", status: "planned", notes: "Roadmap — mid term" },
   { category: "AI", feature: "LoResLM fine-tune on full BnSentMix", status: "planned", notes: "Roadmap — long term" },
@@ -78,17 +81,22 @@ export const ARCHITECTURE_COLUMNS: DiagramColumn[] = [
   { title: "API", nodes: [
     { id: "campaigns", label: "POST /api/campaigns" },
     { id: "simulate", label: "POST /api/simulate", sub: "SSE stream" },
+    { id: "boardroom", label: "POST /api/boardroom", sub: "SSE · token stream" },
+    { id: "premortem", label: "POST /api/premortem", sub: "SSE · token stream" },
     { id: "memes", label: "POST /api/memes" },
     { id: "brands", label: "GET/POST /api/brands" },
   ] },
   { title: "Services (lib/)", nodes: [
     { id: "orch", label: "Orchestrator", sub: "parallel fan-out" },
+    { id: "debate", label: "Boardroom engine", sub: "framework-free state machine" },
+    { id: "premortem", label: "Pre-Mortem engine", sub: "strategy lookup map" },
     { id: "rag", label: "Banglish RAG" },
     { id: "vision", label: "Vision Parser" },
     { id: "score", label: "Score Aggregator" },
   ] },
   { title: "AI + Data", nodes: [
-    { id: "llm", label: "Gemini 3.5 Flash", sub: "structured JSON" },
+    { id: "llm", label: "Gemini 3.5 Flash", sub: "structured JSON + vision" },
+    { id: "groq", label: "Groq scout + compound", sub: "streamed debate turns" },
     { id: "img", label: "Pollinations / Flux", sub: "meme images" },
     { id: "db", label: "Supabase + pgvector", sub: "RLS per user" },
   ] },
@@ -115,6 +123,10 @@ export const DATAFLOW_STAGES: DiagramColumn[] = [
     { id: "dash", label: "Backfire Dashboard" },
     { id: "extras", label: "Memes · Heatmap · Graph" },
   ] },
+  { title: "War room", nodes: [
+    { id: "board", label: "Boardroom debate", sub: "4 personas · per-market grounding" },
+    { id: "pm", label: "Pre-Mortem report", sub: "forward-dated incident" },
+  ] },
   { title: "Feedback", nodes: [
     { id: "edit", label: "Edit slogan / fork branch" },
     { id: "history", label: "Brand history grows" },
@@ -125,17 +137,25 @@ export const MERMAID_ARCHITECTURE = `flowchart TD
   U[User] --> UI[Next.js 16 App Router]
   UI -->|fetch / SSE| API[Route Handlers]
   API --> ORCH[Orchestrator]
+  API --> BOARD[Boardroom engine]
+  API --> PM[Pre-Mortem engine]
   ORCH --> RAG[Banglish RAG] & VIS[Vision] & SCORE[Score Aggregator]
   ORCH --> AGENTS[6 Red-Team Personas]
   AGENTS --> LLM[Gemini 3.5 Flash]
+  BOARD --> GROQ[Groq scout + compound]
+  BOARD -.fallback.-> LLM
+  PM --> LLM
   SCORE --> DB[(Supabase + pgvector)]
-  RAG --> DB`;
+  RAG --> DB
+  BOARD --> DB
+  PM --> DB`;
 
 export const MERMAID_DATAFLOW = `flowchart LR
   IN[Slogan + visual + brand] --> PROC[Validate · Vision · Embed]
   PROC --> AI[6 agents -> Gemini -> Score]
   AI --> OUT[SSE -> Dashboard -> Memes/Heatmap]
-  OUT --> FB[Edit / fork -> brand history]
+  OUT --> WAR[Boardroom debate + Pre-Mortem]
+  WAR --> FB[Edit / fork -> brand history]
   FB --> IN`;
 
 // ── Sections ─────────────────────────────────────────────────────────────────
@@ -171,11 +191,11 @@ export const SECTIONS: DocSection[] = [
         { title: "Brand Purist", body: "Audits consistency against the brand's own prior public stance.", tag: "weight 1.2" },
       ] },
       { kind: "para", text: "Output: a Backfire Score, mutated parody memes, a cultural stress heatmap, a polarization graph, and counterfactual branches — in ~30 seconds." },
-      { kind: "callout", tone: "info", title: "Under active development", text: "Three additional surfaces are shipping by June 10, 2026 — expanding Backfire OS from a verdict engine into a full pre-launch war room." },
+      { kind: "callout", tone: "success", title: "The pre-launch war room is live", text: "Three surfaces now extend Backfire OS from a verdict engine into a full pre-launch war room — a live boardroom debate and a forward-dated pre-mortem on top of counterfactual branching." },
       { kind: "cards", items: [
-        { title: "Counterfactual Branching", body: "Git for campaigns — fork the slogan, tweak a value, and watch how the Backfire Score shifts in real time.", tag: "In Progress" },
-        { title: "Boardroom Mode", body: "Synthetic personas debate the campaign live; produces a structured greenlight / revise / kill call with dissenting views.", tag: "Live" },
-        { title: "Regulatory Pre-Mortem", body: "Auto-drafts the apology the brand would publish after a regulatory misfire — before it happens.", tag: "In Progress" },
+        { title: "Counterfactual Branching", body: "Git for campaigns — fork the slogan, tweak a value, and watch how the Backfire Score shifts in real time.", tag: "Live" },
+        { title: "Boardroom Mode", body: "Four synthetic personas debate the campaign live, token-streamed turn by turn, grounded in the per-market stress map; ends in a structured greenlight / revise / kill call with dissenting views.", tag: "Live" },
+        { title: "Regulatory Pre-Mortem", body: "Takes the harshest red-team verdict and writes the forward-dated incident report — the headline, blast radius, and apology the brand would be forced to publish months later.", tag: "Live" },
       ] },
     ],
   },
@@ -313,7 +333,7 @@ export const SECTIONS: DocSection[] = [
   {
     id: "architecture", label: "Architecture", group: "technical", eyebrow: "02 · Technical",
     title: "Architecture",
-    description: "UI → API → Services → AI/DB. Stateless route handlers scale horizontally on Vercel.",
+    description: "UI → API → Services → AI/DB. Stateless route handlers scale horizontally on Vercel; the red-team orchestrator and the two war-room engines (Boardroom, Pre-Mortem) sit side by side, each streaming over SSE.",
     blocks: [],
     special: "diagram-architecture",
   },
@@ -332,7 +352,8 @@ export const SECTIONS: DocSection[] = [
         { title: "Frontend", body: "Next.js 16.2 App Router · React 19.2 · Tailwind CSS 4 · server components + client islands · SSE streaming · custom Bangla/English i18n.", tag: "UI" },
         { title: "Backend", body: "Next.js Route Handlers (Node runtime, maxDuration 120s) · native ReadableStream / text-event-stream · Zod 4 validation · @supabase/ssr cookie auth.", tag: "API" },
         { title: "Database", body: "Supabase Postgres + pgvector (768-dim, IVFFlat) · per-user RLS · Supabase Storage for visuals · in-memory fallback in demo mode.", tag: "Data" },
-        { title: "AI", body: "Gemini 3.5 Flash (reasoning + vision + meme captions) · text-embedding-004 (768d) · Pollinations/Flux images · BnSentMix RAG corpus.", tag: "AI" },
+        { title: "AI", body: "Gemini 3.5 Flash (reasoning + vision + meme captions) · Groq llama-4-scout + groq/compound (streamed debate turns) · text-embedding-004 (768d) · Pollinations/Flux images · BnSentMix RAG corpus.", tag: "AI" },
+        { title: "Agents", body: "Framework-free, hand-rolled state machines — no LangChain/agent SDK. Boardroom debate = one model call per turn; Pre-Mortem = strategy-lookup prompt framing. Deliberate, to stay inside free-tier request budgets.", tag: "Engine" },
         { title: "Infrastructure", body: "Vercel hosting (preview + prod) · Supabase DB · Pollinations image CDN · pnpm · TypeScript 5 strict.", tag: "Ops" },
       ] },
     ],
@@ -346,13 +367,15 @@ export const SECTIONS: DocSection[] = [
         ["/api/campaigns", "POST", "Create a campaign + initial run"],
         ["/api/campaigns?runId=", "GET", "Fetch one run (verdicts, memes, stress map)"],
         ["/api/simulate", "POST", "Run 6-agent simulation — SSE stream"],
+        ["/api/boardroom", "GET / POST", "List saved debates / run a live multi-agent debate — SSE token stream"],
+        ["/api/premortem", "GET / POST", "List saved reports / generate a forward-dated pre-mortem — SSE token stream"],
         ["/api/memes", "POST", "Generate 4 parody memes + Memeability"],
         ["/api/brands", "GET / POST", "List / create brand entities"],
         ["/api/brands/[id]", "GET / PATCH / DELETE", "Inspect / update / delete a brand"],
         ["/api/docs/config", "GET / PUT", "Read config / admin-only update (visibility, schedule, team)"],
         ["/api/docs/live", "GET", "Live system stats for this page"],
       ] },
-      { kind: "callout", tone: "info", title: "SSE events", text: "/api/simulate streams: status · agent_start · agent_verdict ×6 · stress_map · complete · error." },
+      { kind: "callout", tone: "info", title: "SSE events", text: "/api/simulate: status · agent_start · agent_verdict ×6 · stress_map · complete · error.  /api/boardroom: debate_start · speaker_start · token · speaker_end · round_end · synthesis · complete · error.  /api/premortem: premortem_start · token · complete · error." },
     ],
   },
   {
@@ -363,6 +386,7 @@ export const SECTIONS: DocSection[] = [
         "Sources: BnSentMix (~20K labelled Banglish samples), cultural stress-map definitions, user campaign data, brand entities, embedded regulatory references.",
         "Ingestion: download-bnsentmix.ts pulls parquet from HF; seed-bnsentmix.ts embeds with text-embedding-004 and upserts into pgvector (resumable).",
         "Storage: campaigns, simulation_runs, agent_verdicts, memes, bnsentmix_samples (vector 768), brands, cultural_stress_maps, docs_config.",
+        "War-room tables: boardroom_debates and premortem_reports — both append-only (one row per iteration, history never overwritten), indexed (run_id, created_at desc) and read newest-first, so re-runs and counterfactual-branch variants accumulate side by side.",
         "Object storage: Supabase Storage buckets campaign-images & meme-images, RLS-scoped per user.",
       ] },
       { kind: "callout", tone: "success", title: "Privacy", text: "All tables RLS-protected; no PII collected; campaign content treated as user IP; demo mode never hits external services; AI outputs labelled synthetic." },
@@ -376,6 +400,10 @@ export const SECTIONS: DocSection[] = [
         ["Agent reasoning (×6)", "gemini-3.5-flash", "Google AI"],
         ["Vision (image → description)", "gemini-3.5-flash", "Google AI"],
         ["Embeddings", "text-embedding-004 (768d)", "Google AI"],
+        ["Boardroom debate (3 personas)", "llama-4-scout-17b", "Groq"],
+        ["Boardroom Activist (agentic)", "groq/compound", "Groq"],
+        ["Boardroom fallback", "gemini-3.5-flash stream → scripted mock", "Google AI"],
+        ["Pre-Mortem report", "gemini-3.5-flash → scripted mock", "Google AI"],
         ["Meme images (primary)", "Flux Schnell", "Pollinations.ai"],
         ["Meme images (fallback)", "Gemini image gen", "Google AI"],
       ] },
@@ -383,8 +411,30 @@ export const SECTIONS: DocSection[] = [
         "RAG: match_bnsentmix(query_embedding, 5) — cosine on IVFFlat; top-5 Banglish examples injected into every agent prompt.",
         "Personalization: the Brand Purist ingests a brand's canonical values + its 10 most-recent runs, so accuracy compounds with history.",
         "Weighted ensemble: Regulatory 1.4 · Journalist 1.3 · Meme/Purist 1.2 · Rival 1.1 · Outsider 1.0.",
+        "Hybrid debate: only the adversarial Activist runs on the agentic groq/compound model; the other three personas use the fast, quota-cheap scout model so a full debate stays inside the free-tier budget (30 RPM / 250 req-day).",
+        "Graceful degradation: each turn streams from Groq, falls back to a Gemini token stream if GROQ_API_KEY is absent, and finally to a scripted mock — so the live transcript always types out, even with zero keys.",
         "Explainability: every verdict is structured JSON with severity, reasoning, sample_attack and citation_ids back to corpus rows — no black box.",
       ] },
+    ],
+  },
+  {
+    id: "war-room", label: "War-Room Engines", group: "technical", eyebrow: "02 · Technical",
+    title: "War-room engines",
+    description: "Two framework-free engines turn a completed run into a live debate and a forward-dated obituary — the newest architectural layer on top of the red-team.",
+    blocks: [
+      { kind: "lead", text: "Both engines are deliberately hand-rolled state machines — no LangChain, no agent SDK. Agent frameworks make hidden, redundant model calls that would blow free-tier request budgets; instead each engine makes exactly the calls it needs and streams every token to the client over SSE." },
+      { kind: "cards", items: [
+        { title: "Boardroom Mode", body: "Four opposed personas (Brand Manager, Activist, Journalist, Brand Purist) argue the campaign in fixed speaking order across capped rounds, then a synthesis call returns a greenlight / revise / kill decision with conditions.", tag: "lib/boardroom" },
+        { title: "Pre-Mortem Generator", body: "Classifies the run's worst plausible failure, selects a per-class prompt-framing strategy, and writes the incident report the brand would publish ~6 months after the misfire.", tag: "lib/premortem" },
+      ] },
+      { kind: "steps", items: [
+        { title: "Hybrid Groq model assignment", body: "The Boardroom runs the adversarial Activist on the agentic groq/compound model and the other three personas on the fast llama-4-scout — one model call per turn, streamed token-by-token." },
+        { title: "Per-market grounding", body: "Each debate is pinned to the run's own red-team findings plus a per-market cultural-stress summary (Dhaka / Sylhet / Chittagong / rural), so personas argue regional fit instead of a single global severity number." },
+        { title: "Convergence + round cap", body: "A heuristic halts the debate early when the room converges; rounds are hard-capped (BOARDROOM_MAX_ROUNDS, default 2) as the primary 429 protection." },
+        { title: "Strategy-via-lookup framing", body: "Pre-Mortem maps the harshest critic to one of five failure classes (regulatory · cultural · reputational · competitive · brand) and pulls its framing from a Record<FailureType, fn> — no Strategy-class hierarchy." },
+        { title: "Append-only iterations", body: "Every debate and every report is saved as a new row keyed by run, so re-runs and counterfactual-branch variants accumulate into a browsable timeline rather than overwriting history." },
+      ] },
+      { kind: "callout", tone: "info", title: "Always degrades, never dies", text: "Groq turn → Gemini token-stream fallback → scripted mock. The synthesis and the full report fall back the same way, so the war room still runs end-to-end with zero API keys (demo mode)." },
     ],
   },
   {
@@ -392,7 +442,7 @@ export const SECTIONS: DocSection[] = [
     title: "Product roadmap",
     blocks: [
       { kind: "cards", items: [
-        { title: "Short term — by Jun 10, 2026", body: "Finish Counterfactual Branching, Boardroom Mode & Regulatory Pre-Mortem; per-run shareable URLs; better meme image quality.", tag: "Now" },
+        { title: "Short term — now shipped", body: "Counterfactual Branching, Boardroom Mode (hybrid Groq debate + per-market grounding) & Regulatory Pre-Mortem are all live. Next: per-run shareable URLs and better meme image quality.", tag: "Now" },
         { title: "Mid term — by Aug 2026", body: "Firecrawl live-news ingestion; GraphRAG over brand × backlash; CSV/Figma import; Slack/Teams alerts; multi-brand workspaces; expand map to IN/PK/ID/NG.", tag: "Next" },
         { title: "Long term — by 2027 Q2", body: "LoResLM on-prem fine-tune; agentic safer-slogan rewriter; API/SDK; audit-grade signed compliance reports; community persona marketplace.", tag: "Later" },
       ] },
@@ -413,6 +463,8 @@ export const SECTIONS: DocSection[] = [
         "SSE streaming so verdicts render as they land.",
         "pgvector IVFFlat (lists=100) keeps retrieval sub-50ms.",
         "Server components keep the JS bundle small; stateless handlers scale horizontally on Vercel.",
+        "War-room engines are framework-free: exactly one model call per debate turn and a hard round cap (default 2) plus an early-convergence halt, keeping a full debate inside Groq's free-tier budget (30 RPM / 250 req-day).",
+        "Token-streamed Boardroom & Pre-Mortem output renders as it generates, so a multi-round debate feels live instead of blocking on a long completion.",
         "Demo-mode short-circuit so judges never burn LLM quota.",
       ] },
     ],
@@ -456,6 +508,9 @@ export const SECTIONS: DocSection[] = [
     title: "Changelog",
     blocks: [
       { kind: "steps", items: [
+        { title: "v0.2 — Per-market grounding & spoken-turn style", body: "Boardroom debates pinned to a per-market cultural-stress summary (Dhaka/Sylhet/Chittagong/rural) and a region context; turns enforced as live spoken argument with sharper fallbacks." },
+        { title: "v0.2 — Regulatory Pre-Mortem Generator", body: "Forward-dated incident report (headline · timeline · blast radius · apology · exposure) driven by a five-class failure strategy engine; new /api/premortem SSE route + premortem_reports table." },
+        { title: "v0.2 — Boardroom Mode", body: "Live multi-agent debate on a framework-free state machine with the hybrid Groq architecture (llama-4-scout + groq/compound), convergence + round caps; new /api/boardroom SSE route + boardroom_debates table." },
         { title: "v0.1 — Brand assets, panel AI, retries & provenance", body: "Verdict provenance (ai/mock), retry logic, brand asset polish, panel prompt." },
         { title: "v0.1 — Counterfactual branches", body: "Git-style campaign forks with live score deltas + dedicated page." },
         { title: "v0.1 — Graph selection & run-aware header", body: "Polarization graph selection, run-aware navigation, optimized run loading." },
