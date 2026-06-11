@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { UploadForm } from "@/components/upload-form";
+import { ScoreDashboard } from "@/components/score-dashboard";
+import { ScoreRadar } from "@/components/score-radar";
+import { LogoBadge } from "@/components/logo";
 import { Badge, Kbd } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
+import type { RunScores } from "@/lib/agents/types";
 
 const AGENTS = [
   { id: "meme_engineer", name: "Dhaka Meme Engineer", initials: "ME", tone: "from-rose-500/30 to-amber-500/10" },
@@ -12,14 +16,23 @@ const AGENTS = [
   { id: "brand_purist", name: "Brand Purist", initials: "BP", tone: "from-sky-500/30 to-cyan-500/10" },
 ] as const;
 
-const METRICS = [
-  { label: "Backfire Score", v: 78 },
-  { label: "Resonance", v: 42 },
-  { label: "Backfire Risk", v: 88 },
-  { label: "Memeability", v: 71 },
-  { label: "Brand-Safety Drift", v: 35 },
-  { label: "Polarization", v: 64 },
-] as const;
+const PREVIEW_SCORES: RunScores = {
+  backfireScore: 78,
+  resonance: 42,
+  backfireRisk: 88,
+  memeability: 71,
+  brandSafetyDrift: 35,
+  polarizationCoefficient: 64,
+};
+
+const PREVIEW_LABELS = {
+  backfireScore: "Backfire Score",
+  resonance: "Resonance",
+  backfireRisk: "Backfire Risk",
+  memeability: "Memeability",
+  brandSafetyDrift: "Brand-Safety Drift",
+  polarization: "Polarization",
+};
 
 const MODES = [
   { href: "/heatmap", title: "Cultural Heat Map", desc: "City-by-city severity overlay across Bangladesh.", status: "live", icon: <><circle cx="12" cy="10" r="3" /><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.95 8 11.7z" /></> },
@@ -149,44 +162,38 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
 
       {/* ── Metrics preview ── */}
       <section className="mb-28 md:mb-36">
-        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.2fr]">
-          <div>
-            <p className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">
-              <span className="h-px w-7 bg-[var(--accent)]/60" /> Six metrics
-            </p>
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--fg)] md:text-4xl">
-              One dashboard.<br />Every angle of failure.
-            </h2>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[var(--fg-muted)]">
-              Backfire Score, Resonance, Backfire Risk, Memeability, Brand-Safety Drift, and Polarization — composite scores that translate adversarial output into board-room numbers.
-            </p>
-            <div className="mt-7">
-              <ButtonLink href="#simulate" variant="outline" size="md">Try it now</ButtonLink>
-            </div>
+        <div className="mb-10 max-w-2xl">
+          <p className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">
+            <span className="h-px w-7 bg-[var(--accent)]/60" /> Six metrics
+          </p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--fg)] md:text-4xl">
+            One dashboard.<br />Every angle of failure.
+          </h2>
+          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[var(--fg-muted)]">
+            Backfire Score, Resonance, Backfire Risk, Memeability, Brand-Safety Drift, and Polarization — composite scores that translate adversarial output into board-room numbers.
+          </p>
+          <div className="mt-7">
+            <ButtonLink href="#simulate" variant="outline" size="md">Try it now</ButtonLink>
           </div>
+        </div>
 
-          <div className="relative">
-            <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[32px] bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(255,77,87,0.16),transparent_70%)] blur-2xl" />
-            <div className="overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/80 p-5 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-              <div className="mb-4 flex items-center justify-between">
-                <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">/runs/preview · 14:32:08</p>
-                <Badge variant="accent" dot>live</Badge>
+        <div className="relative">
+          <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[40px] bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(255,77,87,0.18),transparent_70%)] blur-3xl" />
+          <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] shadow-[0_40px_120px_-32px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+            {/* App chrome */}
+            <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
+              <LogoBadge size="xs" tile glow={false} />
+              <div className="flex h-6 min-w-0 flex-1 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 font-mono text-[11px] text-[var(--fg-subtle)]">
+                <span className="truncate">backfire.os/runs/sample</span>
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[var(--success)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] pulse-dot" />
+                  live
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-                {METRICS.map((m, i) => {
-                  const tone = m.v >= 70 ? "text-[var(--danger)]" : m.v >= 40 ? "text-[var(--warning)]" : "text-[var(--success)]";
-                  const bar = m.v >= 70 ? "bg-[var(--danger)]" : m.v >= 40 ? "bg-[var(--warning)]" : "bg-[var(--success)]";
-                  return (
-                    <div key={m.label} className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-2)]/60 p-3.5 fade-up" style={{ animationDelay: `${i * 60}ms` }}>
-                      <p className="text-[11px] text-[var(--fg-subtle)]">{m.label}</p>
-                      <p className={`mt-1 font-display text-2xl font-semibold ${tone}`}>{m.v}</p>
-                      <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--bg-elev-3)]">
-                        <div className={`h-full rounded-full ${bar}`} style={{ width: `${m.v}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            </div>
+            <div className="space-y-6 p-5 md:p-7">
+              <ScoreRadar scores={PREVIEW_SCORES} labels={PREVIEW_LABELS} />
+              <ScoreDashboard scores={PREVIEW_SCORES} labels={PREVIEW_LABELS} />
             </div>
           </div>
         </div>
