@@ -142,11 +142,84 @@ export function buildMarketSummary(
    Turn prompts
    ────────────────────────────────────────────────────────────────── */
 
+/**
+ * Appended to every turn for every persona. The agentic compound model (the
+ * Activist) tends to drift into a written report — markdown headings, tables,
+ * "---" dividers — which reads nothing like someone speaking in a live room.
+ * This hard-pins the output to spoken prose so the transcript stays a debate.
+ */
+const SPOKEN_STYLE_RULE = `Speak out loud as if you are in the room: 2-4 short sentences of plain conversational prose. When you address another participant, call them only by their role — the Brand Manager, the Activist, the Journalist, or the Brand Purist — exactly as labelled in the transcript. Never invent a personal name for anyone in the room. This is dialogue, not a document — do NOT use any markdown formatting, headings, tables, bullet points, numbered lists, bold, or "---" dividers. No section titles, no "Result:" summaries. Just say your piece in flowing sentences.`;
+
+/**
+ * Belt-and-suspenders backstop for when a model ignores SPOKEN_STYLE_RULE and
+ * still emits report-style markdown. Flattens the structural artifacts (headings,
+ * table rules, dividers, list/bold markers) into plain prose so the saved
+ * transcript and final bubble read as speech — without trying to reflow tables,
+ * which would be lossy. Words are preserved; only the scaffolding is removed.
+ */
+function stripReportFormatting(text: string): string {
+  const cleaned = text
+    .split("\n")
+    .map((line) => line.trim())
+    // Drop horizontal rules ("---") and markdown table separator rows ("|---|:--|").
+    .filter((line) => !/^[-_*\s]{3,}$/.test(line))
+    .filter((line) => !/^\|?[\s:|-]+\|[\s:|-]*$/.test(line))
+    .map((line) =>
+      line
+        .replace(/^#{1,6}\s+/, "") // heading markers
+        .replace(/^[-*+]\s+/, "") // bullet markers
+        .replace(/^\d+[.)]\s+/, "") // numbered-list markers
+        .replace(/\|/g, " ") // collapse table pipes into spaces
+        .replace(/\*\*|__|`/g, "") // bold / inline-code markers
+        .replace(/\s{2,}/g, " ")
+        .trim()
+    )
+    .filter((line) => line.length > 0)
+    .join(" ");
+  return cleaned.replace(/\s{2,}/g, " ").trim();
+}
+
+/**
+ * Hard length backstop. The agentic compound model (the Activist) routinely
+ * ignores the "2-4 sentences" rule and emits a full essay; instructions alone do
+ * not constrain it. This clamps any turn to the contract — the first few
+ * sentences, within a character ceiling — so the transcript reads as a debate
+ * line, not a report. Trims on a sentence boundary where possible so it never
+ * cuts off mid-word.
+ */
+function clampToSpokenTurn(
+  text: string,
+  maxSentences = 4,
+  maxChars = 650
+): string {
+  // Split into sentences, keeping their terminating punctuation.
+  const sentences = text.match(/[^.!?]+[.!?]+(?:["')\]]+)?\s*|[^.!?]+$/g) ?? [
+    text,
+  ];
+  let out = sentences.slice(0, maxSentences).join("").trim();
+
+  if (out.length > maxChars) {
+    const slice = out.slice(0, maxChars);
+    const lastBoundary = Math.max(
+      slice.lastIndexOf("."),
+      slice.lastIndexOf("!"),
+      slice.lastIndexOf("?")
+    );
+    // Prefer cutting at the last sentence end inside the limit; otherwise hard
+    // cut and signal the truncation rather than leave a dangling clause.
+    out =
+      lastBoundary > maxChars * 0.5
+        ? slice.slice(0, lastBoundary + 1).trim()
+        : `${slice.trim()}…`;
+  }
+  return out;
+}
+
 function turnInstruction(personaName: string, round: number): string {
   if (round === 1) {
-    return `It is round ${round}. Open your position as ${personaName}. Be specific to the campaign above.`;
+    return `It is round ${round}. Open your position as ${personaName}. Be specific to the campaign above.\n\n${SPOKEN_STYLE_RULE}`;
   }
-  return `It is round ${round} — the rebuttal round. As ${personaName}, respond to what was just said. Sharpen or revise your position; do not simply repeat round 1.`;
+  return `It is round ${round} — the rebuttal round. As ${personaName}, respond to what was just said. Sharpen or revise your position; do not simply repeat round 1.\n\n${SPOKEN_STYLE_RULE}`;
 }
 
 function buildTurnMessages(
@@ -189,9 +262,14 @@ async function streamTurn(
   const messages = buildTurnMessages(persona, ctx, round);
 
   if (provider === "groq") {
+    // The agentic compound model burns part of its budget on internal tool
+    // calls; a tight cap can leave nothing for the visible answer (it returns an
+    // empty completion). Give it more headroom than the fast scout personas so it
+    // actually emits a spoken turn. The spoken-style rule keeps the prose short.
+    const maxTokens = persona.model === "compound" ? 512 : 320;
     return streamGroqChat(messages, groqModelFor(persona), onToken, {
       temperature: 0.85,
-      maxTokens: 320,
+      maxTokens,
       signal,
     });
   }
@@ -556,13 +634,41 @@ export async function runDebate(
         content = await streamMockTurn(persona, ctx, round, onToken, signal);
       }
 
-      // The agentic compound model (the Activist) occasionally returns a 200 with
-      // no content on the longer rebuttal round, which would render as a skipped,
-      // empty bubble. Treat an empty turn as a degraded turn and fall back to the
-      // scripted line so every persona always speaks.
+      // The agentic compound model (the Activist) intermittently returns a 200
+      // with no text on the longer rebuttal round — it spends its budget on
+      // internal tool calls and emits an empty completion. Rather than dropping
+      // straight to the canned scripted line (which then repeats across every
+      // campaign), retry the SAME turn on the live scout model so the room still
+      // gets a real, varied argument. Only if that also comes back empty do we
+      // fall back to the scripted line.
+      if (
+        !signal?.aborted &&
+        content.trim().length === 0 &&
+        provider === "groq"
+      ) {
+        console.warn(
+          `Boardroom turn (${persona.id}, round ${round}) returned empty on compound; retrying live on scout.`
+        );
+        try {
+          const messages = buildTurnMessages(persona, ctx, round);
+          content = await streamGroqChat(messages, SCOUT_MODEL, onToken, {
+            temperature: 0.85,
+            maxTokens: 320,
+            signal,
+          });
+        } catch (error) {
+          console.error(
+            `Boardroom scout retry (${persona.id}, round ${round}) failed:`,
+            error instanceof Error ? error.message : error
+          );
+        }
+      }
+
+      // Last resort: every persona must speak, so if no live model produced text
+      // (no provider configured, or the retry also failed), use the scripted line.
       if (!signal?.aborted && content.trim().length === 0) {
         console.warn(
-          `Boardroom turn (${persona.id}, round ${round}) returned empty on ${provider}; using scripted fallback.`
+          `Boardroom turn (${persona.id}, round ${round}) still empty on ${provider}; using scripted fallback.`
         );
         degraded = true;
         content = await streamMockTurn(persona, ctx, round, onToken, signal);
@@ -573,7 +679,7 @@ export async function runDebate(
         speakerId: persona.id,
         speakerName: persona.name,
         model: persona.model,
-        content: content.trim(),
+        content: clampToSpokenTurn(stripReportFormatting(content)),
         round,
       };
       ctx.messages.push(message);
