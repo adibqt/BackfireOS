@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const TEXT_MODEL = "gemini-3.5-flash";
+const TEXT_FALLBACK_MODEL = "gemini-3.1-flash-lite";
 const EMBEDDING_MODEL = "gemini-embedding-001";
 const EMBEDDING_DIMENSIONS = 768;
 const IMAGE_MODEL = "imagen-4.0-generate-001";
@@ -202,20 +203,45 @@ async function withTextRetry<T>(fn: () => Promise<T>): Promise<T> {
   throw lastError;
 }
 
+/**
+ * Runs a text/vision call against `model`, and if it fails (e.g. the model is
+ * unavailable or its quota is exhausted after retries), transparently retries
+ * once against the lighter {@link TEXT_FALLBACK_MODEL}. Skipped when the call is
+ * already using the fallback model so a failure surfaces instead of looping.
+ */
+async function withModelFallback<T>(
+  model: string,
+  run: (model: string) => Promise<T>
+): Promise<T> {
+  try {
+    return await run(model);
+  } catch (error) {
+    if (model === TEXT_FALLBACK_MODEL) throw error;
+    console.warn(
+      `Gemini model "${model}" failed; falling back to "${TEXT_FALLBACK_MODEL}". ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return run(TEXT_FALLBACK_MODEL);
+  }
+}
+
 export async function generateJson<T>(
   prompt: string,
   model = TEXT_MODEL
 ): Promise<T> {
   const genAI = getTextClient();
-  const generativeModel = genAI.getGenerativeModel({
-    model,
-    generationConfig: { responseMimeType: "application/json" },
-  });
+  return withModelFallback(model, async (activeModel) => {
+    const generativeModel = genAI.getGenerativeModel({
+      model: activeModel,
+      generationConfig: { responseMimeType: "application/json" },
+    });
 
-  const result = await withTextRetry(() =>
-    generativeModel.generateContent(prompt)
-  );
-  return parseJson<T>(result.response.text());
+    const result = await withTextRetry(() =>
+      generativeModel.generateContent(prompt)
+    );
+    return parseJson<T>(result.response.text());
+  });
 }
 
 export async function generateText(
@@ -223,11 +249,13 @@ export async function generateText(
   model = TEXT_MODEL
 ): Promise<string> {
   const genAI = getTextClient();
-  const generativeModel = genAI.getGenerativeModel({ model });
-  const result = await withTextRetry(() =>
-    generativeModel.generateContent(prompt)
-  );
-  return result.response.text();
+  return withModelFallback(model, async (activeModel) => {
+    const generativeModel = genAI.getGenerativeModel({ model: activeModel });
+    const result = await withTextRetry(() =>
+      generativeModel.generateContent(prompt)
+    );
+    return result.response.text();
+  });
 }
 
 /**
@@ -243,23 +271,27 @@ export async function generateTextStream(
   model = TEXT_MODEL
 ): Promise<string> {
   const genAI = getTextClient();
-  const generativeModel = genAI.getGenerativeModel(
-    systemInstruction ? { model, systemInstruction } : { model }
-  );
+  return withModelFallback(model, async (activeModel) => {
+    const generativeModel = genAI.getGenerativeModel(
+      systemInstruction
+        ? { model: activeModel, systemInstruction }
+        : { model: activeModel }
+    );
 
-  const result = await withTextRetry(() =>
-    generativeModel.generateContentStream(prompt)
-  );
+    const result = await withTextRetry(() =>
+      generativeModel.generateContentStream(prompt)
+    );
 
-  let full = "";
-  for await (const chunk of result.stream) {
-    const token = chunk.text();
-    if (token) {
-      full += token;
-      onToken(token);
+    let full = "";
+    for await (const chunk of result.stream) {
+      const token = chunk.text();
+      if (token) {
+        full += token;
+        onToken(token);
+      }
     }
-  }
-  return full;
+    return full;
+  });
 }
 
 export async function describeImage(
@@ -268,16 +300,18 @@ export async function describeImage(
   mimeType = "image/jpeg"
 ): Promise<string> {
   const genAI = getTextClient();
-  const generativeModel = genAI.getGenerativeModel({ model: TEXT_MODEL });
+  return withModelFallback(TEXT_MODEL, async (activeModel) => {
+    const generativeModel = genAI.getGenerativeModel({ model: activeModel });
 
-  const result = await withTextRetry(() =>
-    generativeModel.generateContent([
-      prompt,
-      { inlineData: { data: base64, mimeType } },
-    ])
-  );
+    const result = await withTextRetry(() =>
+      generativeModel.generateContent([
+        prompt,
+        { inlineData: { data: base64, mimeType } },
+      ])
+    );
 
-  return result.response.text();
+    return result.response.text();
+  });
 }
 
 /** Generate a satirical meme image; returns a data URL for inline display. */
@@ -316,6 +350,7 @@ export async function generateMemeImage(
 
 export {
   TEXT_MODEL,
+  TEXT_FALLBACK_MODEL,
   EMBEDDING_MODEL,
   EMBEDDING_DIMENSIONS,
   IMAGE_MODEL,
