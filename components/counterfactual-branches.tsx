@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { scoreBranch } from "@/lib/branches/heuristic";
@@ -816,7 +817,20 @@ export function CounterfactualBranches() {
       )}
 
       {/* Main split: tree + inspector */}
-      <div className="grid items-start gap-6 lg:grid-cols-[1.35fr_1fr]">
+      <div className="relative grid items-start gap-6 lg:grid-cols-[1.35fr_1fr]">
+        {treeLoading && (
+          <div className="absolute inset-0 z-10 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/90 p-6 lg:col-span-2">
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-32 rounded-md" />
+              <Skeleton className="h-[280px] w-full rounded-2xl" />
+              <div className="grid gap-3 sm:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <TreeCanvas
           branches={branches}
           positions={positions}
@@ -1024,10 +1038,7 @@ function CampaignPicker({
       )}
 
       {loading && (
-        <span className="ml-auto inline-flex items-center gap-2 font-mono text-[11px] text-[var(--fg-subtle)]">
-          <span className="inline-flex h-1.5 w-1.5 animate-ping rounded-full bg-[var(--accent)]" />
-          loading tree…
-        </span>
+        <Skeleton className="ml-auto h-4 w-24 rounded-md" />
       )}
     </div>
   );
@@ -1867,8 +1878,14 @@ function AiVerdictPanel({
           >
             auto {autoAi ? "on" : "off"}
           </button>
-          <Button size="xs" variant={done ? "outline" : "primary"} onClick={onScoreAI} disabled={loading}>
-            {loading ? "Convening…" : done ? (stale ? "↻ Re-score" : "↻ Re-run") : "⚔ Run war room"}
+          <Button
+            size="xs"
+            variant={done ? "outline" : "primary"}
+            onClick={onScoreAI}
+            loading={loading}
+            loadingLabel="Convening…"
+          >
+            {done ? (stale ? "↻ Re-score" : "↻ Re-run") : "⚔ Run war room"}
           </Button>
         </div>
       </div>

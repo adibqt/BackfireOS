@@ -13,6 +13,7 @@ import {
   DropdownMenuLink,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SimpleBlockSkeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export function AuthButton() {
@@ -29,7 +30,7 @@ export function AuthButton() {
   if (!configured) return null;
 
   if (loading) {
-    return <span className="h-9 w-20 shimmer rounded-lg" />;
+    return <SimpleBlockSkeleton className="h-9 w-20" />;
   }
 
   if (!user) {

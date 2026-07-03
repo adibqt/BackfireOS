@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 const variants = {
   primary: [
@@ -42,6 +43,8 @@ const sizes = {
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: keyof typeof variants;
   size?: keyof typeof sizes;
+  loading?: boolean;
+  loadingLabel?: React.ReactNode;
 };
 
 const base =
@@ -49,19 +52,46 @@ const base =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] " +
   "disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
+function ButtonContent({
+  loading,
+  loadingLabel,
+  children,
+}: {
+  loading?: boolean;
+  loadingLabel?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  if (!loading) return <>{children}</>;
+  return (
+    <span className="inline-flex items-center justify-center gap-2 transition-opacity duration-150">
+      <Spinner size="sm" />
+      <span>{loadingLabel ?? children}</span>
+    </span>
+  );
+}
+
 export function Button({
   variant = "primary",
   size = "md",
   className,
   disabled,
+  loading,
+  loadingLabel,
+  children,
   ...props
 }: ButtonProps) {
+  const isDisabled = disabled || loading;
   return (
     <button
       className={cn(base, variants[variant], sizes[size], className)}
-      disabled={disabled}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
       {...props}
-    />
+    >
+      <ButtonContent loading={loading} loadingLabel={loadingLabel}>
+        {children}
+      </ButtonContent>
+    </button>
   );
 }
 
@@ -88,6 +118,9 @@ export function IconButton({
   className,
   size = "md",
   variant = "ghost",
+  loading,
+  children,
+  disabled,
   ...props
 }: ButtonProps) {
   const sizeMap = {
@@ -97,10 +130,15 @@ export function IconButton({
     lg: "h-12 w-12 rounded-xl",
     xl: "h-14 w-14 rounded-xl",
   } as const;
+  const isDisabled = disabled || loading;
   return (
     <button
       className={cn(base, variants[variant], sizeMap[size], "p-0", className)}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
       {...props}
-    />
+    >
+      {loading ? <Spinner size="sm" /> : children}
+    </button>
   );
 }

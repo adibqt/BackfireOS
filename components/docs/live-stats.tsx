@@ -1,6 +1,7 @@
 "use client";
 
 import type { LiveStats } from "@/lib/docs/types";
+import { Button } from "@/components/ui/button";
 
 const SOURCE_LABEL: Record<LiveStats["source"], string> = {
   database: "Live · Supabase",
@@ -37,11 +38,14 @@ export function LiveStatsPanel({
           {SOURCE_LABEL[stats.source]}
         </span>
         {onRefresh && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={onRefresh}
-            disabled={loading}
-            className="no-print inline-flex items-center gap-1.5 rounded-md border border-[var(--border-strong)] bg-[var(--bg-surface)] px-2.5 py-1 text-[12px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] disabled:opacity-50"
+            loading={loading}
+            loadingLabel="Refreshing…"
+            className="no-print"
           >
             <svg
               width="13"
@@ -50,14 +54,13 @@ export function LiveStatsPanel({
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className={loading ? "animate-spin" : ""}
               aria-hidden
             >
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
             Refresh
-          </button>
+          </Button>
         )}
       </div>
 

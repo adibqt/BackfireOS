@@ -2,6 +2,7 @@ import Link from "next/link";
 import { UploadForm } from "@/components/upload-form";
 import { Badge, Kbd } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
+import { PendingButtonLink } from "@/components/ui/pending-link";
 
 const AGENTS = [
   { id: "meme_engineer", name: "Dhaka Meme Engineer", initials: "ME", tone: "from-rose-500/30 to-amber-500/10" },
@@ -81,9 +82,9 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
               </ButtonLink>
-              <ButtonLink href="/history" variant="secondary" size="lg">
+              <PendingButtonLink href="/history" variant="secondary" size="lg">
                 View past runs
-              </ButtonLink>
+              </PendingButtonLink>
             </div>
 
             <div className="mt-10 flex items-center gap-2.5 text-[12px] text-[var(--fg-subtle)]">
@@ -248,7 +249,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
                 <polyline points="12 5 19 12 12 19" />
               </svg>
             </ButtonLink>
-            <ButtonLink href="/history" variant="secondary" size="xl">View history</ButtonLink>
+            <PendingButtonLink href="/history" variant="secondary" size="xl">View history</PendingButtonLink>
           </div>
         </div>
       </section>

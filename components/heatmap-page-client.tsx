@@ -8,8 +8,9 @@ import {
 } from "@/components/cultural-heatmap";
 import { PageShell } from "@/components/page-shell";
 import { SectionHeader } from "@/components/ui/card";
-import { ButtonLink } from "@/components/ui/button";
+import { PendingButtonLink } from "@/components/ui/pending-link";
 import { Select } from "@/components/ui/select";
+import { HeatmapPageSkeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/components/language-provider";
 import { highestRiskRegion } from "@/lib/cultural-stress-map";
 import { t } from "@/lib/i18n";
@@ -60,6 +61,7 @@ function HeatmapContent() {
   const [selectedRunId, setSelectedRunId] = useState(runIdParam);
   const [run, setRun] = useState<SimulationRun | null>(null);
   const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState("");
 
   useEffect(() => {
@@ -72,12 +74,13 @@ function HeatmapContent() {
         }
         setRuns(data.runs ?? []);
       })
-      .catch(() => setListError("Failed to load simulations"));
+      .catch(() => setListError("Failed to load simulations"))
+      .finally(() => setListLoading(false));
   }, []);
 
   useEffect(() => {
     const id = runIdParam || selectedRunId;
-    if (!id) return; // no run selected — the empty state is derived below
+    if (!id) return;
     let cancelled = false;
     fetch(`/api/campaigns?runId=${id}`)
       .then((res) => res.json())
@@ -98,10 +101,9 @@ function HeatmapContent() {
   }, [runIdParam, selectedRunId]);
 
   const activeId = runIdParam || selectedRunId;
-  // When nothing is selected, show the empty state regardless of any stale run.
   const displayRun = activeId ? run : null;
-  // Loading is derived: an id is selected but its fetch has not settled yet.
-  const loading = Boolean(activeId) && loadedId !== activeId;
+  const runLoading = Boolean(activeId) && loadedId !== activeId;
+  const showSkeleton = listLoading || runLoading;
 
   return (
     <PageShell footer={false}>
@@ -111,58 +113,58 @@ function HeatmapContent() {
         description={t(locale, "stressMapDescription")}
       />
 
-      <div className="mb-8">
-        <RunPicker
-          runs={runs}
-          selectedId={activeId}
-          onChange={setSelectedRunId}
-          emptyMessage={
-            listError
-              ? listError
-              : runs.length > 0 && runs.every((r) => r.status !== "complete")
-                ? "No completed simulations yet — finish a run from the home page first."
-                : runs.length === 0 && !listError
-                  ? "No simulations yet — run one from the home page."
-                  : undefined
-          }
-        />
-      </div>
-
-      {loading && (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="shimmer h-20 rounded-2xl" />
-          ))}
+      {!listLoading && (
+        <div className="mb-8">
+          <RunPicker
+            runs={runs}
+            selectedId={activeId}
+            onChange={setSelectedRunId}
+            emptyMessage={
+              listError
+                ? listError
+                : runs.length > 0 && runs.every((r) => r.status !== "complete")
+                  ? "No completed simulations yet — finish a run from the home page first."
+                  : runs.length === 0 && !listError
+                    ? "No simulations yet — run one from the home page."
+                    : undefined
+            }
+          />
         </div>
       )}
 
-      {!loading && !activeId && (
-        <div className="card-glow rounded-2xl border border-[var(--border)] px-6 py-12 text-center">
+      {showSkeleton && <HeatmapPageSkeleton />}
+
+      {!showSkeleton && !activeId && (
+        <div className="content-enter card-glow rounded-2xl border border-[var(--border)] px-6 py-12 text-center">
           <p className="text-[15px] text-[var(--fg-muted)]">
             {t(locale, "stressMapSelectRun")}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <ButtonLink href="/" variant="primary" size="md">
+            <PendingButtonLink href="/" variant="primary" size="md">
               {t(locale, "newSimulation")}
-            </ButtonLink>
-            <ButtonLink href="/history" variant="secondary" size="md">
+            </PendingButtonLink>
+            <PendingButtonLink href="/history" variant="secondary" size="md">
               {t(locale, "history")}
-            </ButtonLink>
+            </PendingButtonLink>
           </div>
         </div>
       )}
 
-      {!loading && activeId && displayRun && !displayRun.culturalStressMap && (
-        <CulturalHeatmapEmpty locale={locale} />
+      {!showSkeleton && activeId && displayRun && !displayRun.culturalStressMap && (
+        <div className="content-enter">
+          <CulturalHeatmapEmpty locale={locale} />
+        </div>
       )}
 
-      {!loading && activeId && displayRun?.culturalStressMap && (
-        <CulturalHeatmap
-          stressMap={displayRun.culturalStressMap}
-          locale={locale}
-          slogan={displayRun.campaign?.slogan}
-          defaultRegion={highestRiskRegion(displayRun.culturalStressMap)}
-        />
+      {!showSkeleton && activeId && displayRun?.culturalStressMap && (
+        <div className="content-enter">
+          <CulturalHeatmap
+            stressMap={displayRun.culturalStressMap}
+            locale={locale}
+            slogan={displayRun.campaign?.slogan}
+            defaultRegion={highestRiskRegion(displayRun.culturalStressMap)}
+          />
+        </div>
       )}
     </PageShell>
   );
@@ -173,7 +175,7 @@ export function HeatmapPageClient() {
     <Suspense
       fallback={
         <PageShell footer={false}>
-          <div className="shimmer h-40 rounded-2xl" />
+          <HeatmapPageSkeleton />
         </PageShell>
       }
     >

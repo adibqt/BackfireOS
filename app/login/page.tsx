@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/page-shell";
 import { LogoBadge } from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { FormPageSkeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 
 function LoginForm() {
@@ -61,8 +62,8 @@ function LoginForm() {
           {error}
         </div>
       )}
-      <Button type="submit" size="lg" disabled={loading} className="w-full">
-        {loading ? "Signing in…" : "Sign in"}
+      <Button type="submit" size="lg" loading={loading} loadingLabel="Signing in…" className="w-full">
+        Sign in
       </Button>
       <p className="pt-2 text-center text-sm text-[var(--fg-muted)]">
         No account?{" "}
@@ -100,14 +101,7 @@ export default function LoginPage() {
             </p>
           </div>
           <div className="p-8">
-            <Suspense
-              fallback={
-                <div className="space-y-3">
-                  <div className="shimmer h-11 rounded-lg" />
-                  <div className="shimmer h-11 rounded-lg" />
-                </div>
-              }
-            >
+            <Suspense fallback={<FormPageSkeleton />}>
               <LoginForm />
             </Suspense>
           </div>

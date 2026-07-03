@@ -4,7 +4,9 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { SectionHeader } from "@/components/ui/card";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { PendingButtonLink } from "@/components/ui/pending-link";
+import { PageSkeleton } from "@/components/ui/skeleton";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/language-provider";
@@ -1267,22 +1269,19 @@ function BoardroomInner() {
           />
         )}
         {activeId && (
-          <Button type="button" size="lg" className="w-full sm:w-auto" onClick={startDebate} disabled={debating}>
-            {debating ? (
-              <span className="flex items-center gap-2">
-                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                  <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                {status || "Debating…"}
-              </span>
-            ) : selectedVariantId !== ORIGINAL_VARIANT_ID ? (
-              "Debate this version"
-            ) : iterations.length > 0 ? (
-              "Re-run debate"
-            ) : (
-              "Convene the boardroom"
-            )}
+          <Button
+            type="button"
+            size="lg"
+            className="w-full sm:w-auto"
+            onClick={startDebate}
+            loading={debating}
+            loadingLabel={status || "Debating…"}
+          >
+            {selectedVariantId !== ORIGINAL_VARIANT_ID
+              ? "Debate this version"
+              : iterations.length > 0
+                ? "Re-run debate"
+                : "Convene the boardroom"}
           </Button>
         )}
       </div>
@@ -1293,12 +1292,12 @@ function BoardroomInner() {
             Select a completed campaign to convene its boardroom debate.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <ButtonLink href="/" variant="primary" size="md">
+            <PendingButtonLink href="/" variant="primary" size="md">
               {t(locale, "newSimulation")}
-            </ButtonLink>
-            <ButtonLink href="/history" variant="secondary" size="md">
+            </PendingButtonLink>
+            <PendingButtonLink href="/history" variant="secondary" size="md">
               {t(locale, "history")}
-            </ButtonLink>
+            </PendingButtonLink>
           </div>
         </div>
       )}
@@ -1428,7 +1427,7 @@ export function BoardroomMode() {
     <Suspense
       fallback={
         <PageShell footer={false} wide>
-          <div className="shimmer h-40 rounded-2xl" />
+          <PageSkeleton />
         </PageShell>
       }
     >

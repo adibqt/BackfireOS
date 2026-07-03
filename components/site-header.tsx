@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Moon, Sun } from "lucide-react";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AuthButton } from "./auth-button";
 import { signOutUser, useAuthUser } from "./use-auth-user";
 import { useLanguage } from "./language-provider";
 import { LogoBadge } from "./logo";
+import { useNavigationProgress } from "@/components/navigation-progress";
 import { useTheme } from "@/lib/theme-provider";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -53,9 +54,21 @@ function HeaderLogo() {
 
 type Pill = { left: number; top: number; width: number; height: number };
 
+function measurePill(nav: HTMLElement, target: HTMLElement): Pill {
+  const navRect = nav.getBoundingClientRect();
+  const elRect = target.getBoundingClientRect();
+  return {
+    left: elRect.left - navRect.left,
+    top: elRect.top - navRect.top,
+    width: elRect.width,
+    height: elRect.height,
+  };
+}
+
 function SiteHeaderInner() {
   const { locale, setLocale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { startNavigation } = useNavigationProgress();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,7 +76,28 @@ function SiteHeaderInner() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pill, setPill] = useState<Pill | null>(null);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
+  const linkRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [pillReady, setPillReady] = useState(false);
+
+  const syncPillToActive = useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const activeEl = nav.querySelector<HTMLElement>('[data-active="true"]');
+    if (!activeEl) {
+      setPill(null);
+      return;
+    }
+    setPill(measurePill(nav, activeEl));
+  }, []);
+
+  const movePillToLink = useCallback((href: string) => {
+    const nav = navRef.current;
+    const el = linkRefs.current.get(href);
+    if (!nav || !el) return;
+    setPill(measurePill(nav, el));
+  }, []);
 
   // Run ID from path (/runs/[id]) or from query string on any run-aware page
   const runIdFromPath = pathname?.match(/^\/runs\/([^/]+)/)?.[1] ?? null;
@@ -88,21 +122,23 @@ function SiteHeaderInner() {
     return pathname === href || (href !== "/" && pathname?.startsWith(href));
   }
 
-  // Measure active nav item and update sliding pill position
+  // Sync pill when route or locale changes (after navigation completes)
+  useLayoutEffect(() => {
+    setPendingHref(null);
+    syncPillToActive();
+    if (!pillReady) {
+      requestAnimationFrame(() => setPillReady(true));
+    }
+  }, [pathname, searchParams, locale, syncPillToActive, pillReady]);
+
+  // Re-measure on resize / font load so the pill stays aligned
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-    const active = nav.querySelector<HTMLElement>('[data-active="true"]');
-    if (!active) { setPill(null); return; }
-    const navRect = nav.getBoundingClientRect();
-    const elRect = active.getBoundingClientRect();
-    setPill({
-      left: elRect.left - navRect.left,
-      top: elRect.top - navRect.top,
-      width: elRect.width,
-      height: elRect.height,
-    });
-  }, [pathname, searchParams]);
+    const ro = new ResizeObserver(() => syncPillToActive());
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [syncPillToActive]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -121,7 +157,11 @@ function SiteHeaderInner() {
       )}
     >
       <div className="flex w-full min-w-0 items-center justify-between gap-4 px-5 py-3.5 md:px-8">
-        <Link href="/" className="group no-underline">
+        <Link
+          href="/"
+          className="group no-underline"
+          onClick={() => startNavigation()}
+        >
           <HeaderLogo />
         </Link>
 
@@ -134,17 +174,33 @@ function SiteHeaderInner() {
           {pill && (
             <span
               aria-hidden
-              className="pointer-events-none absolute rounded-full bg-[var(--bg-elevated)] transition-[left,top,width,height] duration-200 ease-out"
-              style={{ left: pill.left, top: pill.top, width: pill.width, height: pill.height }}
+              className={cn(
+                "nav-active-pill pointer-events-none absolute rounded-full bg-[var(--bg-elevated)] shadow-[inset_0_0_0_1px_var(--border)]",
+                pillReady && "nav-active-pill--ready"
+              )}
+              style={{
+                width: pill.width,
+                height: pill.height,
+                transform: `translate(${pill.left}px, ${pill.top}px)`,
+              }}
             />
           )}
 
           {NAV_ITEMS.map(({ href, key, labelOverride }) => {
-            const active = isActive(href);
+            const active = pendingHref ? pendingHref === href : isActive(href);
             return (
               <Link
                 key={href}
+                ref={(el) => {
+                  if (el) linkRefs.current.set(href, el);
+                  else linkRefs.current.delete(href);
+                }}
                 href={resolveHref(href)}
+                onClick={() => {
+                  movePillToLink(href);
+                  setPendingHref(href);
+                  startNavigation();
+                }}
                 data-active={String(active)}
                 className={cn(
                   "relative rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-200",
@@ -233,7 +289,10 @@ function SiteHeaderInner() {
                 <Link
                   key={href}
                   href={resolveHref(href)}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    startNavigation();
+                    setMobileOpen(false);
+                  }}
                   className={cn(
                     "rounded-lg px-3 py-2.5 text-sm transition-colors",
                     active
@@ -247,7 +306,10 @@ function SiteHeaderInner() {
             })}
             <Link
               href="/history"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                startNavigation();
+                setMobileOpen(false);
+              }}
               className={cn(
                 "rounded-lg px-3 py-2.5 text-sm transition-colors",
                 pathname === "/history"
@@ -285,7 +347,10 @@ function SiteHeaderInner() {
                 ) : (
                   <Link
                     href="/login"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => {
+                      startNavigation();
+                      setMobileOpen(false);
+                    }}
                     className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-[var(--bg-elevated)]"
                   >
                     Sign in

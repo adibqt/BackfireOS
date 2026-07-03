@@ -637,6 +637,46 @@ body > * {
   will-change: transform;
 }
 
+/* Content reveal after skeleton → data load */
+@keyframes content-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.content-enter {
+  animation: content-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Navbar sliding active indicator */
+.nav-active-pill {
+  left: 0;
+  top: 0;
+  will-change: transform, width, height;
+}
+
+.nav-active-pill--ready {
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    width 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    height 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-active-pill--ready {
+    transition: none;
+  }
+}
+
+/* Navigation top progress bar */
+@keyframes nav-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+.nav-progress-active {
+  animation: nav-progress 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -644,6 +684,12 @@ body > * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .content-enter,
+  .nav-progress-active {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

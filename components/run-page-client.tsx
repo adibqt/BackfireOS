@@ -19,28 +19,13 @@ import { t } from "@/lib/i18n";
 import { riskLevel } from "@/lib/scoring";
 import { highestRiskRegion } from "@/lib/cultural-stress-map";
 import type { SimulationRun } from "@/lib/agents/types";
+import { PageSkeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 function LoadingSkeleton() {
   return (
     <PageShell footer={false}>
-      <div className="space-y-10">
-        <div className="space-y-3">
-          <div className="shimmer h-5 w-32 rounded-md" />
-          <div className="shimmer h-10 w-3/4 rounded-lg" />
-          <div className="shimmer h-4 w-1/2 rounded-md" />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="shimmer h-32 rounded-2xl" />
-          ))}
-        </div>
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="shimmer h-20 rounded-2xl" />
-          ))}
-        </div>
-      </div>
+      <PageSkeleton />
     </PageShell>
   );
 }
@@ -109,6 +94,7 @@ export default function RunPageClient({ id }: { id: string }) {
 
   return (
     <PageShell footer={false}>
+      <div className="content-enter">
       {/* Hero summary */}
       <section className="relative mb-12 overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-6 py-8 md:px-10 md:py-10">
         <div
@@ -294,6 +280,7 @@ export default function RunPageClient({ id }: { id: string }) {
           memeability={run.scores.memeability}
         />
       </section>
+      </div>
     </PageShell>
   );
 }

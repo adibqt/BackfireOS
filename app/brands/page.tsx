@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { PageShell, PageHero } from "@/components/page-shell";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { PendingButtonLink } from "@/components/ui/pending-link";
+import { ListPageSkeleton } from "@/components/ui/skeleton";
 import { Input, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -101,9 +103,9 @@ export default function BrandsPage() {
           description="Create a brand to anchor its canonical values. The Brand Purist audits each campaign against the brand's history."
         />
         <div className="flex gap-2">
-          <ButtonLink href="/" variant="secondary">
+          <PendingButtonLink href="/" variant="secondary">
             New simulation
-          </ButtonLink>
+          </PendingButtonLink>
           {!showCreate && (
             <Button onClick={() => setShowCreate(true)}>
               <span className="flex items-center gap-1.5">
@@ -155,8 +157,8 @@ export default function BrandsPage() {
             <Button type="button" variant="ghost" onClick={resetForm} disabled={submitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting || !name.trim()}>
-              {submitting ? "Creating…" : "Create brand"}
+            <Button type="submit" loading={submitting} loadingLabel="Creating…" disabled={!name.trim()}>
+              Create brand
             </Button>
           </div>
         </form>
@@ -168,50 +170,48 @@ export default function BrandsPage() {
         </div>
       )}
 
-      {loading && (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="shimmer h-[96px] rounded-2xl" />
-          ))}
-        </div>
-      )}
+      {loading && <ListPageSkeleton />}
 
-      {!loading && !error && brands.length === 0 && (
-        <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-20 text-center">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,var(--aurora-1),transparent_70%)]"
-          />
-          <div className="relative">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                <line x1="7" y1="7" x2="7.01" y2="7" />
-              </svg>
+      {!loading && (
+        <div className="content-enter">
+          {!error && brands.length === 0 && (
+            <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-20 text-center">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,var(--aurora-1),transparent_70%)]"
+              />
+              <div className="relative">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                  </svg>
+                </div>
+                <p className="font-display text-[18px] text-[var(--fg)]">No brands yet</p>
+                <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
+                  Create a brand to start running simulations against its canonical values.
+                </p>
+                {!showCreate && (
+                  <Button className="mt-6" onClick={() => setShowCreate(true)}>
+                    Create your first brand
+                  </Button>
+                )}
+              </div>
             </div>
-            <p className="font-display text-[18px] text-[var(--fg)]">No brands yet</p>
-            <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
-              Create a brand to start running simulations against its canonical values.
-            </p>
-            {!showCreate && (
-              <Button className="mt-6" onClick={() => setShowCreate(true)}>
-                Create your first brand
-              </Button>
-            )}
+          )}
+
+          <div className="space-y-3">
+            {brands.map((brand) => (
+              <BrandRow
+                key={brand.id}
+                brand={brand}
+                onDelete={() => handleDelete(brand.id)}
+                deleting={deletingId === brand.id}
+              />
+            ))}
           </div>
         </div>
       )}
-
-      <div className="space-y-3">
-        {brands.map((brand) => (
-          <BrandRow
-            key={brand.id}
-            brand={brand}
-            onDelete={() => handleDelete(brand.id)}
-            deleting={deletingId === brand.id}
-          />
-        ))}
-      </div>
     </PageShell>
   );
 }
@@ -258,9 +258,10 @@ function BrandRow({
           variant="danger"
           size="sm"
           onClick={onDelete}
-          disabled={deleting}
+          loading={deleting}
+          loadingLabel="Deleting…"
         >
-          {deleting ? "Deleting…" : "Delete"}
+          Delete
         </Button>
       </div>
     </div>

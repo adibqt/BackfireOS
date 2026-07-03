@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { PageShell, PageHero } from "@/components/page-shell";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { PendingButtonLink } from "@/components/ui/pending-link";
+import { ListPageSkeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { riskLevel } from "@/lib/scoring";
@@ -126,9 +128,10 @@ function RunRow({
           e.stopPropagation();
           onDelete();
         }}
-        disabled={deleting}
+        loading={deleting}
+        loadingLabel="Deleting…"
       >
-        {deleting ? "Deleting…" : "Delete"}
+        Delete
       </Button>
     </div>
   );
@@ -202,9 +205,9 @@ export default function HistoryPage() {
           title="Simulation history"
           description="Every run, every verdict, every meme — saved to your account."
         />
-        <ButtonLink href="/" variant="primary">
+        <PendingButtonLink href="/" variant="primary">
           New simulation
-        </ButtonLink>
+        </PendingButtonLink>
       </div>
 
       {/* Stats strip */}
@@ -227,60 +230,58 @@ export default function HistoryPage() {
         </div>
       )}
 
-      {loading && (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="shimmer h-[88px] rounded-2xl" />
-          ))}
-        </div>
-      )}
+      {loading && <ListPageSkeleton />}
 
-      {error && (
-        <div className="rounded-2xl border border-[var(--danger)]/30 bg-[var(--danger-soft)] px-5 py-4 text-[var(--danger)]">
-          {error}
-        </div>
-      )}
-
-      {!loading && !error && runs.length === 0 && (
-        <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-20 text-center">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,var(--aurora-1),transparent_70%)]"
-          />
-          <div className="relative">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M3 3h18v18H3z" />
-                <path d="M21 9H3" />
-                <path d="M9 21V9" />
-              </svg>
+      {!loading && (
+        <div className="content-enter">
+          {error && (
+            <div className="mb-6 rounded-2xl border border-[var(--danger)]/30 bg-[var(--danger-soft)] px-5 py-4 text-[var(--danger)]">
+              {error}
             </div>
-            <p className="font-display text-[18px] text-[var(--fg)]">No simulations yet</p>
-            <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
-              Run your first campaign and it will appear here.
-            </p>
-            <ButtonLink href="/" variant="primary" className="mt-6">
-              Run your first simulation
-            </ButtonLink>
+          )}
+
+          {!error && runs.length === 0 && (
+            <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-20 text-center">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,var(--aurora-1),transparent_70%)]"
+              />
+              <div className="relative">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <path d="M3 3h18v18H3z" />
+                    <path d="M21 9H3" />
+                    <path d="M9 21V9" />
+                  </svg>
+                </div>
+                <p className="font-display text-[18px] text-[var(--fg)]">No simulations yet</p>
+                <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
+                  Run your first campaign and it will appear here.
+                </p>
+                <PendingButtonLink href="/" variant="primary" className="mt-6">
+                  Run your first simulation
+                </PendingButtonLink>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {filtered.map((run) => (
+              <RunRow
+                key={run.id}
+                run={run}
+                onDelete={() => handleDelete(run.id)}
+                deleting={deletingId === run.id}
+              />
+            ))}
+            {!error && filtered.length === 0 && runs.length > 0 && (
+              <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-10 text-center text-sm text-[var(--fg-muted)]">
+                No campaigns match &ldquo;{query}&rdquo;.
+              </div>
+            )}
           </div>
         </div>
       )}
-
-      <div className="space-y-3">
-        {filtered.map((run) => (
-          <RunRow
-            key={run.id}
-            run={run}
-            onDelete={() => handleDelete(run.id)}
-            deleting={deletingId === run.id}
-          />
-        ))}
-        {!loading && !error && filtered.length === 0 && runs.length > 0 && (
-          <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-10 text-center text-sm text-[var(--fg-muted)]">
-            No campaigns match &ldquo;{query}&rdquo;.
-          </div>
-        )}
-      </div>
     </PageShell>
   );
 }

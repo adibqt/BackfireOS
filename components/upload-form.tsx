@@ -8,6 +8,7 @@ import { countFlaggedMarkets } from "@/lib/cultural-stress-map";
 import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { SimpleBlockSkeleton } from "@/components/ui/skeleton";
 import { Input, Textarea, FileInput } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Badge, RiskBadge, Kbd } from "@/components/ui/badge";
@@ -262,7 +263,9 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
             <Button
               type="button"
               size="lg"
-              disabled={loading || !ready}
+              loading={loading}
+              loadingLabel={status || t(locale, "analyzing")}
+              disabled={!ready}
               onClick={runSimulation}
               className="group relative w-full overflow-hidden"
             >
@@ -271,32 +274,22 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-full"
               />
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                    <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  {status || t(locale, "analyzing")}
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  {t(locale, "runSimulation")}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    aria-hidden
-                    className="transition-transform duration-300 group-hover:translate-x-0.5"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </span>
-              )}
+              <span className="flex items-center gap-2">
+                {t(locale, "runSimulation")}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  aria-hidden
+                  className="transition-transform duration-300 group-hover:translate-x-0.5"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </span>
             </Button>
           </Reveal>
 
@@ -403,7 +396,7 @@ function BrandSelector({
         <span className="mb-1.5 block text-[13px] font-medium text-[var(--fg-muted)]">
           Brand
         </span>
-        <div className="shimmer h-11 rounded-lg" />
+        <SimpleBlockSkeleton />
       </div>
     );
   }

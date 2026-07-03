@@ -92,8 +92,8 @@ export default function SignupPage() {
                   {message}
                 </div>
               )}
-              <Button type="submit" size="lg" disabled={loading} className="w-full">
-                {loading ? "Creating account…" : "Create account"}
+              <Button type="submit" size="lg" loading={loading} loadingLabel="Creating account…" className="w-full">
+                Create account
               </Button>
               <p className="pt-2 text-center text-sm text-[var(--fg-muted)]">
                 Already have an account?{" "}
