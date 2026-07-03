@@ -85,7 +85,7 @@ export default function LoginPage() {
         {/* Aurora */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -inset-12 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,var(--aurora-1),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute -inset-12 -z-10 bg-[var(--bg-base)]"
         />
 
         <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[var(--shadow-xl)]">

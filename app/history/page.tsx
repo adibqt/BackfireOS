@@ -38,9 +38,9 @@ function RunRow({
   const score = run.scores?.backfireScore ?? 0;
   const level = riskLevel(score);
   const tone = {
-    low: { bar: "bg-[var(--success)]", text: "text-[var(--success)]", border: "hover:border-[var(--success)]/30" },
-    medium: { bar: "bg-[var(--warning)]", text: "text-[var(--warning)]", border: "hover:border-[var(--warning)]/30" },
-    high: { bar: "bg-[var(--danger)]", text: "text-[var(--danger)]", border: "hover:border-[var(--danger)]/30" },
+    low: { bar: "bg-[var(--success)]", text: "text-[var(--success)]", border: "hover:border-[var(--success)]" },
+    medium: { bar: "bg-[var(--warning)]", text: "text-[var(--warning)]", border: "hover:border-[var(--warning)]" },
+    high: { bar: "bg-[var(--danger)]", text: "text-[var(--danger)]", border: "hover:border-[var(--danger)]" },
   }[level];
 
   return (
@@ -235,7 +235,7 @@ export default function HistoryPage() {
       {!loading && (
         <div className="content-enter">
           {error && (
-            <div className="mb-6 rounded-2xl border border-[var(--danger)]/30 bg-[var(--danger-soft)] px-5 py-4 text-[var(--danger)]">
+            <div className="mb-6 rounded-2xl border border-[var(--danger)] bg-[var(--danger-soft)] px-5 py-4 text-[var(--danger)]">
               {error}
             </div>
           )}

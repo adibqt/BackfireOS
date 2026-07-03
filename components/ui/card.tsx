@@ -137,7 +137,7 @@ export function SectionHeader({
       <div className={cn(align === "center" && "mx-auto max-w-2xl")}>
         {eyebrow && (
           <p className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">
-            <span className="h-px w-6 bg-[var(--accent)]/60" />
+            <span className="h-px w-6 bg-[var(--signal)]" />
             {eyebrow}
           </p>
         )}

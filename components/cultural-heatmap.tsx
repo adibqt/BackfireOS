@@ -19,7 +19,7 @@ const LEVEL_TONE = {
     ring: "text-[var(--success)]",
     bar: "bg-[var(--success)]",
     bg: "bg-[var(--success-soft)]",
-    border: "border-[var(--success)]/20",
+    border: "border-[var(--success)]",
     accent: "var(--success)",
     badgeBg: "var(--success-soft)",
     glow: "var(--success-glow)",
@@ -28,7 +28,7 @@ const LEVEL_TONE = {
     ring: "text-[var(--warning)]",
     bar: "bg-[var(--warning)]",
     bg: "bg-[var(--warning-soft)]",
-    border: "border-[var(--warning)]/20",
+    border: "border-[var(--warning)]",
     accent: "var(--warning)",
     badgeBg: "var(--warning-soft)",
     glow: "var(--warning-glow)",
@@ -37,7 +37,7 @@ const LEVEL_TONE = {
     ring: "text-[var(--danger)]",
     bar: "bg-[var(--danger)]",
     bg: "bg-[var(--danger-soft)]",
-    border: "border-[var(--danger)]/20",
+    border: "border-[var(--danger)]",
     accent: "var(--danger)",
     badgeBg: "var(--danger-soft)",
     glow: "var(--danger-glow)",
@@ -371,7 +371,7 @@ export function CulturalHeatmap({
               className={cn(
                 "relative inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-medium transition-all duration-200",
                 isActive
-                  ? "border-[var(--accent)]/50 bg-[var(--accent-soft)] text-[var(--accent-400)] shadow-[0_0_16px_-4px_var(--accent-glow)]"
+                  ? "border-[var(--signal)] bg-[var(--accent-soft)] text-[var(--accent-400)] shadow-[var(--shadow-card)]"
                   : "border-[var(--border)] bg-[var(--bg-elev-1)] text-[var(--fg-muted)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elev-2)] hover:text-[var(--fg)]",
               )}
             >

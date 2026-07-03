@@ -4,21 +4,21 @@ const variants = {
   default:
     "bg-[var(--bg-elevated)] text-[var(--fg-muted)] border-[var(--border-strong)]",
   accent:
-    "bg-[var(--accent-soft)] text-[var(--accent-400)] border-[var(--accent)]/25",
+    "bg-[var(--accent-soft)] text-[var(--accent-400)] border-[var(--signal)]",
   outline:
     "bg-transparent text-[var(--fg-muted)] border-[var(--border-strong)]",
   success:
-    "bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/25",
+    "bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]",
   warning:
-    "bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/25",
+    "bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]",
   danger:
-    "bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/25",
+    "bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]",
   info:
-    "bg-[var(--info-soft)] text-[var(--info)] border-[var(--info)]/25",
+    "bg-[var(--info-soft)] text-[var(--info)] border-[var(--info)]",
   live:
-    "bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/25",
+    "bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]",
   demo:
-    "bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/25",
+    "bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]",
 } as const;
 
 export function Badge({

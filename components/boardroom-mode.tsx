@@ -311,7 +311,7 @@ function Avatar({
         size === "sm" ? "h-9 w-9 text-[12px]" : "h-10 w-10 text-[13px]",
         tone.chip,
         tone.ring,
-        active && "shadow-[0_0_0_3px_var(--card-hover-ring)]"
+        active && "shadow-[var(--shadow-card)]"
       )}
     >
       {initials}
@@ -377,7 +377,7 @@ function CampaignBriefPanel({
               className={cn(
                 "relative rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 transition-all duration-300",
                 criticalActive
-                  ? "border-[var(--warning)]/40 shadow-[0_0_0_1px_var(--warning-soft),0_0_30px_-10px_var(--warning)]"
+                  ? "border-[var(--warning)] shadow-[var(--shadow-card)]"
                   : "border-[var(--border)]"
               )}
             >
@@ -500,7 +500,7 @@ function PersonaRoster({
               "flex flex-col gap-2 rounded-xl border px-2.5 py-2 transition-all duration-200 sm:flex-row sm:items-center",
               active
                 ? "border-[var(--border-bright)] bg-[var(--bg-elevated)]"
-                : "border-[var(--border)] bg-[var(--bg-elev-1)]/50"
+                : "border-[var(--border)] bg-[var(--bg-elevated)]"
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -614,7 +614,7 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full blur-3xl"
+        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[var(--bg-inset)]"
         style={{ background: `radial-gradient(circle, ${tone.glow}, transparent 70%)` }}
       />
       <div className="relative">

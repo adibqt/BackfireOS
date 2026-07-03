@@ -171,7 +171,7 @@ function TreeNodeCard({
           "rounded-2xl border p-3 transition-all duration-500",
           visible ? "scale-100 opacity-100" : "scale-95 opacity-0",
           winner
-            ? "border-[var(--success)]/45 bg-[var(--success-soft)] shadow-[0_0_44px_-12px_rgba(52,211,153,0.45)]"
+            ? "border-[var(--success)] bg-[var(--success-soft)] shadow-[var(--shadow-card)]"
             : isRoot
               ? "border-[var(--border-strong)] bg-[var(--bg-surface)]"
               : "border-[var(--border)] bg-[var(--bg-surface)]"
@@ -223,7 +223,7 @@ function LiveTree() {
     <div className="relative mx-auto mt-14 max-w-4xl overflow-hidden px-1 text-left md:mt-16">
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,var(--aurora-1),transparent_70%)] blur-3xl"
+        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[var(--bg-base)]"
       />
 
       <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[var(--shadow-xl)]">
@@ -410,7 +410,7 @@ export function BranchesAd() {
       <section className="relative overflow-x-clip pb-10 pt-4 text-center md:pt-10">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,var(--aurora-1),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[var(--bg-base)]"
         />
         <div className="bg-grid absolute inset-x-0 top-0 -z-10 h-[620px] opacity-60" aria-hidden />
 
@@ -517,7 +517,7 @@ export function BranchesAd() {
             >
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
-                <span className="absolute inset-0 -z-10 rounded-2xl bg-[var(--accent-soft)] blur-xl" />
+                <span className="absolute inset-0 -z-10 rounded-2xl bg-[var(--accent-soft)]" />
               </div>
               <h3 className="font-display text-[18px] font-semibold tracking-tight text-[var(--fg)]">
                 {s.title}
@@ -533,7 +533,7 @@ export function BranchesAd() {
         <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] surface-dark-panel p-8 md:p-14">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--aurora-1),transparent_60%)] blur-3xl"
+            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[var(--bg-inset)]"
           />
           <div className="relative grid items-start gap-10 md:grid-cols-[1fr_1fr]">
             <div>

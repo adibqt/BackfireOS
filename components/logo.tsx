@@ -250,7 +250,7 @@ export function LogoBadge({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0", className)}
-      style={glow ? { filter: "drop-shadow(0 3px 10px var(--accent-glow))" } : undefined}
+      style={glow ? { boxShadow: "var(--shadow-card)" } : undefined}
       role="img"
       aria-label="Backfire OS"
     >

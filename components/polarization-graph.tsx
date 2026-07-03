@@ -73,7 +73,7 @@ interface GraphEdge {
   kind: "spoke" | "citation" | "proximity";
 }
 
-function buildGraph(
+export function buildGraph(
   verdicts: AgentVerdict[],
   slogan: string
 ): { nodes: GraphNode[]; edges: GraphEdge[] } {
@@ -141,10 +141,12 @@ export function PolarizationGraph({
   verdicts,
   polarizationCoefficient,
   campaignSlogan,
+  embedded = false,
 }: {
   verdicts: AgentVerdict[];
   polarizationCoefficient: number;
   campaignSlogan: string;
+  embedded?: boolean;
 }) {
   const p = useProgress();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -200,15 +202,29 @@ export function PolarizationGraph({
         : "All your critics are zeroing in on the same weakness. That's actually good news — one targeted fix could address most of the risk.";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,var(--aurora-1),transparent_70%)]"
-      />
+    <div
+      className={
+        embedded
+          ? "w-full"
+          : "relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8"
+      }
+    >
+      {!embedded && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,var(--aurora-1),transparent_70%)]"
+        />
+      )}
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_1.05fr]">
+      <div
+        className={
+          embedded
+            ? "relative w-full"
+            : "relative grid items-center gap-8 lg:grid-cols-[1fr_1.05fr]"
+        }
+      >
         {/* Graph */}
-        <div className="mx-auto w-full max-w-[420px]">
+        <div className={embedded ? "mx-auto w-full max-w-[min(42vw,340px)]" : "mx-auto w-full max-w-[420px]"}>
           <svg
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             className="h-auto w-full"
@@ -428,7 +444,7 @@ export function PolarizationGraph({
           </svg>
         </div>
 
-        {/* Side panel */}
+        {!embedded && (
         <div className="flex flex-col gap-5">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
@@ -548,6 +564,7 @@ export function PolarizationGraph({
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

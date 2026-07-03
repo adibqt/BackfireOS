@@ -23,12 +23,12 @@ const variants = {
   ].join(" "),
   outline: [
     "border border-[var(--border)] bg-transparent text-[var(--fg-muted)]",
-    "hover:border-[var(--accent)]/40 hover:text-[var(--accent)] hover:bg-[var(--accent-soft)]",
+    "hover:border-[var(--signal)] hover:text-[var(--signal)] hover:bg-[var(--accent-soft)]",
     "active:scale-[0.98]",
   ].join(" "),
   danger: [
-    "border border-[var(--danger)]/30 bg-[var(--danger-soft)] text-[var(--danger)]",
-    "hover:bg-[var(--danger)]/15 hover:border-[var(--danger)]/50",
+    "border border-[var(--danger)] bg-[var(--danger-soft)] text-[var(--danger)]",
+    "hover:bg-[var(--danger-soft)] hover:border-[var(--danger)]",
     "active:scale-[0.98]",
   ].join(" "),
 } as const;

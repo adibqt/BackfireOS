@@ -157,7 +157,7 @@ function Avatar({ persona, active = false }: { persona: Persona; active?: boolea
         "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-semibold ring-1 ring-inset transition-shadow",
         persona.chip,
         persona.ring,
-        active && "shadow-[0_0_0_3px_var(--card-hover-ring)]"
+        active && "shadow-[var(--shadow-card)]"
       )}
     >
       {persona.initials}
@@ -228,7 +228,7 @@ function LiveSession() {
       {/* Ambient glow under the frame */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,var(--aurora-1),transparent_70%)] blur-3xl"
+        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[var(--bg-base)]"
       />
 
       <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[var(--shadow-xl)]">
@@ -390,7 +390,7 @@ function LiveSession() {
               <div className="fade-up relative mt-auto overflow-hidden rounded-2xl border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-5 py-4">
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),transparent_70%)] blur-2xl"
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[var(--bg-inset)]"
                 />
                 <div className="relative">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
@@ -508,7 +508,7 @@ export function BoardroomAd() {
       <section className="relative overflow-x-clip pb-10 pt-4 text-center md:pt-10">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,var(--aurora-1),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[var(--bg-base)]"
         />
         <div className="bg-grid absolute inset-x-0 top-0 -z-10 h-[620px] opacity-60" aria-hidden />
 
@@ -637,7 +637,7 @@ export function BoardroomAd() {
             >
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
-                <span className="absolute inset-0 -z-10 rounded-2xl bg-[var(--accent-soft)] blur-xl" />
+                <span className="absolute inset-0 -z-10 rounded-2xl bg-[var(--accent-soft)]" />
               </div>
               <h3 className="font-display text-[18px] font-semibold tracking-tight text-[var(--fg)]">
                 {s.title}
@@ -653,7 +653,7 @@ export function BoardroomAd() {
         <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] surface-dark-panel p-8 md:p-14">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--aurora-1),transparent_60%)] blur-3xl"
+            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[var(--bg-inset)]"
           />
           <div className="relative grid items-start gap-10 md:grid-cols-[1fr_1fr]">
             <div>

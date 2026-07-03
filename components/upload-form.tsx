@@ -159,7 +159,7 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
       {/* Decorative glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-x-4 -top-4 -bottom-2 -z-10 rounded-[28px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,var(--aurora-1),transparent_70%)] blur-2xl"
+        className="pointer-events-none absolute -inset-x-4 -top-4 -bottom-2 -z-10 rounded-[28px] bg-[var(--bg-base)]"
       />
 
       <div
