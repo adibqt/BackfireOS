@@ -39,10 +39,7 @@ export function FramedCardFront({
       </div>
       <div className="framed-card__nameplate">
         <div className="min-w-0 flex-1">
-          <h3 className="line-clamp-2 font-display text-[var(--text-xl)] font-medium leading-[var(--leading-tight)] text-[var(--ink-primary)]">
-            {verdict.agentName}
-          </h3>
-          <p className="mt-1.5 font-mono text-[var(--text-base)] uppercase tracking-[0.08em] text-[var(--ink-secondary)]">
+          <p className="font-mono text-[var(--text-base)] uppercase tracking-[0.08em] text-[var(--ink-secondary)]">
             {agentRole(verdict.agentId)}
           </p>
         </div>
@@ -50,7 +47,7 @@ export function FramedCardFront({
           className="framed-card__severity-chip shrink-0"
           aria-label={`${t(locale, "severity")} ${animatedSeverity}`}
         >
-          <span className="font-mono text-[var(--text-xl)] font-semibold tabular-nums leading-none text-[var(--ink-primary)]">
+          <span className="font-mono text-[var(--text-xl)] font-semibold tabular-nums leading-none text-[var(--signal)]">
             {animatedSeverity}
           </span>
         </div>
@@ -119,7 +116,7 @@ export const AgentDossierCard = forwardRef<HTMLButtonElement, AgentDossierCardPr
           onFocus={() => setHovered(true)}
           onBlur={() => setHovered(false)}
           aria-expanded={active}
-          aria-label={`${verdict.agentName}, ${agentRole(verdict.agentId)}`}
+          aria-label={agentRole(verdict.agentId)}
           className={cn(
             "framed-card w-full cursor-pointer text-left outline-none",
             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--signal)]",

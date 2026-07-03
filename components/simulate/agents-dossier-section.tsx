@@ -147,19 +147,19 @@ export function AgentsDossierSection({
         <div className="simulate-gutter">
           <div className="text-center">
             <DossierReveal index={0} visible={sectionVisible}>
-              <p className="font-mono text-[var(--text-sm)] uppercase tracking-[0.1em] text-[var(--ink-tertiary)]">
-                {t(locale, "redTeamAgentsEyebrow")}
-              </p>
-            </DossierReveal>
-
-            <DossierReveal index={1} visible={sectionVisible}>
-              <h2 className="mt-4 font-display text-[var(--text-3xl)] font-medium leading-[var(--leading-tight)] text-[var(--ink-primary)]">
-                {t(locale, "sixAdversariesOneCampaign")}
+              <h2 className="font-display text-[clamp(2rem,4.5vw,3.75rem)] font-medium leading-[var(--leading-tight)] text-[var(--ink-primary)]">
+                {t(locale, "redTeamAgents")}
               </h2>
             </DossierReveal>
 
+            <DossierReveal index={1} visible={sectionVisible}>
+              <p className="mt-5 font-display text-[clamp(1.75rem,3.5vw,3rem)] italic leading-[var(--leading-tight)] text-[var(--ink-secondary)]">
+                {t(locale, "sixAdversariesOneCampaign")}
+              </p>
+            </DossierReveal>
+
             <DossierReveal index={2} visible={sectionVisible}>
-              <p className="mt-4 text-[var(--text-md)] italic text-[var(--ink-secondary)]">
+              <p className="mt-6 text-[var(--text-md)] italic leading-[var(--leading-relaxed)] text-[var(--ink-secondary)]">
                 {t(locale, "tapDossierSubheading")}
               </p>
             </DossierReveal>

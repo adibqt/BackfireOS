@@ -86,6 +86,18 @@ export const strings = {
     axisActive: "active",
     axisSevere: "severe",
     axisCatastrophic: "catastrophic",
+    axisDescBackfireScore:
+      "Composite severity across all six red-team agents. Higher means the campaign is more likely to backfire in market.",
+    axisDescBackfireRisk:
+      "Likelihood the creative triggers backlash, boycotts, or reputational damage beyond the core audience.",
+    axisDescMemeability:
+      "How easily the campaign becomes parody, meme fodder, or screenshot bait — especially among Gen-Z Bangladeshi audiences.",
+    axisDescPolarization:
+      "Potential to split audiences into opposing camps and invite pile-on from critics on both sides.",
+    axisDescBrandSafetyDrift:
+      "Distance between this creative and the brand's stated values or prior campaign promises — inconsistency reads as hypocrisy.",
+    axisDescResonance:
+      "How strongly the message lands with the intended audience. Lower resonance means the creative fails to connect before critics even engage.",
     redTeamAgentsEyebrow: "RED-TEAM AGENTS",
     sixAdversariesOneCampaign: "Six adversaries. One campaign.",
     tapDossierSubheading: "Tap a card to open the case file.",
@@ -200,6 +212,18 @@ export const strings = {
     axisActive: "সক্রিয়",
     axisSevere: "গুরুতর",
     axisCatastrophic: "বিপর্যয়কর",
+    axisDescBackfireScore:
+      "ছয়টি রেড-টিম এজেন্টের সম্মিলিত তীব্রতা। উচ্চ মানে ক্যাম্পেইন বাজারে ব্যাকফায়ার হওয়ার সম্ভাবনা বেশি।",
+    axisDescBackfireRisk:
+      "ক্রিয়েটিভ ব্যাকল্যাশ, বয়কট বা মূল অডিয়েন্সের বাইরে খ্যাতিগত ক্ষতির সম্ভাবনা।",
+    axisDescMemeability:
+      "ক্যাম্পেইন কত সহজে প্যারোডি, মিম বা স্ক্রিনশট-বেট হয় — বিশেষ করে বাংলাদেশি Gen-Z অডিয়েন্সের মধ্যে।",
+    axisDescPolarization:
+      "অডিয়েন্সকে বিপরীত মেরুতে ভাগ করার এবং উভয় পক্ষের সমালোচকদের পাইল-অনের ঝুঁকি।",
+    axisDescBrandSafetyDrift:
+      "এই ক্রিয়েটিভ ও ব্র্যান্ডের ঘোষিত মূল্যবোধ বা আগের ক্যাম্পেইনের প্রতিশ্রুতির মধ্যে দূরত্ব — অসামঞ্জস্যে হিপোক্রিসি দেখা যায়।",
+    axisDescResonance:
+      "বার্তা টার্গেট অডিয়েন্সের কাছে কতটা ল্যান্ড করে। কম রেজোন্যান্স মানে সমালোচকরা জড়ানোর আগেই ক্রিয়েটিভ ব্যর্থ।",
     redTeamAgentsEyebrow: "রেড-টিম এজেন্ট",
     sixAdversariesOneCampaign: "ছয় প্রতিপক্ষ। একটি ক্যাম্পেইন।",
     tapDossierSubheading: "কেস ফাইল খুলতে একটি কার্ডে ট্যাপ করুন।",

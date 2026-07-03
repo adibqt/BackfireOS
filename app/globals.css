@@ -964,6 +964,20 @@ details[open] > summary .chevron {
   height: 100%;
   overflow: hidden;
   background: var(--bg-elevated);
+  border: 2px solid var(--signal);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--signal) 35%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--signal) 25%, transparent);
+  transition:
+    border-color 300ms var(--ease-out-expo),
+    box-shadow 300ms var(--ease-out-expo);
+}
+
+.framed-card--hover .framed-card__photo {
+  border-color: var(--signal);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--signal) 50%, transparent),
+    0 0 16px color-mix(in srgb, var(--signal) 40%, transparent);
 }
 
 .framed-card__nameplate {
@@ -983,9 +997,23 @@ details[open] > summary .chevron {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1px solid var(--hairline);
-  background: var(--bg-elevated);
+  border: 2px solid var(--signal);
+  background: color-mix(in srgb, var(--signal) 14%, var(--bg-elevated));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--signal) 30%, transparent),
+    0 0 14px color-mix(in srgb, var(--signal) 28%, transparent);
   margin-top: 2px;
+  transition:
+    border-color 300ms var(--ease-out-expo),
+    background 300ms var(--ease-out-expo),
+    box-shadow 300ms var(--ease-out-expo);
+}
+
+.framed-card--hover .framed-card__severity-chip {
+  background: color-mix(in srgb, var(--signal) 22%, var(--bg-elevated));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--signal) 45%, transparent),
+    0 0 20px color-mix(in srgb, var(--signal) 42%, transparent);
 }
 
 /* Overlay enlarge + flip + expand — GPU transform-only sequence */

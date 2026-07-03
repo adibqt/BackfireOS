@@ -23,6 +23,23 @@ export function axisInterpretationKey(score: number): AxisInterpretationKey {
   return "axisDormant";
 }
 
+const AXIS_DESC_KEYS = {
+  backfireScore: "axisDescBackfireScore",
+  backfireRisk: "axisDescBackfireRisk",
+  memeability: "axisDescMemeability",
+  polarization: "axisDescPolarization",
+  brandSafetyDrift: "axisDescBrandSafetyDrift",
+  resonance: "axisDescResonance",
+} as const satisfies Record<string, keyof (typeof import("@/lib/i18n"))["strings"]["en"]>;
+
+export function axisDescriptionKey(
+  metricKey: string
+): (typeof AXIS_DESC_KEYS)[keyof typeof AXIS_DESC_KEYS] {
+  return (
+    AXIS_DESC_KEYS[metricKey as keyof typeof AXIS_DESC_KEYS] ?? "axisDescBackfireScore"
+  );
+}
+
 export function truncateQuote(text: string, maxLen = 140): string {
   const trimmed = text.trim();
   if (trimmed.length <= maxLen) return trimmed;

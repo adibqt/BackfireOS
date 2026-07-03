@@ -21,6 +21,19 @@ export function agentRole(agentId: AgentId): string {
   return AGENT_ROLES[agentId] ?? agentId;
 }
 
+export const AGENT_AVATAR_PATHS: Record<AgentId, string> = {
+  meme_engineer: "/agent-avatars/meme-engineer.png",
+  regional_outsider: "/agent-avatars/reg-outsider.png",
+  cynical_journalist: "/agent-avatars/journalist.png",
+  rival_brand: "/agent-avatars/rival.png",
+  regulatory_activist: "/agent-avatars/activist.png",
+  brand_purist: "/agent-avatars/brand-purist.png",
+};
+
+export function agentAvatarPath(agentId: AgentId): string {
+  return AGENT_AVATAR_PATHS[agentId];
+}
+
 export function severityBarColor(severity: number): string {
   if (severity >= 70) return "var(--signal)";
   if (severity >= 40) return "var(--ink-secondary)";
