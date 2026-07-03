@@ -1568,6 +1568,15 @@ details[open] > summary .chevron {
   color: var(--ink-secondary);
 }
 
+:root:not([data-theme="dark"]) .boardroom-page-header .text-section-heading {
+  font-size: clamp(1.625rem, 3vw, 2.25rem);
+}
+
+:root:not([data-theme="dark"]) .boardroom-page-header p {
+  font-size: var(--text-md);
+  color: var(--ink-secondary);
+}
+
 /* Embedded heatmap on simulate page — stack columns to fit viewport */
 .simulate-heatmap-embed > div > .grid {
   grid-template-columns: 1fr !important;

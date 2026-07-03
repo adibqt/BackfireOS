@@ -30,7 +30,7 @@ export function AuthButton() {
   if (!configured) return null;
 
   if (loading) {
-    return <SimpleBlockSkeleton className="h-9 w-20" />;
+    return <SimpleBlockSkeleton className="h-10 w-24" />;
   }
 
   if (!user) {
@@ -38,7 +38,7 @@ export function AuthButton() {
       <Link
         href="/login"
         className={cn(
-          "hidden h-9 items-center rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3.5 text-[13px] font-medium text-[var(--fg)]",
+          "hidden h-10 items-center rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] px-4 text-[14px] font-medium text-[var(--fg)]",
           "transition-colors hover:bg-[var(--bg-elevated)] hover:border-[var(--border-bright)] sm:inline-flex"
         )}
       >
@@ -53,7 +53,7 @@ export function AuthButton() {
     <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger
         className={cn(
-          "flex h-9 items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)] py-0.5 pl-0.5 pr-1.5",
+          "flex h-10 items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)] py-0.5 pl-0.5 pr-1.5",
           "transition-[border-color,background-color,box-shadow] duration-200",
           "hover:border-[var(--border-bright)] hover:bg-[var(--bg-elevated)]",
           menuOpen && "border-[var(--border-bright)] bg-[var(--bg-elevated)] ring-2 ring-[var(--accent-ring)]",
@@ -61,10 +61,10 @@ export function AuthButton() {
         )}
         aria-label={menuOpen ? "Close account menu" : "Open account menu"}
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)] text-[12px] font-semibold text-[var(--selection-fg)] shadow-[var(--btn-primary-shadow)]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-[13px] font-semibold text-[var(--selection-fg)] shadow-[var(--btn-primary-shadow)]">
           {initial}
         </span>
-        <span className="hidden max-w-[120px] truncate text-[13px] text-[var(--fg)] sm:inline">
+        <span className="hidden max-w-[140px] truncate text-[14px] text-[var(--fg)] sm:inline">
           {user.email}
         </span>
         <svg

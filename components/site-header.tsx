@@ -35,17 +35,17 @@ function HeaderLogo() {
   return (
     <div className="group inline-flex items-center gap-2.5">
       <div className="relative shrink-0">
-        <LogoBadge size="sm" glow={false} />
-        <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--success)] ring-2 ring-[var(--bg)] pulse-dot" />
+        <LogoBadge size="md" glow={false} />
+        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--success)] ring-2 ring-[var(--bg)] pulse-dot" />
       </div>
       <div className="hidden flex-col leading-none sm:flex">
-        <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--fg)] transition-colors group-hover:text-[var(--accent-400)]">
+        <span className="font-display text-[17px] font-semibold tracking-tight text-[var(--fg)] transition-colors group-hover:text-[var(--accent-400)]">
           Backfire
           <span className="ml-1 align-[0.08em] font-mono text-[0.7em] font-medium tracking-[0.18em] text-[var(--fg-muted)]">
             OS
           </span>
         </span>
-        <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--fg-subtle)]">
+        <span className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--fg-subtle)]">
           Adversarial brand sim
         </span>
       </div>
@@ -146,14 +146,14 @@ function SiteHeaderInner() {
       className={cn(
         "sticky top-0 z-40 overflow-x-clip transition-[background-color,box-shadow,height,border-color] duration-300 ease-[ease]",
         scrolled
-          ? "h-[52px] border-b border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
-          : "h-16 border-b border-transparent bg-transparent"
+          ? "h-[60px] border-b border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
+          : "h-[72px] border-b border-transparent bg-transparent"
       )}
     >
       <div
         className={cn(
-          "flex w-full min-w-0 items-center justify-between gap-4 px-5 md:px-8",
-          scrolled ? "py-2" : "py-3.5"
+          "flex w-full min-w-0 items-center justify-between gap-4 px-5 md:px-8 lg:px-10",
+          scrolled ? "py-2.5" : "py-4"
         )}
         style={{ transition: "padding 0.25s ease" }}
       >
@@ -167,7 +167,7 @@ function SiteHeaderInner() {
 
         <nav
           ref={navRef}
-          className="relative hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] p-1 lg:flex"
+          className="relative hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] p-1.5 lg:flex"
           aria-label="Main"
         >
           {/* Sliding active pill */}
@@ -203,7 +203,7 @@ function SiteHeaderInner() {
                 }}
                 data-active={String(active)}
                 className={cn(
-                  "relative rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-200",
+                  "relative rounded-full px-4 py-2 text-[15px] font-medium transition-colors duration-200",
                   active
                     ? "text-[var(--fg)]"
                     : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
@@ -221,13 +221,13 @@ function SiteHeaderInner() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
             {theme === "dark" ? (
-              <Sun size={16} strokeWidth={2} aria-hidden />
+              <Sun size={18} strokeWidth={2} aria-hidden />
             ) : (
-              <Moon size={16} strokeWidth={2} aria-hidden />
+              <Moon size={18} strokeWidth={2} aria-hidden />
             )}
           </button>
 
@@ -242,7 +242,7 @@ function SiteHeaderInner() {
                 type="button"
                 onClick={() => setLocale(lang)}
                 className={cn(
-                  "rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider transition-colors duration-200",
+                  "rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-wider transition-colors duration-200",
                   locale === lang
                     ? "bg-[var(--bg-elevated)] text-[var(--fg)]"
                     : "text-[var(--fg-subtle)] hover:text-[var(--fg)]"
@@ -257,18 +257,18 @@ function SiteHeaderInner() {
 
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] lg:hidden"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((open) => !open)}
           >
             {mobileOpen ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <line x1="4" y1="8" x2="20" y2="8" />
                 <line x1="4" y1="16" x2="20" y2="16" />
               </svg>
@@ -279,7 +279,7 @@ function SiteHeaderInner() {
 
       {mobileOpen && (
         <nav
-          className="border-t border-[var(--border)] bg-[var(--bg-surface)] px-5 py-4 lg:hidden fade-in"
+          className="border-t border-[var(--border)] bg-[var(--bg-surface)] px-5 py-5 lg:hidden fade-in"
           aria-label="Mobile"
         >
           <div className="flex flex-col gap-1">
@@ -294,7 +294,7 @@ function SiteHeaderInner() {
                     setMobileOpen(false);
                   }}
                   className={cn(
-                    "rounded-lg px-3 py-2.5 text-sm transition-colors",
+                    "rounded-lg px-3.5 py-3 text-[15px] transition-colors",
                     active
                       ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
                       : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
@@ -311,7 +311,7 @@ function SiteHeaderInner() {
                 setMobileOpen(false);
               }}
               className={cn(
-                "rounded-lg px-3 py-2.5 text-sm transition-colors",
+                "rounded-lg px-3.5 py-3 text-[15px] transition-colors",
                 pathname === "/history"
                   ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
                   : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
@@ -325,10 +325,10 @@ function SiteHeaderInner() {
                 <div className="my-2 border-t border-[var(--border)]" />
                 {user ? (
                   <>
-                    <p className="px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+                    <p className="px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
                       Signed in as
                     </p>
-                    <p className="truncate px-3 pb-1 text-[13px] text-[var(--fg-muted)]">
+                    <p className="truncate px-3 pb-1 text-[14px] text-[var(--fg-muted)]">
                       {user.email}
                     </p>
                     <button
@@ -339,7 +339,7 @@ function SiteHeaderInner() {
                         router.push("/login");
                         router.refresh();
                       }}
-                      className="w-full rounded-lg px-3 py-2.5 text-left text-sm text-[var(--danger)] transition-colors hover:bg-[var(--danger-soft)]"
+                      className="w-full rounded-lg px-3.5 py-3 text-left text-[15px] text-[var(--danger)] transition-colors hover:bg-[var(--danger-soft)]"
                     >
                       Sign out
                     </button>
@@ -351,7 +351,7 @@ function SiteHeaderInner() {
                       startNavigation();
                       setMobileOpen(false);
                     }}
-                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-[var(--bg-elevated)]"
+                    className="rounded-lg px-3.5 py-3 text-[15px] font-medium text-[var(--fg)] transition-colors hover:bg-[var(--bg-elevated)]"
                   >
                     Sign in
                   </Link>

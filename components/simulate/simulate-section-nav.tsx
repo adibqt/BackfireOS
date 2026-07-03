@@ -62,7 +62,7 @@ export function SimulateSectionNav({ locale }: { locale: Locale }) {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const headerOffset = 72;
+    const headerOffset = 76;
     const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
     window.scrollTo({ top, behavior: "smooth" });
   };

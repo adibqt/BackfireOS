@@ -201,7 +201,7 @@ function renderInline(text: string): React.ReactNode[] {
     const bold = m[1] ?? m[3];
     if (bold !== undefined) {
       nodes.push(
-        <strong key={key++} className="font-semibold text-[var(--fg)]">
+        <strong key={key++} className="font-semibold text-[var(--ink-primary)]">
           {bold}
         </strong>
       );
@@ -230,7 +230,7 @@ function ConfidenceSignal({
   if (severity === null) {
     if (personaId === "brand_manager") {
       return (
-        <span className="inline-flex items-center rounded-full border border-[var(--success)]/25 bg-[var(--success-soft)] px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-[var(--success)]">
+        <span className="inline-flex items-center rounded-full border border-[var(--success)]/25 bg-[var(--success-soft)] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-[var(--success)]">
           Pro-launch
         </span>
       );
@@ -239,7 +239,7 @@ function ConfidenceSignal({
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-full border border-transparent px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider",
+          "inline-flex items-center rounded-full border border-transparent px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider",
           tone.chip
         )}
       >
@@ -259,7 +259,7 @@ function ConfidenceSignal({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium tracking-wider",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[11px] font-medium tracking-wider",
         tone
       )}
       title={`Red-team severity for this persona: ${severity}/100`}
@@ -278,7 +278,7 @@ function ConfidenceSignal({
 /** Pulsing "Thinking…" placeholder shown the moment a persona takes the floor. */
 function ThinkingIndicator() {
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+    <span className="inline-flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
       Thinking
       <span className="flex gap-1">
         {[0, 1, 2].map((i) => (
@@ -308,7 +308,7 @@ function Avatar({
     <span
       className={cn(
         "relative flex shrink-0 items-center justify-center rounded-lg font-mono font-semibold ring-1 ring-inset transition-shadow",
-        size === "sm" ? "h-9 w-9 text-[12px]" : "h-10 w-10 text-[13px]",
+        size === "sm" ? "h-9 w-9 text-[13px]" : "h-10 w-10 text-[14px]",
         tone.chip,
         tone.ring,
         active && "shadow-[var(--shadow-card)]"
@@ -351,7 +351,7 @@ function CampaignBriefPanel({
               alt="Campaign creative under debate"
               className="h-full w-full object-cover"
             />
-            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
               Exhibit A
             </span>
           </div>
@@ -360,7 +360,7 @@ function CampaignBriefPanel({
         <div className="space-y-5 p-4 sm:p-5">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">
+              <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--accent)]">
                 Campaign on trial
               </p>
               {isVariant && (
@@ -388,16 +388,16 @@ function CampaignBriefPanel({
                 )}
                 aria-hidden
               />
-              <p className="font-display text-[15px] font-semibold leading-snug tracking-tight text-[var(--fg)] sm:text-[17px]">
+              <p className="font-display text-[17px] font-semibold leading-snug tracking-tight text-[var(--ink-primary)] sm:text-[19px]">
                 “{slogan}”
               </p>
               {isVariant && (
-                <p className="mt-2 truncate font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+                <p className="mt-2 truncate font-mono text-[11px] uppercase tracking-wider text-[var(--ink-secondary)]">
                   original: “{campaign.slogan}”
                 </p>
               )}
               {criticalActive && (
-                <p className="mt-1.5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--warning)]">
+                <p className="mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-[var(--warning)]">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--warning)]" />
                   under cross-examination
                 </p>
@@ -417,7 +417,7 @@ function CampaignBriefPanel({
 
           {run.verdicts && run.verdicts.length > 0 && (
             <div className="border-t border-[var(--border)] pt-4">
-              <p className="mb-3 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
+              <p className="mb-3 font-mono text-[12px] uppercase tracking-wider text-[var(--ink-secondary)]">
                 Red-team severity
               </p>
               <div className="space-y-2.5">
@@ -436,11 +436,11 @@ function CampaignBriefPanel({
                     return (
                       <div key={v.agentId}>
                         <div className="mb-1 flex items-center justify-between gap-2">
-                          <span className="truncate text-[12px] text-[var(--fg-muted)]">
+                          <span className="truncate text-[14px] text-[var(--ink-secondary)]">
                             {v.agentName}
                           </span>
                           <span
-                            className="font-mono text-[11px] font-medium"
+                            className="font-mono text-[12px] font-medium"
                             style={{ color }}
                           >
                             {Math.round(v.severity)}
@@ -467,10 +467,10 @@ function CampaignBriefPanel({
 function BriefRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-1 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
+      <p className="mb-1 font-mono text-[12px] uppercase tracking-wider text-[var(--ink-secondary)]">
         {label}
       </p>
-      <p className="text-[13px] leading-relaxed text-[var(--fg-muted)]">{children}</p>
+      <p className="text-[15px] leading-relaxed text-[var(--ink-secondary)]">{children}</p>
     </div>
   );
 }
@@ -506,13 +506,13 @@ function PersonaRoster({
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <Avatar initials={p.initials} tone={tone} size="sm" active={active} />
               <div className="min-w-0 flex-1 leading-tight">
-                <p className="flex items-center gap-1.5 truncate text-[13px] font-medium text-[var(--fg)]">
+                <p className="flex items-center gap-1.5 truncate text-[15px] font-medium text-[var(--ink-primary)]">
                   {p.name}
                   {active && (
                     <span className={cn("inline-block h-1.5 w-1.5 animate-pulse rounded-full", tone.dot)} />
                   )}
                 </p>
-                <p className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+                <p className="truncate font-mono text-[11px] uppercase tracking-wider text-[var(--ink-secondary)]">
                   {active && thinking ? "thinking…" : tone.stance}
                 </p>
               </div>
@@ -563,7 +563,7 @@ function ChatBubble({
             right && "justify-end"
           )}
         >
-          <span className="font-display text-[12.5px] font-semibold tracking-tight text-[var(--fg)] sm:text-[13px]">
+          <span className="font-display text-[14px] font-semibold tracking-tight text-[var(--ink-primary)] sm:text-[15px]">
             {message.speakerName}
           </span>
           <ConfidenceSignal personaId={message.speakerId} severity={severity} />
@@ -578,7 +578,7 @@ function ChatBubble({
             to form a chat "tail". */}
         <div
           className={cn(
-            "w-full rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-[var(--fg)] sm:px-4 sm:text-[14px]",
+            "w-full rounded-2xl border px-4 py-3 text-[15px] leading-relaxed text-[var(--ink-primary)] sm:px-4 sm:text-[16px] sm:leading-[1.65]",
             tone.bubble,
             right ? "rounded-br-sm" : "rounded-bl-sm"
           )}
@@ -587,7 +587,7 @@ function ChatBubble({
           {isThinking ? (
             <ThinkingIndicator />
           ) : isEmpty ? (
-            <span className="text-[13px] italic text-[var(--fg-subtle)]">
+            <span className="text-[15px] italic text-[var(--ink-secondary)]">
               — held back this round —
             </span>
           ) : (
@@ -620,13 +620,13 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
       <div className="relative">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+            <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--ink-secondary)]">
               Boardroom recommendation
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
               <span
                 className={cn(
-                  "font-display text-[28px] font-semibold leading-none tracking-tight sm:text-[34px]",
+                  "font-display text-[32px] font-semibold leading-none tracking-tight sm:text-[38px]",
                   tone.text
                 )}
               >
@@ -646,20 +646,20 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
           </div>
         </div>
 
-        <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-[var(--fg-muted)]">
+        <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-[var(--ink-secondary)]">
           {transcript.synthesis.summary}
         </p>
 
         {transcript.synthesis.conditions.length > 0 && (
           <div className="mt-6">
-            <p className="mb-3 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
+            <p className="mb-3 font-mono text-[12px] uppercase tracking-wider text-[var(--ink-secondary)]">
               Conditions before launch
             </p>
             <ul className="space-y-2.5">
               {transcript.synthesis.conditions.map((c, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-2.5 text-[14px] leading-relaxed text-[var(--fg-muted)]"
+                  className="flex items-start gap-2.5 text-[15px] leading-relaxed text-[var(--ink-secondary)]"
                 >
                   <span className="mt-1.5 inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
                   {c}
@@ -703,7 +703,7 @@ function RunPicker({
           </option>
         ))}
       </Select>
-      {emptyMessage && <p className="text-[13px] text-[var(--fg-muted)]">{emptyMessage}</p>}
+      {emptyMessage && <p className="text-[15px] text-[var(--ink-secondary)]">{emptyMessage}</p>}
     </div>
   );
 }
@@ -726,7 +726,7 @@ function SloganVariantPicker({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
+      <label className="block font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ink-secondary)]">
         Slogan version
       </label>
       <Select
@@ -766,7 +766,7 @@ function IterationTimeline({
   return (
     <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+        <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
           Iterations
         </p>
         <Badge variant="outline">{iterations.length} saved</Badge>
@@ -788,19 +788,19 @@ function IterationTimeline({
               >
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                   <span className="flex min-w-0 flex-wrap items-center gap-2">
-                    <span className="font-mono text-[11px] text-[var(--fg-subtle)]">
+                    <span className="font-mono text-[12px] text-[var(--ink-secondary)]">
                       #{it.iteration}
                     </span>
                     <Badge variant={tone.chip} dot>
                       {tone.label}
                     </Badge>
                     {it.branchLabel && (
-                      <span className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--accent-200)]">
+                      <span className="truncate font-mono text-[11px] uppercase tracking-wider text-[var(--accent-200)]">
                         ⎇ {it.branchLabel}
                       </span>
                     )}
                   </span>
-                  <span className="shrink-0 font-mono text-[10px] text-[var(--fg-subtle)]">
+                  <span className="shrink-0 font-mono text-[11px] text-[var(--ink-secondary)]">
                     {new Date(it.createdAt).toLocaleString(undefined, {
                       month: "short",
                       day: "numeric",
@@ -809,10 +809,10 @@ function IterationTimeline({
                     })}
                   </span>
                 </div>
-                <p className="truncate text-[13px] text-[var(--fg-muted)]">
+                <p className="truncate text-[14px] text-[var(--ink-secondary)]">
                   “{it.campaignSlogan}”
                 </p>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+                <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--ink-secondary)]">
                   {it.synthesis.confidence}% confidence · {it.rounds} rounds
                   {it.converged ? " · converged" : ""}
                   {it.degraded ? " · degraded" : ""}
@@ -1240,7 +1240,7 @@ function BoardroomInner() {
         eyebrow={t(locale, "boardroom")}
         title="Watch the room argue your campaign"
         description="Four synthetic personas debate the campaign live — the Activist argues with the Brand Manager while the Cynical Journalist cross-examines the slogan. Read the exchange, then the room's greenlight call."
-        className="mb-6 sm:mb-8"
+        className="boardroom-page-header mb-6 sm:mb-8"
       />
 
       <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
@@ -1328,7 +1328,7 @@ function BoardroomInner() {
           {/* Center: the live audit trail. */}
           <div className="order-1 min-w-0 lg:order-none">
             {/* Blue informational banner — sets expectations for the agentic run. */}
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[var(--info)]/25 bg-[var(--info-soft)] px-3.5 py-2.5 text-[12.5px] text-[var(--info)] sm:px-4 sm:text-[13px]">
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[var(--info)]/25 bg-[var(--info-soft)] px-3.5 py-3 text-[14px] text-[var(--info)] sm:px-4 sm:text-[15px]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0" aria-hidden>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="16" x2="12" y2="12" />
@@ -1343,7 +1343,7 @@ function BoardroomInner() {
             {displayPersonas.length > 0 && (
               <div className="mb-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
                 <div className="mb-3 flex items-center justify-between gap-3 px-1">
-                  <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+                  <p className="flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
                     {debating && (
                       <span className="relative flex h-2 w-2">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
@@ -1372,7 +1372,7 @@ function BoardroomInner() {
               {renderMessages.length === 0 && (
                 <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
                   <ThinkingIndicator />
-                  <p className="max-w-xs text-[13px] text-[var(--fg-muted)]">
+                  <p className="max-w-xs text-[15px] text-[var(--ink-secondary)]">
                     {status || "Convening the boardroom…"}
                   </p>
                 </div>
@@ -1385,7 +1385,7 @@ function BoardroomInner() {
                     {showDivider && (
                       <div className="flex items-center justify-center gap-3 py-1">
                         <span className="h-px w-10 bg-[var(--border)]" />
-                        <span className="rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+                        <span className="rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-0.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ink-secondary)]">
                           Round {m.round}
                         </span>
                         <span className="h-px w-10 bg-[var(--border)]" />
