@@ -35,7 +35,7 @@ export function BlockRenderer({ block }: { block: DocBlock }) {
           {block.items.map((i) => (
             <li
               key={i.label}
-              className="rounded-xl border border-[var(--border)] bg-white/[0.015] p-4"
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
             >
               <div className="flex items-start gap-2.5">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5" className="mt-0.5 shrink-0" aria-hidden>
@@ -71,7 +71,7 @@ export function BlockRenderer({ block }: { block: DocBlock }) {
           {block.items.map((i) => (
             <div
               key={i.title}
-              className="rounded-xl border border-[var(--border)] bg-white/[0.015] p-4 transition-colors hover:border-[var(--border-strong)]"
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-colors hover:border-[var(--border-strong)]"
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="font-display text-[15px] font-semibold tracking-tight text-[var(--fg)]">{i.title}</p>
@@ -107,7 +107,7 @@ export function BlockRenderer({ block }: { block: DocBlock }) {
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
           <table className="w-full border-collapse text-left text-[13px]">
             <thead>
-              <tr className="border-b border-[var(--border)] bg-white/[0.02]">
+              <tr className="border-b border-[var(--border)] bg-[var(--bg-elevated)]">
                 {block.headers.map((h) => (
                   <th key={h} className="px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
                     {h}

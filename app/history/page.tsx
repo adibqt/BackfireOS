@@ -98,7 +98,7 @@ function RunRow({
             <Badge
               variant={level === "high" ? "danger" : level === "medium" ? "warning" : "success"}
             >
-              Backfire {Math.round(run.scores.backfireScore)}
+              Backfire Score {Math.round(run.scores.backfireScore)}
             </Badge>
             <Badge variant="outline" className="hidden sm:inline-flex">
               Meme {Math.round(run.scores.memeability)}
@@ -214,7 +214,7 @@ export default function HistoryPage() {
       {!loading && !error && runs.length > 0 && (
         <div className="mb-8 grid gap-3 sm:grid-cols-3">
           <StatCard label="Total runs" value={stats.total.toString()} />
-          <StatCard label="Average Backfire" value={Math.round(stats.avg).toString()} accent />
+          <StatCard label="Average Backfire Score" value={Math.round(stats.avg).toString()} accent />
           <StatCard label="High-risk runs" value={stats.high.toString()} />
         </div>
       )}

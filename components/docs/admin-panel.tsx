@@ -294,7 +294,7 @@ export function DocsAdminPanel({ initialConfig }: { initialConfig: DocsConfig })
             {config.team.map((m, idx) => (
               <div
                 key={m.id}
-                className="rounded-xl border border-[var(--border)] bg-white/[0.012] p-4"
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
               >
                 <div className="flex items-start gap-4">
                   <Avatar name={m.name || "?"} src={m.avatarUrl} size="md" />

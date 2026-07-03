@@ -65,10 +65,10 @@ export function RiskBadge({
   label?: string;
 }) {
   const variant =
-    level === "high" ? "danger" : level === "medium" ? "warning" : "success";
+    level === "high" ? "accent" : level === "medium" ? "default" : "outline";
 
   return (
-    <Badge variant={variant} className="font-mono">
+    <Badge variant={variant} className="font-mono tabular-nums">
       {label && `${label} `}
       {Math.round(score)}
     </Badge>

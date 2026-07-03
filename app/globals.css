@@ -112,6 +112,21 @@
   --z-modal-backdrop: 80;
   --z-modal: 90;
   --z-toast: 100;
+
+  /* Typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.25rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.75;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "Fira Code", monospace;
 }
 
 [data-theme="dark"] {
@@ -256,9 +271,9 @@
   --color-success-muted: var(--success-soft);
   --color-danger-muted: var(--danger-soft);
 
-  --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-syne);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "Fira Code", monospace;
 }
 
 /* ──────────────────────────────────────────────────────────────────
@@ -285,7 +300,9 @@ html {
 body {
   background-color: var(--bg);
   color: var(--fg);
-  font-family: var(--font-dm-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   min-height: 100vh;
   position: relative;
@@ -324,12 +341,41 @@ body > * {
 }
 
 .font-display {
-  font-family: var(--font-syne), system-ui, sans-serif;
+  font-family: var(--font-sans);
   letter-spacing: -0.02em;
 }
 
 .font-mono {
-  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-family: var(--font-mono);
+}
+
+.text-page-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+.text-section-heading {
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+}
+
+.text-card-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+.text-body {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.text-mono-data {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
 }
 
 /* ──────────────────────────────────────────────────────────────────
@@ -432,10 +478,7 @@ body > * {
 
 .card-glow:hover {
   border-color: var(--border-strong);
-  box-shadow:
-    0 0 0 1px var(--card-hover-ring),
-    var(--shadow-lg),
-    0 0 60px -16px var(--accent-glow);
+  box-shadow: var(--shadow-md);
 }
 
 /* Animated gradient border */
@@ -754,6 +797,77 @@ details > summary::-webkit-details-marker {
 
 details[open] > summary .chevron {
   transform: rotate(180deg);
+}
+
+/* Scroll reveal */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.4s ease-out;
+  will-change: transform, opacity;
+}
+
+.reveal-on-scroll.reveal-on-scroll--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
+
+/* Collapsible content animation */
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible-content {
+    transition: none;
+  }
+}
+
+/* Modal panel animation */
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-panel-enter {
+  animation: modal-panel-in 0.2s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-panel-enter {
+    animation: fade-in 0.01ms both;
+    transform: none;
+  }
+}
+
+/* Agent card expand */
+.agent-card-body {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-card-body {
+    transition: none;
+  }
 }
 
 /* Focus rings */

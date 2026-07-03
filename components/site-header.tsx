@@ -10,6 +10,7 @@ import { useLanguage } from "./language-provider";
 import { LogoBadge } from "./logo";
 import { useNavigationProgress } from "@/components/navigation-progress";
 import { useTheme } from "@/lib/theme-provider";
+import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +75,7 @@ function SiteHeaderInner() {
   const searchParams = useSearchParams();
   const { user, configured: authConfigured } = useAuthUser();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrollPosition(60);
   const [pill, setPill] = useState<Pill | null>(null);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -140,23 +141,22 @@ function SiteHeaderInner() {
     return () => ro.disconnect();
   }, [syncPillToActive]);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 overflow-x-clip transition-[background-color,border-color] duration-200",
+        "sticky top-0 z-40 overflow-x-clip transition-[background-color,box-shadow,height,border-color] duration-300 ease-[ease]",
         scrolled
-          ? "border-b border-[var(--border)] bg-[var(--bg)]/95"
-          : "border-b border-transparent bg-transparent"
+          ? "h-[52px] border-b border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
+          : "h-16 border-b border-transparent bg-transparent"
       )}
     >
-      <div className="flex w-full min-w-0 items-center justify-between gap-4 px-5 py-3.5 md:px-8">
+      <div
+        className={cn(
+          "flex w-full min-w-0 items-center justify-between gap-4 px-5 md:px-8",
+          scrolled ? "py-2" : "py-3.5"
+        )}
+        style={{ transition: "padding 0.25s ease" }}
+      >
         <Link
           href="/"
           className="group no-underline"

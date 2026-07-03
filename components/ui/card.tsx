@@ -141,11 +141,11 @@ export function SectionHeader({
             {eyebrow}
           </p>
         )}
-        <h2 className="font-display text-2xl font-semibold tracking-tight text-[var(--fg)] md:text-3xl">
+        <h2 className="text-section-heading font-semibold text-[var(--fg)]">
           {title}
         </h2>
         {description && (
-          <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[var(--fg-muted)]">
+          <p className="mt-2 max-w-2xl text-[var(--text-base)] leading-[var(--leading-normal)] text-[var(--fg-muted)]">
             {description}
           </p>
         )}

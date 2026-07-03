@@ -1,36 +1,15 @@
 import type { AgentVerdict } from "@/lib/agents/types";
 import { riskLevel } from "@/lib/scoring";
 import { Badge, RiskBadge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
-const AGENT_INITIALS: Record<string, string> = {
-  meme_engineer: "ME",
-  regional_outsider: "RO",
-  cynical_journalist: "CJ",
-  rival_brand: "RB",
-  cultural_activist: "CA",
+const AGENT_ROLES: Record<string, string> = {
+  meme_engineer: "Meme Engineer",
+  regional_outsider: "Regional Outsider",
+  cynical_journalist: "Cynical Journalist",
+  rival_brand: "Rival Brand",
+  regulatory_activist: "Regulatory Activist",
+  brand_purist: "Brand Purist",
 };
-
-const LEVEL_TONE = {
-  low: {
-    ring: "ring-[var(--success)]/20",
-    bar: "bg-[var(--success)]",
-    chip: "bg-[var(--success-soft)] text-[var(--success)]",
-    accent: "from-[var(--success)]/40",
-  },
-  medium: {
-    ring: "ring-[var(--warning)]/25",
-    bar: "bg-[var(--warning)]",
-    chip: "bg-[var(--warning-soft)] text-[var(--warning)]",
-    accent: "from-[var(--warning)]/40",
-  },
-  high: {
-    ring: "ring-[var(--danger)]/30",
-    bar: "bg-[var(--danger)]",
-    chip: "bg-[var(--danger-soft)] text-[var(--danger)]",
-    accent: "from-[var(--danger)]/40",
-  },
-} as const;
 
 export function AgentVerdictCard({
   verdict,
@@ -40,62 +19,27 @@ export function AgentVerdictCard({
   labels: { severity: string; reasoning: string; sampleAttack: string };
 }) {
   const level = riskLevel(verdict.severity);
-  const tone = LEVEL_TONE[level];
-  const initials =
-    AGENT_INITIALS[verdict.agentId] ?? verdict.agentName.slice(0, 2).toUpperCase();
+  const role = AGENT_ROLES[verdict.agentId] ?? verdict.agentName;
 
   return (
-    <details
-      className={cn(
-        "group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] card-glow"
-      )}
-    >
-      {/* Left accent line */}
-      <div
-        className={cn(
-          "absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b to-transparent",
-          tone.accent
-        )}
-        aria-hidden
-      />
-
-      <summary className="cursor-pointer list-none px-6 py-5">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div
-              className={cn(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-mono text-[13px] font-semibold ring-1 ring-inset",
-                tone.chip,
-                tone.ring
-              )}
-            >
-              {initials}
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-display text-[15px] font-semibold text-[var(--fg)]">
-                  {verdict.agentName}
-                </h3>
-                {verdict.source === "mock" && (
-                  <Badge
-                    variant="demo"
-                    title="This agent fell back to demo data — the model was unavailable or returned an unusable response. Its severity is heuristic, not a real judgment."
-                  >
-                    Demo data
-                  </Badge>
-                )}
-              </div>
-              <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
-                {verdict.agentId}
-              </p>
-            </div>
+    <details className="group overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+      <summary className="cursor-pointer list-none px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+            <h3 className="text-card-title text-[var(--fg)]">{verdict.agentName}</h3>
+            <span className="text-[var(--text-xs)] text-[var(--fg-subtle)]">{role}</span>
+            {verdict.source === "mock" && (
+              <Badge variant="outline" title="Demo data — severity is heuristic.">
+                Demo
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--bg-elev-2)]">
+            <div className="hidden min-w-[80px] sm:block">
+              <div className="h-px w-full overflow-hidden bg-[var(--border-strong)]">
                 <div
-                  className={cn("h-full rounded-full transition-all duration-700", tone.bar)}
-                  style={{ width: `${verdict.severity}%` }}
+                  className="h-full bg-[var(--accent)] transition-all duration-700"
+                  style={{ width: `${verdict.severity}%`, opacity: 0.35 + (verdict.severity / 100) * 0.65 }}
                 />
               </div>
             </div>
@@ -116,33 +60,29 @@ export function AgentVerdictCard({
         </div>
       </summary>
 
-      <div className="space-y-5 border-t border-[var(--border)] px-6 py-5 text-sm fade-in">
+      <div className="agent-card-body space-y-4 border-t border-[var(--border)] px-5 py-4">
         <div>
-          <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
+          <p className="mb-2 font-mono text-[var(--text-xs)] uppercase tracking-wider text-[var(--fg-subtle)]">
             {labels.reasoning}
           </p>
-          <p className="leading-relaxed text-[var(--fg-muted)]">{verdict.reasoning}</p>
+          <p className="text-[var(--text-md)] leading-[var(--leading-relaxed)] text-[var(--fg-muted)]">
+            {verdict.reasoning}
+          </p>
         </div>
         <div>
-          <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
+          <p className="mb-2 font-mono text-[var(--text-xs)] uppercase tracking-wider text-[var(--fg-subtle)]">
             {labels.sampleAttack}
           </p>
-          <blockquote className="relative rounded-xl border border-[var(--accent)]/20 bg-[var(--accent-soft)] px-4 py-3 font-mono text-[13px] leading-relaxed text-[var(--accent-200)]">
-            <span className="absolute left-2 top-1 font-display text-2xl leading-none text-[var(--accent)]/30">
-              &ldquo;
-            </span>
-            <span className="block pl-3">{verdict.sampleAttack}</span>
+          <blockquote className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 font-mono text-[var(--text-sm)] leading-[var(--leading-relaxed)] text-[var(--fg-muted)]">
+            {verdict.sampleAttack}
           </blockquote>
         </div>
         {verdict.citationIds.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
-              RAG sources:
-            </span>
+          <div className="flex flex-wrap items-center gap-1.5">
             {verdict.citationIds.map((id) => (
               <span
                 key={id}
-                className="rounded-md bg-[var(--bg-elev-2)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--fg-muted)]"
+                className="rounded-md border border-[var(--border)] bg-[var(--bg-elev-2)] px-2 py-0.5 font-mono text-[var(--text-xs)] text-[var(--fg-subtle)]"
               >
                 {id}
               </span>

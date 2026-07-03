@@ -257,7 +257,7 @@ function LiveSession() {
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--accent)]">
               Campaign on trial
             </p>
-            <blockquote className="mt-2.5 rounded-xl border border-[var(--border)] bg-white/[0.02] px-3.5 py-3">
+            <blockquote className="mt-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-3.5 py-3">
               <p className="font-display text-[14px] font-semibold leading-snug tracking-tight text-[var(--fg)] sm:text-[16px]">
                 “{TRIAL_SLOGAN}”
               </p>

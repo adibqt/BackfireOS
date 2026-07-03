@@ -7,8 +7,9 @@ const variants = {
     "relative isolate text-[var(--selection-fg)]",
     "bg-[var(--accent)]",
     "shadow-[var(--btn-primary-shadow)]",
-    "hover:brightness-110",
+    "hover:brightness-110 hover:scale-[1.02]",
     "active:scale-[0.98] active:brightness-95",
+    "transition-[transform,filter] duration-150 ease",
   ].join(" "),
   secondary: [
     "border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--fg)]",

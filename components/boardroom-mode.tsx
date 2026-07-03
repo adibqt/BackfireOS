@@ -351,7 +351,7 @@ function CampaignBriefPanel({
               alt="Campaign creative under debate"
               className="h-full w-full object-cover"
             />
-            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80">
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-muted)]">
               Exhibit A
             </span>
           </div>
@@ -375,7 +375,7 @@ function CampaignBriefPanel({
                 counterfactual variant is on trial we quote IT (not the original). */}
             <blockquote
               className={cn(
-                "relative rounded-xl border bg-white/[0.02] px-4 py-3 transition-all duration-300",
+                "relative rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 transition-all duration-300",
                 criticalActive
                   ? "border-[var(--warning)]/40 shadow-[0_0_0_1px_var(--warning-soft),0_0_30px_-10px_var(--warning)]"
                   : "border-[var(--border)]"
@@ -783,7 +783,7 @@ function IterationTimeline({
                 disabled={debating}
                 className={cn(
                   "flex w-full flex-col gap-1.5 px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                  active ? "bg-[var(--bg-elevated)]" : "hover:bg-white/[0.025]"
+                  active ? "bg-[var(--bg-elevated)]" : "hover:bg-[var(--bg-surface)]"
                 )}
               >
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">

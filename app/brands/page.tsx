@@ -100,7 +100,7 @@ export default function BrandsPage() {
         <PageHero
           eyebrow="Brands"
           title="Your brands"
-          description="Create a brand to anchor its canonical values. The Brand Purist audits each campaign against the brand's history."
+          description="Create a brand to anchor canonical values for the Brand Purist."
         />
         <div className="flex gap-2">
           <PendingButtonLink href="/" variant="secondary">
@@ -200,7 +200,7 @@ export default function BrandsPage() {
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {brands.map((brand) => (
               <BrandRow
                 key={brand.id}

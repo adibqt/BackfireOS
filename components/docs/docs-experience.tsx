@@ -120,7 +120,7 @@ export function DocsExperience({
   return (
     <div className="docs-root min-h-screen">
       {/* ── Toolbar ──────────────────────────────────────────────── */}
-      <header className="no-print sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/95">
+      <header className="no-print sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg-surface)]">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
           <Link href="/" className="flex items-center gap-2.5 no-underline">
             <LogoBadge size="sm" glow={false} />
