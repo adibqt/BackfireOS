@@ -23,13 +23,25 @@ export function axisInterpretationKey(score: number): AxisInterpretationKey {
   return "axisDormant";
 }
 
-export function truncateQuote(text: string, maxLen = 90): string {
+export function truncateQuote(text: string, maxLen = 140): string {
   const trimmed = text.trim();
   if (trimmed.length <= maxLen) return trimmed;
-  return `${trimmed.slice(0, maxLen).trim()}…`;
+
+  const slice = trimmed.slice(0, maxLen);
+  const lastPeriod = slice.lastIndexOf(".");
+  if (lastPeriod >= Math.floor(maxLen * 0.4)) {
+    return slice.slice(0, lastPeriod + 1).trim();
+  }
+
+  const lastSpace = slice.lastIndexOf(" ");
+  if (lastSpace > 0) {
+    return `${slice.slice(0, lastSpace).trim()}…`;
+  }
+
+  return `${slice.trim()}…`;
 }
 
-export function topAgentQuote(verdicts: AgentVerdict[], maxLen = 90): string {
+export function topAgentQuote(verdicts: AgentVerdict[], maxLen = 140): string {
   if (verdicts.length === 0) return "";
   const top = [...verdicts].sort((a, b) => b.severity - a.severity)[0];
   return truncateQuote(top.reasoning, maxLen);

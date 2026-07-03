@@ -963,6 +963,26 @@ details[open] > summary .chevron {
   }
 }
 
+@keyframes score-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.94;
+  }
+}
+
+.hero-score-breathe {
+  animation: score-breathe 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-score-breathe {
+    animation: none;
+  }
+}
+
 /* Simulate section content gutter */
 .simulate-gutter {
   max-width: 1240px;
