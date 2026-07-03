@@ -63,9 +63,9 @@ ${SIMPLEX_NOISE}
 
 void main() {
   vec3 pos = position;
-  float n1 = snoise(vec3(pos.x * 0.35, pos.y * 0.35, uTime * 0.08));
-  float n2 = snoise(vec3(pos.x * 0.75, pos.y * 0.75, uTime * 0.08 + 12.0)) * 0.5;
-  float n3 = snoise(vec3(pos.x * 1.5, pos.y * 1.5, uTime * 0.08 + 24.0)) * 0.25;
+  float n1 = snoise(vec3(pos.x * 0.35, pos.y * 0.35, uTime * 0.03));
+  float n2 = snoise(vec3(pos.x * 0.75, pos.y * 0.75, uTime * 0.03 + 12.0)) * 0.5;
+  float n3 = snoise(vec3(pos.x * 1.5, pos.y * 1.5, uTime * 0.03 + 24.0)) * 0.25;
   float displacement = (n1 + n2 + n3) * uWarpAmplitude;
   pos.z += displacement;
   vHeight = displacement;
@@ -93,8 +93,8 @@ ${SIMPLEX_NOISE}
 
 void main() {
   vec3 pos = position;
-  float cycle = uTime * (6.2831853 / 12.0);
-  float n = snoise(normalize(pos) * 2.0 + vec3(cycle * 0.15, cycle * 0.2, cycle * 0.1));
+  float cycle = uTime * (6.2831853 / 24.0);
+  float n = snoise(normalize(pos) * 2.0 + vec3(cycle * 0.12, cycle * 0.15, cycle * 0.08));
   pos += normal * n * uWarpAmplitude;
   vNormal = normalize(normalMatrix * normal);
   vNoise = n;
@@ -112,7 +112,7 @@ void main() {
   float fresnel = pow(1.0 - abs(dot(normalize(vNormal), viewDir)), 2.2);
   vec3 core = vec3(0.114, 0.102, 0.090);
   vec3 edge = vec3(0.290, 0.118, 0.071);
-  vec3 col = mix(core, edge, fresnel * 0.65 + vNoise * 0.12 + 0.15);
+  vec3 col = mix(core, edge, fresnel * 0.55 + vNoise * 0.08 + 0.12);
   gl_FragColor = vec4(col, uOpacity);
 }
 `;
@@ -130,18 +130,22 @@ function CameraRig({
 }) {
   const { camera } = useThree();
   const targetZ = useRef(5);
+  const targetY = useRef(0);
 
   useEffect(() => {
-    targetZ.current = reduced ? 5 : 5 + scrollProgress * 4;
+    targetZ.current = reduced ? 5 : 5 + scrollProgress * 2.5;
+    targetY.current = reduced ? 0 : scrollProgress * 0.35;
   }, [scrollProgress, reduced]);
 
   useFrame(() => {
     if (reduced) {
       camera.position.z = 5;
+      camera.position.y = 0;
       camera.lookAt(0, 0, 0);
       return;
     }
-    camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ.current, 0.06);
+    camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ.current, 0.018);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY.current, 0.018);
     camera.lookAt(0, 0, 0);
   });
 
@@ -162,7 +166,7 @@ function AmbientPlane({
       new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uWarpAmplitude: { value: 0.3 },
+          uWarpAmplitude: { value: 0.25 },
         },
         vertexShader: PLANE_VERTEX,
         fragmentShader: PLANE_FRAGMENT,
@@ -175,8 +179,8 @@ function AmbientPlane({
       material.uniforms.uTime.value = state.clock.elapsedTime;
     }
     material.uniforms.uWarpAmplitude.value = reduced
-      ? 0.3
-      : 0.3 + scrollProgress * 0.9;
+      ? 0.25
+      : 0.25 + scrollProgress * 0.25;
   });
 
   return (
@@ -201,8 +205,8 @@ function InkOrb({
       new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uWarpAmplitude: { value: 0.4 },
-          uOpacity: { value: 1 },
+          uWarpAmplitude: { value: 0.32 },
+          uOpacity: { value: 0.92 },
         },
         vertexShader: ORB_VERTEX,
         fragmentShader: ORB_FRAGMENT,
@@ -217,56 +221,35 @@ function InkOrb({
     if (!groupRef.current) return;
 
     const s = scrollProgress;
-    let z = -3;
-    let scale = 1;
-    let opacity = 1;
-    let warp = 0.4;
+    const parallaxY = -s * 0.45;
+    const parallaxX = s * 0.12;
+    const z = -3.8 + s * 0.6;
+    const opacity = s > 0.82 ? 1 - (s - 0.82) / 0.18 : 0.92;
+    const warp = 0.32 + s * 0.12;
 
-    if (s <= 0.3) {
-      z = -3;
-    } else if (s <= 0.7) {
-      const t = (s - 0.3) / 0.4;
-      z = -3 + t * 4;
-      scale = 1 + t * 0.4;
-      warp = 0.4 + t * 0.35;
-    } else {
-      const t = (s - 0.7) / 0.3;
-      z = 1 + t * 0.6;
-      scale = 1.4 + t * 0.25;
-      opacity = 1 - t;
-      warp = 0.75 + t * 0.15;
-    }
-
-    if (reduced) {
-      z = -3;
-      scale = 1;
-      opacity = 0.85;
-      warp = 0.4;
-    }
-
-    groupRef.current.position.set(2.6, 0.15, z);
-    groupRef.current.scale.setScalar(scale);
+    groupRef.current.position.set(2.10 + parallaxX, 0.72 + parallaxY, z);
+    groupRef.current.scale.setScalar(1);
 
     if (!reduced) {
       material.uniforms.uTime.value = state.clock.elapsedTime;
-      tilt.current.x = THREE.MathUtils.lerp(tilt.current.x, mouse.y * 0.15, 0.04);
+      tilt.current.x = THREE.MathUtils.lerp(tilt.current.x, mouse.y * 0.08, 0.025);
       tilt.current.y = THREE.MathUtils.lerp(
         tilt.current.y,
-        mouse.x * 0.15 + state.clock.elapsedTime * 0.08,
-        0.04
+        mouse.x * 0.08 + state.clock.elapsedTime * 0.04,
+        0.025
       );
       groupRef.current.rotation.x = tilt.current.x;
       groupRef.current.rotation.y = tilt.current.y;
     }
 
-    material.uniforms.uWarpAmplitude.value = warp;
-    material.uniforms.uOpacity.value = opacity;
+    material.uniforms.uWarpAmplitude.value = reduced ? 0.32 : warp;
+    material.uniforms.uOpacity.value = reduced ? 0.88 : opacity;
   });
 
   return (
     <group ref={groupRef}>
       <mesh material={material}>
-        <sphereGeometry args={[2.4, 64, 64]} />
+        <sphereGeometry args={[2.55, 64, 64]} />
       </mesh>
     </group>
   );
@@ -332,8 +315,8 @@ export function Hero3DLayer({ scrollProgress }: Hero3DLayerProps) {
     let raf = 0;
     const loop = () => {
       setMouse((prev) => ({
-        x: THREE.MathUtils.lerp(prev.x, mouseTarget.current.x, 0.06),
-        y: THREE.MathUtils.lerp(prev.y, mouseTarget.current.y, 0.06),
+        x: THREE.MathUtils.lerp(prev.x, mouseTarget.current.x, 0.035),
+        y: THREE.MathUtils.lerp(prev.y, mouseTarget.current.y, 0.035),
       }));
       raf = requestAnimationFrame(loop);
     };

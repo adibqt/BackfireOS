@@ -12,7 +12,7 @@ type HeroScoreGaugeProps = {
 
 export function HeroScoreGauge({ score, size = 440, className }: HeroScoreGaugeProps) {
   const cx = size / 2;
-  const cy = size * 0.46;
+  const cy = size / 2;
   const outerR = size * 0.55;
   const innerR = size * 0.4;
   const circumference = 2 * Math.PI * outerR;
@@ -66,7 +66,10 @@ export function HeroScoreGauge({ score, size = 440, className }: HeroScoreGaugeP
   return (
     <svg
       aria-hidden
-      className={cn("pointer-events-none absolute right-0 top-1/2 -translate-y-[52%]", className)}
+      className={cn(
+        "pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+        className
+      )}
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}

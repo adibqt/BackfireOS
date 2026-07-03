@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { HeroCursorCrack } from "@/components/hero-cursor-crack";
 import { HeroScoreGauge } from "@/components/hero-score-gauge";
 import { useLanguage } from "@/components/language-provider";
 import { useCountUp } from "@/hooks/use-count-up";
@@ -87,6 +88,7 @@ export function HeroVerdictSection({
         className="relative min-h-[85vh] scroll-mt-20 overflow-hidden bg-[var(--bg-base)]"
       >
         <Hero3DLayer scrollProgress={scrollProgress} />
+        <HeroCursorCrack containerRef={sectionRef} />
 
         <div className="simulate-gutter relative z-[2] flex min-h-[85vh] items-center py-12">
           <div className="grid w-full grid-cols-1 items-end gap-12 min-[900px]:grid-cols-[42fr_58fr]">
@@ -141,35 +143,35 @@ export function HeroVerdictSection({
             </div>
 
             <div
-              className="relative flex w-full flex-col items-end max-[899px]:order-1 min-[900px]:text-right"
+              className="relative flex w-full flex-col items-center max-[899px]:order-1"
               style={{
                 opacity: heroScoreOpacity,
                 willChange: "opacity, transform",
               }}
             >
-              <div className="relative w-full min-h-[clamp(12rem,22vw,20rem)]">
+              <div className="relative flex aspect-square w-[min(100%,28rem)] max-w-[480px] items-center justify-center sm:w-[min(100%,32rem)]">
                 <HeroScoreGauge score={score} size={480} />
                 <p
-                  className="hero-score-breathe relative mr-0 text-right font-display font-light leading-[0.85] tracking-[-0.04em] text-[var(--ink-primary)] text-[clamp(12rem,22vw,20rem)]"
+                  className="hero-score-breathe relative text-center font-display font-light leading-[0.85] tracking-[-0.04em] text-[var(--ink-primary)] text-[clamp(12rem,22vw,20rem)]"
                   aria-label={`${t(locale, "backfireScore")}: ${score}`}
                 >
                   {animatedScore}
                 </p>
               </div>
 
-              <p className="mt-4 font-mono text-[var(--text-xs)] uppercase tracking-[0.14em] text-[var(--ink-tertiary)]">
+              <p className="mt-4 text-center font-mono text-[var(--text-xs)] uppercase tracking-[0.14em] text-[var(--ink-tertiary)]">
                 {t(locale, "backfireScoreOf100")}
               </p>
               <p
                 className={cn(
-                  "mt-3 font-mono text-[var(--text-lg)] font-medium uppercase tracking-wide",
+                  "mt-3 text-center font-mono text-[var(--text-lg)] font-medium uppercase tracking-wide",
                   isHighRisk ? "text-[var(--signal)]" : "text-[var(--ink-primary)]"
                 )}
               >
                 {verdictLabel}
               </p>
               {agentQuote && (
-                <p className="mt-4 max-w-[420px] font-display text-[var(--text-sm)] italic leading-[var(--leading-relaxed)] text-[var(--ink-secondary)] min-[900px]:ml-auto min-[900px]:text-right">
+                <p className="mt-4 max-w-[420px] text-center font-display text-[var(--text-sm)] italic leading-[var(--leading-relaxed)] text-[var(--ink-secondary)]">
                   &ldquo;{truncateQuote(agentQuote, 140)}&rdquo;
                 </p>
               )}
