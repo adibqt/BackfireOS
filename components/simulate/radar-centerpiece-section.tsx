@@ -174,7 +174,6 @@ function RadarCalloutLabel({
     </div>
   );
 }
-
 function RadarReveal({
   index,
   visible,
@@ -199,3 +198,4 @@ function RadarReveal({
     </div>
   );
 }
+

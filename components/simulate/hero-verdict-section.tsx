@@ -15,6 +15,8 @@ import {
   scoreVerdictKey,
   truncateQuote,
 } from "@/lib/simulate-ui";
+import { getHero3DPalette } from "@/lib/hero-3d-palette";
+import { useTheme } from "@/lib/theme-provider";
 import { cn } from "@/lib/utils";
 
 const Hero3DLayer = dynamic(
@@ -38,6 +40,8 @@ export function HeroVerdictSection({
   campaignId,
 }: HeroVerdictSectionProps) {
   const { locale } = useLanguage();
+  const { theme } = useTheme();
+  const heroPalette = getHero3DPalette(theme);
   const sectionRef = useRef<HTMLElement>(null);
   const { ref: visibleRef, visible: sectionVisible } = useRevealOnScroll<HTMLElement>();
   const scrollProgress = useScrollProgress(sectionRef);
@@ -85,7 +89,8 @@ export function HeroVerdictSection({
       <section
         id="simulate-verdict"
         ref={setSectionRef}
-        className="relative min-h-[85vh] scroll-mt-20 overflow-hidden bg-[var(--bg-base)]"
+        className="relative min-h-[85vh] scroll-mt-20 overflow-hidden"
+        style={{ backgroundColor: heroPalette.canvasBg }}
       >
         <Hero3DLayer scrollProgress={scrollProgress} containerRef={sectionRef} />
         <HeroCursorCrack containerRef={sectionRef} />

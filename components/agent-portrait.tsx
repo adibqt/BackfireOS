@@ -93,7 +93,7 @@ export function AgentPortrait({ agentId, hovered = false, className }: AgentPort
   return (
     <div
       className={cn(
-        "relative h-[240px] w-[240px] overflow-hidden bg-[var(--bg-elevated)]",
+        "relative h-full w-full min-h-0 overflow-hidden bg-[var(--bg-elevated)]",
         className
       )}
     >

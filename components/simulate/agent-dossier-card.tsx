@@ -1,82 +1,140 @@
 "use client";
 
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import type { AgentVerdict } from "@/lib/agents/types";
 import { AgentPortrait } from "@/components/agent-portrait";
 import { useCountUp } from "@/hooks/use-count-up";
-import { agentRole, severityBarColor } from "@/lib/agent-display";
+import { agentRole } from "@/lib/agent-display";
+import { useLanguage } from "@/components/language-provider";
+import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-type AgentDossierCardProps = {
+export const CARD_ROTATIONS = [-4, 2.5, -1.5, 3, -2.5, 1.5] as const;
+export const CARD_MARGIN_TOPS = [-20, 16, -8, 20, -14, 6] as const;
+export const FRAMED_CARD_SIZE = 320;
+
+type FramedCardFrontProps = {
   verdict: AgentVerdict;
-  active?: boolean;
-  revealActive?: boolean;
-  onOpen: () => void;
+  hovered?: boolean;
+  animatedSeverity: number;
 };
 
-export function AgentDossierCard({
+export function FramedCardFront({
   verdict,
-  active = false,
-  revealActive = true,
-  onOpen,
-}: AgentDossierCardProps) {
-  const [hovered, setHovered] = useState(false);
-  const animatedSeverity = useCountUp(Math.round(verdict.severity), revealActive, 600);
-  const fillColor = severityBarColor(verdict.severity);
-  const fillHeight = `${Math.min(100, Math.max(0, verdict.severity))}%`;
+  hovered = false,
+  animatedSeverity,
+}: FramedCardFrontProps) {
+  const { locale } = useLanguage();
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={cn(
-        "group relative w-full cursor-pointer text-left transition-[transform,box-shadow] duration-[400ms]",
-        "hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]",
-        active && "ring-1 ring-[var(--hairline)]"
-      )}
-      style={{ transitionTimingFunction: "var(--ease-out-expo)" }}
-      aria-expanded={active}
-    >
-      <div className="relative flex gap-2">
-        <div className="min-w-0 flex-1">
-          <AgentPortrait agentId={verdict.agentId} hovered={hovered} />
-          <div className="mt-5 pr-2">
-            <h3 className="font-display text-[var(--text-xl)] font-medium text-[var(--ink-primary)]">
-              {verdict.agentName}
-            </h3>
-            <p className="mt-1 font-mono text-[var(--text-xs)] uppercase tracking-[0.1em] text-[var(--ink-tertiary)]">
-              {agentRole(verdict.agentId)}
-            </p>
-            {verdict.source === "mock" && (
-              <span className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wider text-[var(--ink-tertiary)]">
-                Demo
-              </span>
-            )}
-          </div>
+    <div className="framed-card__frame">
+      <div className="framed-card__mat">
+        <div className="framed-card__photo">
+          <AgentPortrait
+            agentId={verdict.agentId}
+            hovered={hovered}
+            className="h-full w-full"
+          />
         </div>
-
-        <div className="relative flex w-4 shrink-0 flex-col items-center">
-          <div
-            className="relative h-[240px] w-1 bg-[var(--hairline)]"
-            style={{ width: 4 }}
-            aria-hidden
-          >
-            <div
-              className="absolute bottom-0 left-0 w-full transition-[height] duration-[600ms]"
-              style={{
-                height: fillHeight,
-                backgroundColor: fillColor,
-                transitionTimingFunction: "var(--ease-out-expo)",
-              }}
-            />
-          </div>
-          <span className="mt-2 font-mono text-[var(--text-sm)] tabular-nums text-[var(--ink-primary)]">
+      </div>
+      <div className="framed-card__nameplate">
+        <div className="min-w-0 flex-1">
+          <h3 className="line-clamp-2 font-display text-[var(--text-xl)] font-medium leading-[var(--leading-tight)] text-[var(--ink-primary)]">
+            {verdict.agentName}
+          </h3>
+          <p className="mt-1.5 font-mono text-[var(--text-base)] uppercase tracking-[0.08em] text-[var(--ink-secondary)]">
+            {agentRole(verdict.agentId)}
+          </p>
+        </div>
+        <div
+          className="framed-card__severity-chip shrink-0"
+          aria-label={`${t(locale, "severity")} ${animatedSeverity}`}
+        >
+          <span className="font-mono text-[var(--text-xl)] font-semibold tabular-nums leading-none text-[var(--ink-primary)]">
             {animatedSeverity}
           </span>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
+
+type AgentDossierCardProps = {
+  verdict: AgentVerdict;
+  index: number;
+  active?: boolean;
+  dimmed?: boolean;
+  revealVisible?: boolean;
+  onOpen: (rect: DOMRect) => void;
+};
+
+export const AgentDossierCard = forwardRef<HTMLButtonElement, AgentDossierCardProps>(
+  function AgentDossierCard(
+    {
+      verdict,
+      index,
+      active = false,
+      dimmed = false,
+      revealVisible = true,
+      onOpen,
+    },
+    ref
+  ) {
+    const [hovered, setHovered] = useState(false);
+    const animatedSeverity = useCountUp(Math.round(verdict.severity), revealVisible, 600);
+
+    const rotation = CARD_ROTATIONS[index % CARD_ROTATIONS.length] ?? 0;
+    const marginTop = CARD_MARGIN_TOPS[index % CARD_MARGIN_TOPS.length] ?? 0;
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      onOpen(e.currentTarget.getBoundingClientRect());
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onOpen(e.currentTarget.getBoundingClientRect());
+      }
+    };
+
+    return (
+      <div
+        className={cn(
+          "framed-card-reveal mx-auto w-[320px] max-w-full",
+          revealVisible && "framed-card-reveal--visible"
+        )}
+        style={{
+          marginTop,
+          transitionDelay: revealVisible ? `${Math.min(index * 120, 600)}ms` : undefined,
+          ["--card-rotate" as string]: `${rotation}deg`,
+        }}
+      >
+        <button
+          ref={ref}
+          type="button"
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onFocus={() => setHovered(true)}
+          onBlur={() => setHovered(false)}
+          aria-expanded={active}
+          aria-label={`${verdict.agentName}, ${agentRole(verdict.agentId)}`}
+          className={cn(
+            "framed-card w-full cursor-pointer text-left outline-none",
+            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--signal)]",
+            hovered && !active && "framed-card--hover",
+            dimmed && "framed-card--dimmed",
+            active && "framed-card--hidden"
+          )}
+        >
+          <FramedCardFront
+            verdict={verdict}
+            hovered={hovered}
+            animatedSeverity={animatedSeverity}
+          />
+        </button>
+      </div>
+    );
+  }
+);

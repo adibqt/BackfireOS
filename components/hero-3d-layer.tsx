@@ -5,6 +5,8 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { HeroWarmLight } from "@/components/hero-warm-light";
 import { prefersReducedMotion } from "@/hooks/use-scroll-progress";
+import { getHero3DPalette, type Hero3DPalette } from "@/lib/hero-3d-palette";
+import { useTheme } from "@/lib/theme-provider";
 
 const SIMPLEX_NOISE = `
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -75,13 +77,13 @@ void main() {
 `;
 
 const PLANE_FRAGMENT = `
+uniform vec3 uDark;
+uniform vec3 uLight;
 varying float vHeight;
 
 void main() {
   float t = clamp(vHeight * 0.45 + 0.5, 0.0, 1.0);
-  vec3 dark = vec3(0.059, 0.055, 0.047);
-  vec3 light = vec3(0.086, 0.078, 0.071);
-  gl_FragColor = vec4(mix(dark, light, t), 1.0);
+  gl_FragColor = vec4(mix(uDark, uLight, t), 1.0);
 }
 `;
 
@@ -115,6 +117,10 @@ void main() {
 
 const ORB_FRAGMENT = `
 uniform float uOpacity;
+uniform vec3 uCore;
+uniform vec3 uMid;
+uniform vec3 uEdge;
+uniform vec3 uSpec;
 varying vec3 vNormal;
 varying float vNoise;
 varying float vWetness;
@@ -125,17 +131,17 @@ void main() {
   float fresnel = pow(1.0 - abs(dot(norm, viewDir)), 2.4);
   float wetSpec = pow(max(dot(norm, viewDir), 0.0), 6.0);
 
-  vec3 core = vec3(0.114, 0.102, 0.090);
-  vec3 mid = vec3(0.155, 0.118, 0.095);
-  vec3 edge = vec3(0.290, 0.118, 0.071);
-
-  vec3 col = mix(core, mid, vWetness * 0.18 + vNoise * 0.08);
-  col = mix(col, edge, fresnel * 0.42);
-  col += vec3(0.045, 0.035, 0.028) * wetSpec * 0.28;
+  vec3 col = mix(uCore, uMid, vWetness * 0.18 + vNoise * 0.08);
+  col = mix(col, uEdge, fresnel * 0.42);
+  col += uSpec * wetSpec * 0.28;
 
   gl_FragColor = vec4(col, uOpacity);
 }
 `;
+
+function vec3Uniform(value: Hero3DPalette["planeDark"]) {
+  return new THREE.Vector3(...value);
+}
 
 type Hero3DLayerProps = {
   scrollProgress: number;
@@ -177,10 +183,12 @@ function AmbientPlane({
   scrollProgress,
   reduced,
   segments,
+  palette,
 }: {
   scrollProgress: number;
   reduced: boolean;
   segments: number;
+  palette: Hero3DPalette;
 }) {
   const material = useMemo(
     () =>
@@ -188,11 +196,13 @@ function AmbientPlane({
         uniforms: {
           uTime: { value: 0 },
           uWarpAmplitude: { value: 0.25 },
+          uDark: { value: vec3Uniform(palette.planeDark) },
+          uLight: { value: vec3Uniform(palette.planeLight) },
         },
         vertexShader: PLANE_VERTEX,
         fragmentShader: PLANE_FRAGMENT,
       }),
-    []
+    [palette]
   );
 
   useFrame((state) => {
@@ -215,10 +225,12 @@ function InkOrb({
   scrollProgress,
   mouse,
   reduced,
+  palette,
 }: {
   scrollProgress: number;
   mouse: { x: number; y: number };
   reduced: boolean;
+  palette: Hero3DPalette;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const spinRef = useRef(0);
@@ -229,12 +241,16 @@ function InkOrb({
           uTime: { value: 0 },
           uWarpAmplitude: { value: 0.32 },
           uOpacity: { value: 0.92 },
+          uCore: { value: vec3Uniform(palette.orbCore) },
+          uMid: { value: vec3Uniform(palette.orbMid) },
+          uEdge: { value: vec3Uniform(palette.orbEdge) },
+          uSpec: { value: vec3Uniform(palette.orbSpec) },
         },
         vertexShader: ORB_VERTEX,
         fragmentShader: ORB_FRAGMENT,
         transparent: true,
       }),
-    []
+    [palette]
   );
 
   const tilt = useRef({ x: 0, y: 0 });
@@ -295,6 +311,7 @@ function HeroScene({
   containerRef,
   reduced,
   planeSegments,
+  palette,
 }: {
   scrollProgress: number;
   mouse: { x: number; y: number };
@@ -304,29 +321,39 @@ function HeroScene({
   containerRef: React.RefObject<HTMLElement | null>;
   reduced: boolean;
   planeSegments: number;
+  palette: Hero3DPalette;
 }) {
   return (
     <>
-      <color attach="background" args={["#0F0E0C"]} />
+      <color attach="background" args={[palette.canvasBg]} />
       <CameraRig scrollProgress={scrollProgress} reduced={reduced} />
       <AmbientPlane
         scrollProgress={scrollProgress}
         reduced={reduced}
         segments={planeSegments}
+        palette={palette}
       />
       <HeroWarmLight
         containerRef={containerRef}
         enabled={showWarmLight}
         segments={lightSegments}
+        palette={palette}
       />
       {showOrb && (
-        <InkOrb scrollProgress={scrollProgress} mouse={mouse} reduced={reduced} />
+        <InkOrb
+          scrollProgress={scrollProgress}
+          mouse={mouse}
+          reduced={reduced}
+          palette={palette}
+        />
       )}
     </>
   );
 }
 
 export function Hero3DLayer({ scrollProgress, containerRef }: Hero3DLayerProps) {
+  const { theme } = useTheme();
+  const palette = getHero3DPalette(theme);
   const [reduced, setReduced] = useState(true);
   const [showOrb, setShowOrb] = useState(false);
   const [showWarmLight, setShowWarmLight] = useState(false);
@@ -384,7 +411,10 @@ export function Hero3DLayer({ scrollProgress, containerRef }: Hero3DLayerProps) 
   const effectiveScroll = reduced ? 0 : scrollProgress;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 bg-[var(--bg-base)]">
+    <div
+      className="pointer-events-none absolute inset-0 z-0"
+      style={{ backgroundColor: palette.canvasBg }}
+    >
       <Suspense fallback={null}>
         <Canvas
           dpr={[1, 1.5]}
@@ -393,6 +423,7 @@ export function Hero3DLayer({ scrollProgress, containerRef }: Hero3DLayerProps) 
           style={{ width: "100%", height: "100%" }}
         >
           <HeroScene
+            key={theme}
             scrollProgress={effectiveScroll}
             mouse={mouse}
             showOrb={showOrb}
@@ -401,6 +432,7 @@ export function Hero3DLayer({ scrollProgress, containerRef }: Hero3DLayerProps) 
             containerRef={heroContainerRef}
             reduced={reduced}
             planeSegments={planeSegments}
+            palette={palette}
           />
         </Canvas>
       </Suspense>

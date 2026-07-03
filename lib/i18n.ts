@@ -88,7 +88,9 @@ export const strings = {
     axisCatastrophic: "catastrophic",
     redTeamAgentsEyebrow: "RED-TEAM AGENTS",
     sixAdversariesOneCampaign: "Six adversaries. One campaign.",
-    tapDossierSubheading: "Tap a dossier to open the reasoning and attack vector.",
+    tapDossierSubheading: "Tap a card to open the case file.",
+    openChevron: "OPEN ↗",
+    citations: "Citations",
     demoDataDetails: "Why is demo data showing? ↓",
     demoDataBody:
       "{mockCount} of {total} agents used demo data, so the Backfire Score is partly heuristic. Re-run when the model is available.",
@@ -200,7 +202,9 @@ export const strings = {
     axisCatastrophic: "বিপর্যয়কর",
     redTeamAgentsEyebrow: "রেড-টিম এজেন্ট",
     sixAdversariesOneCampaign: "ছয় প্রতিপক্ষ। একটি ক্যাম্পেইন।",
-    tapDossierSubheading: "যুক্তি ও আক্রমণ ভেক্টর দেখতে একটি ডোজিয়ার খুলুন।",
+    tapDossierSubheading: "কেস ফাইল খুলতে একটি কার্ডে ট্যাপ করুন।",
+    openChevron: "খুলুন ↗",
+    citations: "উদ্ধৃতি",
     demoDataDetails: "ডেমো ডেটা কেন দেখাচ্ছে? ↓",
     demoDataBody:
       "{mockCount}/{total} এজেন্ট ডেমো ডেটা ব্যবহার করেছে, তাই ব্যাকফায়ার স্কোর আংশিক হিউরিস্টিক। মডেল উপলব্ধ হলে পুনরায় চালান।",

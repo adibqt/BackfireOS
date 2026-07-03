@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import type { Hero3DPalette } from "@/lib/hero-3d-palette";
 
 const SIMPLEX_NOISE = `
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -104,6 +105,9 @@ const LIGHT_FRAGMENT = `
 uniform vec2 uLightPos;
 uniform float uLightRadius;
 uniform float uLightIntensity;
+uniform vec3 uWallDark;
+uniform vec3 uWallLight;
+uniform vec3 uWarmTone;
 
 varying vec2 vUv;
 varying float vRelief;
@@ -114,15 +118,11 @@ void main() {
   float lightMask = smoothstep(uLightRadius, 0.0, dist) * uLightIntensity;
   if (lightMask < 0.002) discard;
 
-  vec3 wallDark = vec3(0.0588, 0.0549, 0.0471);
-  vec3 wallLight = vec3(0.1020, 0.0863, 0.0784);
-  vec3 warmTone = vec3(0.1647, 0.1294, 0.1059);
-
   float reliefT = clamp(vRelief * 0.45 + 0.5, 0.0, 1.0);
-  vec3 baseColor = mix(wallDark, wallLight, reliefT);
+  vec3 baseColor = mix(uWallDark, uWallLight, reliefT);
 
   vec3 brightened = mix(baseColor, baseColor * 1.35, lightMask);
-  vec3 litColor = mix(brightened, warmTone, lightMask * 0.28);
+  vec3 litColor = mix(brightened, uWarmTone, lightMask * 0.28);
 
   vec3 lightDir = normalize(vec3(-0.5, 0.7, 0.6));
   float ndotl = dot(normalize(vNormal), lightDir);
@@ -138,11 +138,13 @@ void main() {
 type HeroWarmLightProps = {
   containerRef: React.RefObject<HTMLElement | null>;
   segments: number;
+  palette: Hero3DPalette;
 };
 
 function WarmLightMesh({
   containerRef,
   segments,
+  palette,
   onCompileFail,
 }: HeroWarmLightProps & { onCompileFail: () => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -167,6 +169,9 @@ function WarmLightMesh({
           uLightPos: { value: new THREE.Vector2(0.5, 0.5) },
           uLightRadius: { value: 0.14 },
           uLightIntensity: { value: 0 },
+          uWallDark: { value: new THREE.Vector3(...palette.wallDark) },
+          uWallLight: { value: new THREE.Vector3(...palette.wallLight) },
+          uWarmTone: { value: new THREE.Vector3(...palette.warmTone) },
         },
         vertexShader: LIGHT_VERTEX,
         fragmentShader: LIGHT_FRAGMENT,
@@ -175,7 +180,7 @@ function WarmLightMesh({
         depthTest: true,
         blending: THREE.NormalBlending,
       }),
-    []
+    [palette]
   );
 
   const planeSize = useMemo(() => {
@@ -310,6 +315,7 @@ export function HeroWarmLight({
   containerRef,
   enabled,
   segments,
+  palette,
 }: HeroWarmLightProps & { enabled: boolean }) {
   const [compileFailed, setCompileFailed] = useState(false);
 
@@ -319,6 +325,7 @@ export function HeroWarmLight({
     <WarmLightMesh
       containerRef={containerRef}
       segments={segments}
+      palette={palette}
       onCompileFail={() => setCompileFailed(true)}
     />
   );
