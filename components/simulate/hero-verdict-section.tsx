@@ -87,7 +87,7 @@ export function HeroVerdictSection({
         ref={setSectionRef}
         className="relative min-h-[85vh] scroll-mt-20 overflow-hidden bg-[var(--bg-base)]"
       >
-        <Hero3DLayer scrollProgress={scrollProgress} />
+        <Hero3DLayer scrollProgress={scrollProgress} containerRef={sectionRef} />
         <HeroCursorCrack containerRef={sectionRef} />
 
         <div className="simulate-gutter relative z-[2] flex min-h-[85vh] items-center py-12">

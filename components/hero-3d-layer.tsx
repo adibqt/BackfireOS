@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { HeroWarmLight } from "@/components/hero-warm-light";
 import { prefersReducedMotion } from "@/hooks/use-scroll-progress";
 
 const SIMPLEX_NOISE = `
@@ -138,6 +139,7 @@ void main() {
 
 type Hero3DLayerProps = {
   scrollProgress: number;
+  containerRef?: React.RefObject<HTMLElement | null>;
 };
 
 function CameraRig({
@@ -248,7 +250,7 @@ function InkOrb({
     const warp = 0.28 + s * 0.08;
     const t = state.clock.elapsedTime;
 
-    groupRef.current.position.set(2.1 + parallaxX, 0.72 + parallaxY, z);
+    groupRef.current.position.set(2.05 + parallaxX, 0.72 + parallaxY, z);
 
     if (!reduced) {
       spinRef.current += delta * 0.2;
@@ -288,12 +290,18 @@ function HeroScene({
   scrollProgress,
   mouse,
   showOrb,
+  showWarmLight,
+  lightSegments,
+  containerRef,
   reduced,
   planeSegments,
 }: {
   scrollProgress: number;
   mouse: { x: number; y: number };
   showOrb: boolean;
+  showWarmLight: boolean;
+  lightSegments: number;
+  containerRef: React.RefObject<HTMLElement | null>;
   reduced: boolean;
   planeSegments: number;
 }) {
@@ -306,6 +314,11 @@ function HeroScene({
         reduced={reduced}
         segments={planeSegments}
       />
+      <HeroWarmLight
+        containerRef={containerRef}
+        enabled={showWarmLight}
+        segments={lightSegments}
+      />
       {showOrb && (
         <InkOrb scrollProgress={scrollProgress} mouse={mouse} reduced={reduced} />
       )}
@@ -313,23 +326,35 @@ function HeroScene({
   );
 }
 
-export function Hero3DLayer({ scrollProgress }: Hero3DLayerProps) {
+export function Hero3DLayer({ scrollProgress, containerRef }: Hero3DLayerProps) {
   const [reduced, setReduced] = useState(true);
   const [showOrb, setShowOrb] = useState(false);
+  const [showWarmLight, setShowWarmLight] = useState(false);
+  const [lightSegments, setLightSegments] = useState(128);
   const [planeSegments, setPlaneSegments] = useState(128);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const mouseTarget = useRef({ x: 0, y: 0 });
+  const fallbackContainerRef = useRef<HTMLElement | null>(null);
+  const heroContainerRef = containerRef ?? fallbackContainerRef;
 
   useEffect(() => {
     setReduced(prefersReducedMotion());
-    const mq = window.matchMedia("(max-width: 899px)");
+    const mobileMq = window.matchMedia("(max-width: 899px)");
+    const tabletMq = window.matchMedia("(max-width: 1279px)");
     const apply = () => {
-      setShowOrb(!mq.matches);
-      setPlaneSegments(mq.matches ? 64 : 128);
+      const mobile = mobileMq.matches;
+      setShowOrb(!mobile);
+      setShowWarmLight(!mobile && !prefersReducedMotion());
+      setLightSegments(tabletMq.matches ? 64 : 128);
+      setPlaneSegments(mobile ? 64 : 128);
     };
     apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
+    mobileMq.addEventListener("change", apply);
+    tabletMq.addEventListener("change", apply);
+    return () => {
+      mobileMq.removeEventListener("change", apply);
+      tabletMq.removeEventListener("change", apply);
+    };
   }, []);
 
   useEffect(() => {
@@ -371,6 +396,9 @@ export function Hero3DLayer({ scrollProgress }: Hero3DLayerProps) {
             scrollProgress={effectiveScroll}
             mouse={mouse}
             showOrb={showOrb}
+            showWarmLight={showWarmLight && !reduced}
+            lightSegments={lightSegments}
+            containerRef={heroContainerRef}
             reduced={reduced}
             planeSegments={planeSegments}
           />
