@@ -89,15 +89,25 @@ uniform float uTime;
 uniform float uWarpAmplitude;
 varying vec3 vNormal;
 varying float vNoise;
+varying float vWetness;
 ${SIMPLEX_NOISE}
 
 void main() {
   vec3 pos = position;
-  float cycle = uTime * (6.2831853 / 24.0);
-  float n = snoise(normalize(pos) * 2.0 + vec3(cycle * 0.12, cycle * 0.15, cycle * 0.08));
-  pos += normal * n * uWarpAmplitude;
-  vNormal = normalize(normalMatrix * normal);
-  vNoise = n;
+  vec3 n = normalize(normal);
+  float t = uTime;
+
+  float blob = snoise(n * 1.6 + vec3(t * 0.16, t * 0.12, t * 0.1));
+  float ripple = snoise(n * 3.0 + vec3(t * 0.2 + 4.0, t * 0.15, t * 0.18)) * 0.42;
+  float drip = sin(t * 0.65 + pos.y * 1.35 + pos.x * 0.6) * 0.12;
+  float disp = (blob * 0.7 + ripple + drip) * uWarpAmplitude;
+
+  pos += n * disp;
+  pos.y += sin(t * 0.48 + pos.x * 0.9) * uWarpAmplitude * 0.06;
+
+  vNormal = normalize(normalMatrix * n);
+  vNoise = blob;
+  vWetness = ripple + 0.5;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;
@@ -106,13 +116,22 @@ const ORB_FRAGMENT = `
 uniform float uOpacity;
 varying vec3 vNormal;
 varying float vNoise;
+varying float vWetness;
 
 void main() {
-  vec3 viewDir = vec3(0.0, 0.0, 1.0);
-  float fresnel = pow(1.0 - abs(dot(normalize(vNormal), viewDir)), 2.2);
+  vec3 viewDir = normalize(vec3(0.0, 0.0, 1.0));
+  vec3 norm = normalize(vNormal);
+  float fresnel = pow(1.0 - abs(dot(norm, viewDir)), 2.4);
+  float wetSpec = pow(max(dot(norm, viewDir), 0.0), 6.0);
+
   vec3 core = vec3(0.114, 0.102, 0.090);
+  vec3 mid = vec3(0.155, 0.118, 0.095);
   vec3 edge = vec3(0.290, 0.118, 0.071);
-  vec3 col = mix(core, edge, fresnel * 0.55 + vNoise * 0.08 + 0.12);
+
+  vec3 col = mix(core, mid, vWetness * 0.18 + vNoise * 0.08);
+  col = mix(col, edge, fresnel * 0.42);
+  col += vec3(0.045, 0.035, 0.028) * wetSpec * 0.28;
+
   gl_FragColor = vec4(col, uOpacity);
 }
 `;
@@ -200,6 +219,7 @@ function InkOrb({
   reduced: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
+  const spinRef = useRef(0);
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
@@ -217,7 +237,7 @@ function InkOrb({
 
   const tilt = useRef({ x: 0, y: 0 });
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     const s = scrollProgress;
@@ -225,24 +245,33 @@ function InkOrb({
     const parallaxX = s * 0.12;
     const z = -3.8 + s * 0.6;
     const opacity = s > 0.82 ? 1 - (s - 0.82) / 0.18 : 0.92;
-    const warp = 0.32 + s * 0.12;
+    const warp = 0.28 + s * 0.08;
+    const t = state.clock.elapsedTime;
 
-    groupRef.current.position.set(2.10 + parallaxX, 0.72 + parallaxY, z);
-    groupRef.current.scale.setScalar(1);
+    groupRef.current.position.set(2.1 + parallaxX, 0.72 + parallaxY, z);
 
     if (!reduced) {
-      material.uniforms.uTime.value = state.clock.elapsedTime;
-      tilt.current.x = THREE.MathUtils.lerp(tilt.current.x, mouse.y * 0.08, 0.025);
-      tilt.current.y = THREE.MathUtils.lerp(
-        tilt.current.y,
-        mouse.x * 0.08 + state.clock.elapsedTime * 0.04,
-        0.025
-      );
-      groupRef.current.rotation.x = tilt.current.x;
-      groupRef.current.rotation.y = tilt.current.y;
+      spinRef.current += delta * 0.2;
+      material.uniforms.uTime.value = t;
+
+      tilt.current.x = THREE.MathUtils.lerp(tilt.current.x, mouse.y * 0.04, 0.03);
+      tilt.current.y = THREE.MathUtils.lerp(tilt.current.y, mouse.x * 0.04, 0.03);
+
+      groupRef.current.rotation.y = spinRef.current + tilt.current.y;
+      groupRef.current.rotation.x =
+        Math.sin(t * 0.32) * 0.07 + tilt.current.x;
+      groupRef.current.rotation.z = Math.sin(t * 0.26 + 0.8) * 0.05;
+
+      const breathe = Math.sin(t * 0.72);
+      const sx = 1 + breathe * 0.028;
+      const sy = 1 + Math.cos(t * 0.72) * 0.034;
+      groupRef.current.scale.set(sx, sy, 1 / Math.sqrt(sx * sy));
+    } else {
+      groupRef.current.rotation.set(0, 0, 0);
+      groupRef.current.scale.setScalar(1);
     }
 
-    material.uniforms.uWarpAmplitude.value = reduced ? 0.32 : warp;
+    material.uniforms.uWarpAmplitude.value = reduced ? 0.28 : warp;
     material.uniforms.uOpacity.value = reduced ? 0.88 : opacity;
   });
 
