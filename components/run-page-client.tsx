@@ -80,7 +80,7 @@ export default function RunPageClient({ id }: { id: string }) {
   return (
     <PageShell footer={false} bare>
       <SimulateSectionNav locale={locale} />
-      <div className="xl:pl-14">
+      <div className="xl:pl-[4.75rem]">
       <HeroVerdictSection
         slogan={run.campaign?.slogan ?? "Campaign analysis"}
         createdAt={run.createdAt}
