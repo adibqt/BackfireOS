@@ -24,7 +24,7 @@ export function MemeSummaryRow({ count, score, onOpen }: MemeSummaryRowProps) {
       id="simulate-memes"
       ref={ref}
       className={cn(
-        "scroll-mt-20 bg-[var(--bg-base)]",
+        "simulate-memes-strip scroll-mt-20 bg-[var(--bg-base)]",
         "reveal-on-scroll",
         visible && "reveal-on-scroll--visible"
       )}

@@ -207,7 +207,7 @@ function RadarAxisCallout({
   return (
     <div
       className={cn(
-        "group relative min-w-[150px] max-w-[200px] cursor-default rounded-sm px-2 py-1 text-center outline-none focus-within:ring-2 focus-within:ring-[var(--signal)] focus-within:ring-offset-2",
+        "simulate-radar-callout group relative min-w-[150px] max-w-[200px] cursor-default rounded-sm px-2 py-1 text-center outline-none focus-within:ring-2 focus-within:ring-[var(--signal)] focus-within:ring-offset-2",
         "reveal-on-scroll",
         active && "reveal-on-scroll--visible"
       )}

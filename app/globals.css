@@ -6,37 +6,37 @@
    ────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Autopsy Report — canonical light palette */
-  --bg-base: #F5F3EF;
-  --bg-elevated: #E5E1D8;
-  --bg-inset: #DDD8CF;
+  /* Autopsy Report — enriched light palette (warm parchment, not white) */
+  --bg-base: #E4DFD6;
+  --bg-elevated: #CEC7BC;
+  --bg-inset: #C2BAB0;
 
-  --ink-primary: #1C1A17;
-  --ink-secondary: #5C5750;
-  --ink-tertiary: #9B9288;
+  --ink-primary: #1A1714;
+  --ink-secondary: #4A4540;
+  --ink-tertiary: #7A746C;
 
-  --hairline: #D6D1C8;
+  --hairline: #B8B0A4;
 
-  --signal: #B84A2E;
-  --signal-soft: #8A3822;
-  --data-cool: #4A6B7C;
+  --signal: #A63D2A;
+  --signal-soft: #7A2E1E;
+  --data-cool: #3D5A6B;
 
-  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.09);
-  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 8px 28px rgba(26, 23, 20, 0.11);
+  --shadow-lift: 0 14px 40px rgba(26, 23, 20, 0.14);
 
   /* Legacy surface aliases */
-  --bg-surface: #EDEAE4;
+  --bg-surface: #DAD4CA;
   --text-primary: var(--ink-primary);
   --text-secondary: var(--ink-secondary);
   --text-muted: var(--ink-tertiary);
   --border: var(--hairline);
-  --border-strong: #BAB4A8;
+  --border-strong: #9A9288;
   --accent-red: var(--signal);
-  --accent-amber: #B7700D;
-  --accent-green: #2D6A4F;
+  --accent-amber: #9A5F0A;
+  --accent-green: #2A5E46;
   --accent-blue: var(--data-cool);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.09);
+  --shadow-sm: 0 1px 3px rgba(26, 23, 20, 0.08);
+  --shadow-md: 0 4px 14px rgba(26, 23, 20, 0.1);
 
   /* Legacy aliases */
   --bg: var(--bg-base);
@@ -46,18 +46,18 @@
   --fg: var(--ink-primary);
   --fg-muted: var(--ink-secondary);
   --fg-subtle: var(--ink-tertiary);
-  --fg-faint: #BAB4A8;
-  --border-bright: #A39E94;
+  --fg-faint: #9A9288;
+  --border-bright: #847C72;
 
-  --accent-50: #F5E8E6;
-  --accent-200: #D4A29C;
-  --accent-400: #A84438;
+  --accent-50: #F0E0DC;
+  --accent-200: #C8887A;
+  --accent-400: #9A3828;
   --accent: var(--signal);
   --accent-600: #9E3328;
   --accent-700: #852B22;
-  --accent-glow: rgba(192, 57, 43, 0.18);
-  --accent-soft: rgba(192, 57, 43, 0.08);
-  --accent-ring: rgba(192, 57, 43, 0.22);
+  --accent-glow: rgba(166, 61, 42, 0.22);
+  --accent-soft: rgba(166, 61, 42, 0.1);
+  --accent-ring: rgba(166, 61, 42, 0.28);
 
   --success: var(--accent-green);
   --success-soft: rgba(45, 106, 79, 0.1);
@@ -72,18 +72,27 @@
   --info-soft: rgba(42, 92, 138, 0.1);
 
   /* Decorative / chart */
-  --chart-grid: rgba(28, 26, 23, 0.12);
-  --chart-axis: rgba(28, 26, 23, 0.35);
-  --aurora-1: rgba(192, 57, 43, 0.04);
-  --aurora-2: rgba(183, 112, 13, 0.03);
-  --aurora-3: rgba(45, 106, 79, 0.03);
-  --surface-gradient: var(--bg-surface);
-  --btn-primary-shadow: 0 4px 12px rgba(192, 57, 43, 0.25);
-  --card-hover-ring: rgba(28, 26, 23, 0.06);
-  --grid-line: rgba(28, 26, 23, 0.06);
-  --dot-grid: rgba(28, 26, 23, 0.08);
+  --chart-grid: rgba(26, 23, 20, 0.14);
+  --chart-axis: rgba(26, 23, 20, 0.42);
+  --aurora-1: rgba(166, 61, 42, 0.09);
+  --aurora-2: rgba(154, 95, 10, 0.07);
+  --aurora-3: rgba(42, 94, 70, 0.06);
+  --surface-gradient: linear-gradient(165deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+  --btn-primary-shadow: 0 4px 14px rgba(166, 61, 42, 0.3);
+  --card-hover-ring: rgba(26, 23, 20, 0.08);
+  --grid-line: rgba(26, 23, 20, 0.08);
+  --dot-grid: rgba(26, 23, 20, 0.1);
   --selection-fg: var(--bg-base);
-  --grain-opacity: 0.02;
+  --grain-opacity: 0.035;
+
+  /* Simulate page — light-only section accents */
+  --simulate-panel-warm: #D4C8BA;
+  --simulate-panel-cool: #C8D0D6;
+  --simulate-panel-warm-accent: rgba(166, 61, 42, 0.28);
+  --simulate-panel-cool-accent: rgba(61, 90, 107, 0.28);
+  --simulate-radar-glow: rgba(166, 61, 42, 0.07);
+  --simulate-nav-tint: color-mix(in srgb, var(--bg-base) 88%, var(--signal) 12%);
+  --simulate-memes-strip: color-mix(in srgb, var(--bg-inset) 70%, var(--data-cool) 30%);
   --map-bg-from: var(--bg-base);
   --map-bg-to: var(--bg-surface);
   --map-vignette: rgba(28, 26, 23, 0.08);
@@ -156,6 +165,21 @@
   --dur-mid: 600ms;
   --dur-slow: 900ms;
   --dur-draw: 1200ms;
+}
+
+/* Light mode — lock hero + red-team to original palette (do not restyle these sections) */
+:root:not([data-theme="dark"]) #simulate-verdict,
+:root:not([data-theme="dark"]) #simulate-agents {
+  --bg-surface: #EDEAE4;
+  --bg-elevated: #E5E1D8;
+  --bg-inset: #DDD8CF;
+  --ink-primary: #1C1A17;
+  --ink-secondary: #5C5750;
+  --ink-tertiary: #9B9288;
+  --hairline: #D6D1C8;
+  --border-strong: #BAB4A8;
+  --signal: #B84A2E;
+  --signal-soft: #8A3822;
 }
 
 [data-theme="dark"] {
@@ -1421,6 +1445,127 @@ details[open] > summary .chevron {
   max-width: 1240px;
   margin-inline: auto;
   padding-inline: clamp(24px, 6vw, 96px);
+}
+
+/* ── Simulate page — light-mode section styling ── */
+:root:not([data-theme="dark"]) .simulate-section-nav {
+  background: var(--simulate-nav-tint);
+  border-right-color: var(--border-strong);
+  box-shadow: 4px 0 28px rgba(26, 23, 20, 0.07);
+}
+
+:root:not([data-theme="dark"]) .simulate-section-nav button[aria-current="true"] {
+  background: color-mix(in srgb, var(--signal) 8%, transparent);
+  border-radius: 2px;
+}
+
+:root:not([data-theme="dark"]) #simulate-radar {
+  background:
+    radial-gradient(ellipse 90% 70% at 25% 45%, var(--simulate-radar-glow), transparent 65%),
+    radial-gradient(ellipse 50% 40% at 85% 20%, rgba(61, 90, 107, 0.05), transparent 60%),
+    var(--bg-base);
+}
+
+:root:not([data-theme="dark"]) #simulate-radar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 70% at 40% 50%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 40% 50%, #000 20%, transparent 75%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+:root:not([data-theme="dark"]) #simulate-backlash {
+  background:
+    linear-gradient(180deg, var(--bg-base) 0%, color-mix(in srgb, var(--bg-inset) 40%, var(--bg-base)) 100%);
+}
+
+:root:not([data-theme="dark"]) .simulate-panel--warm {
+  background:
+    linear-gradient(155deg, var(--simulate-panel-warm) 0%, var(--bg-inset) 100%);
+  border-color: var(--simulate-panel-warm-accent);
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+:root:not([data-theme="dark"]) .simulate-panel--cool {
+  background:
+    linear-gradient(155deg, var(--simulate-panel-cool) 0%, var(--bg-elevated) 100%);
+  border-color: var(--simulate-panel-cool-accent);
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+:root:not([data-theme="dark"]) .simulate-memes-strip {
+  background: var(--simulate-memes-strip);
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+:root:not([data-theme="dark"]) .simulate-section-divider line {
+  stroke: var(--signal);
+  stroke-opacity: 0.35;
+}
+
+:root:not([data-theme="dark"]) .simulate-heatmap-embed {
+  background: color-mix(in srgb, var(--bg-base) 60%, var(--data-cool) 8%);
+  border: 1px solid var(--simulate-panel-cool-accent);
+  border-radius: 2px;
+  padding: 0.75rem;
+}
+
+:root:not([data-theme="dark"]) .simulate-radar-callout {
+  background: color-mix(in srgb, var(--bg-elevated) 85%, var(--signal) 15%);
+  border: 1px solid var(--simulate-panel-warm-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+:root:not([data-theme="dark"]) .simulate-eyebrow {
+  color: var(--signal);
+  letter-spacing: 0.14em;
+}
+
+/* Cultural heat map — light-mode readability */
+.world-stress-map .heatmap-chrome {
+  background: var(--bg-surface);
+}
+
+:root:not([data-theme="dark"]) .world-stress-map {
+  --map-bg-from: #D2CCC2;
+  --map-bg-to: #C4BDB2;
+  --map-grid-stroke: rgba(26, 23, 20, 0.22);
+  --map-dot-grid: rgba(166, 61, 42, 0.45);
+  --map-vignette: rgba(26, 23, 20, 0.14);
+  --map-land-from: rgba(166, 61, 42, 0.1);
+  --map-land-to: rgba(166, 61, 42, 0.05);
+  --map-ocean-fill: rgba(166, 61, 42, 0.07);
+  --map-marker-stroke: #F2EDE6;
+  --tooltip-bg: #F2EDE6;
+  --tooltip-fg: #1A1714;
+  --tooltip-fg-muted: #4A4540;
+  --map-tone-high-soft: rgba(166, 61, 42, 0.28);
+  --map-tone-medium-soft: rgba(154, 95, 10, 0.24);
+  --map-tone-low-soft: rgba(120, 95, 60, 0.22);
+}
+
+:root:not([data-theme="dark"]) .world-stress-map .heatmap-chrome {
+  background: #F2EDE6;
+}
+
+:root:not([data-theme="dark"]) .heatmap-page-header .text-section-heading {
+  font-size: clamp(1.625rem, 3vw, 2.25rem);
+}
+
+:root:not([data-theme="dark"]) .heatmap-page-header p {
+  font-size: var(--text-md);
+  color: var(--ink-secondary);
 }
 
 /* Embedded heatmap on simulate page — stack columns to fit viewport */

@@ -7,7 +7,7 @@ export function SectionDivider() {
   const { ref, visible } = useRevealOnScroll<HTMLDivElement>();
 
   return (
-    <div ref={ref} className="flex justify-center py-6" aria-hidden>
+    <div ref={ref} className="simulate-section-divider flex justify-center py-6" aria-hidden>
       <svg width="1" height="80" viewBox="0 0 1 80">
         <line
           x1="0.5"

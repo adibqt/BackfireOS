@@ -101,7 +101,7 @@ export function BacklashTerritorySection({
     >
       <div className="simulate-gutter">
         <SectionReveal index={0} visible={sectionVisible}>
-          <p className="font-mono text-[var(--text-sm)] uppercase tracking-[0.1em] text-[var(--ink-tertiary)]">
+          <p className="simulate-eyebrow font-mono text-[var(--text-sm)] uppercase tracking-[0.1em] text-[var(--ink-tertiary)]">
             {t(locale, "backlashTerritoryEyebrow")}
           </p>
         </SectionReveal>
@@ -115,7 +115,7 @@ export function BacklashTerritorySection({
         <div className="mt-16 flex flex-col gap-12">
           <article
             id="simulate-network"
-            className="scroll-mt-20 rounded-[2px] border border-[var(--hairline)] bg-[var(--bg-inset)] p-6 sm:p-8 lg:p-10"
+            className="simulate-panel--warm scroll-mt-20 rounded-[2px] border border-[var(--hairline)] bg-[var(--bg-inset)] p-6 sm:p-8 lg:p-10"
           >
             <div className="border-l-2 border-[var(--signal)] pl-4 sm:pl-5">
               <SectionReveal index={2} visible={sectionVisible}>
@@ -221,7 +221,7 @@ export function BacklashTerritorySection({
 
           <article
             id="simulate-territory"
-            className="scroll-mt-20 rounded-[2px] border border-[var(--hairline)] bg-[var(--bg-elevated)] p-6 sm:p-8 lg:p-10"
+            className="simulate-panel--cool scroll-mt-20 rounded-[2px] border border-[var(--hairline)] bg-[var(--bg-elevated)] p-6 sm:p-8 lg:p-10"
           >
             <div className="border-l-2 border-[var(--data-cool)] pl-4 sm:pl-5">
               <SectionReveal index={4} visible={sectionVisible}>

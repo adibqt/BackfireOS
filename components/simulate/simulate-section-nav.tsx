@@ -70,9 +70,9 @@ export function SimulateSectionNav({ locale }: { locale: Locale }) {
   return (
     <nav
       aria-label={t(locale, "simulatePageNav")}
-      className="fixed left-0 top-1/2 z-40 hidden -translate-y-1/2 xl:block"
+      className="simulate-section-nav fixed left-0 top-1/2 z-40 hidden -translate-y-1/2 border-r border-[var(--hairline)] bg-[var(--bg-base)] py-5 pl-3 pr-4 xl:block"
     >
-      <ul className="flex flex-col gap-1 border-r border-[var(--hairline)] bg-[var(--bg-base)] py-5 pl-3 pr-4">
+      <ul className="flex flex-col gap-1">
         {SIMULATE_SECTIONS.map(({ id, labelKey }, index) => {
           const active = activeId === id;
           return (

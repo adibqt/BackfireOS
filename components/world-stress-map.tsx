@@ -297,25 +297,25 @@ export function WorldStressMap({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,var(--map-bg-from)_0%,var(--map-bg-to)_100%)] shadow-[var(--shadow-lg)]",
+        "world-stress-map relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,var(--map-bg-from)_0%,var(--map-bg-to)_100%)] shadow-[var(--shadow-lg)]",
         className
       )}
     >
       {/* ─── Top chrome ─── */}
-      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--bg-surface)] px-5 py-3.5">
+      <div className="heatmap-chrome relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-strong)] px-5 py-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/25">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/30">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <circle cx="12" cy="12" r="10" />
               <line x1="2" y1="12" x2="22" y2="12" />
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
           </div>
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+            <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--ink-secondary)]">
               {t(locale, "globalOverview")}
             </p>
-            <p className="font-display text-[14px] font-semibold tracking-tight text-[var(--fg)]">
+            <p className="font-display text-[17px] font-semibold tracking-tight text-[var(--ink-primary)] sm:text-[18px]">
               Cultural stress · global
             </p>
           </div>
@@ -334,7 +334,7 @@ export function WorldStressMap({
       </div>
 
       {/* ─── Map + detail panel ─── */}
-      <div className="grid lg:grid-cols-[1fr_280px]">
+      <div className="grid lg:grid-cols-[1fr_300px]">
         <div className="relative aspect-[2/1] w-full overflow-hidden">
           <div
             aria-hidden
@@ -439,7 +439,7 @@ export function WorldStressMap({
                       fill="none"
                       stroke={tone.color}
                       strokeWidth={isFocus ? 1.5 : 1}
-                      opacity={isFocus ? 0.9 : 0.45}
+                      opacity={isFocus ? 0.95 : 0.62}
                     />
                     <circle
                       cx={x}
@@ -526,42 +526,42 @@ export function WorldStressMap({
                       } ${top ? -6 : 6})`}
                     >
                       <rect
-                        x={anchor === "end" ? -160 : 0}
-                        y={align === "baseline" ? -42 : 0}
-                        width="160"
-                        height="42"
+                        x={anchor === "end" ? -172 : 0}
+                        y={align === "baseline" ? -46 : 0}
+                        width="172"
+                        height="46"
                         rx="8"
                         fill="var(--tooltip-bg)"
                         stroke={tone.color}
-                        strokeWidth="0.7"
-                        strokeOpacity="0.6"
+                        strokeWidth="0.9"
+                        strokeOpacity="0.75"
                       />
                       <text
-                        x={anchor === "end" ? -150 : 10}
-                        y={align === "baseline" ? -26 : 16}
+                        x={anchor === "end" ? -162 : 10}
+                        y={align === "baseline" ? -28 : 18}
                         fill="var(--tooltip-fg)"
-                        fontSize="11"
+                        fontSize="13"
                         fontFamily="var(--font-display), system-ui"
                         fontWeight="600"
                       >
                         {def.label}
                       </text>
                       <text
-                        x={anchor === "end" ? -150 : 10}
-                        y={align === "baseline" ? -14 : 28}
+                        x={anchor === "end" ? -162 : 10}
+                        y={align === "baseline" ? -14 : 32}
                         fill="var(--tooltip-fg-muted)"
-                        fontSize="9"
+                        fontSize="11"
                         fontFamily="var(--font-mono), monospace"
                         letterSpacing="0.08em"
                       >
                         {def.country.toUpperCase()}
                       </text>
                       <text
-                        x={anchor === "end" ? -14 : 150}
-                        y={align === "baseline" ? -18 : 22}
+                        x={anchor === "end" ? -14 : 162}
+                        y={align === "baseline" ? -20 : 24}
                         textAnchor="end"
                         fill={tone.color}
-                        fontSize="16"
+                        fontSize="18"
                         fontFamily="var(--font-display), system-ui"
                         fontWeight="700"
                       >
@@ -575,7 +575,7 @@ export function WorldStressMap({
         </div>
 
         {/* DETAIL PANEL */}
-        <div className="border-t border-[var(--border)] bg-[var(--bg-surface)] p-5 lg:border-l lg:border-t-0">
+        <div className="heatmap-chrome border-t border-[var(--border-strong)] p-5 sm:p-6 lg:border-l lg:border-t-0">
           {focusPoint ? (
             <DetailPanel point={focusPoint} locale={locale} />
           ) : (
@@ -585,14 +585,14 @@ export function WorldStressMap({
       </div>
 
       {/* ─── Bottom strip ─── */}
-      <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] bg-[var(--bg-surface)] px-5 py-3">
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="heatmap-chrome relative z-20 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-strong)] px-5 py-3.5 sm:px-6 sm:py-4">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-5">
           <LegendDot tone="high" label={t(locale, "heatHigh")} sublabel="70 — 100" />
           <LegendDot tone="medium" label={t(locale, "heatMedium")} sublabel="40 — 69" />
           <LegendDot tone="low" label={t(locale, "heatLow")} sublabel="0 — 39" />
         </div>
         {focusPoint && (
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
+          <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--ink-secondary)]">
             {formatCoords(focusPoint.def.lat, focusPoint.def.lng)}
           </p>
         )}
@@ -619,11 +619,11 @@ function Kpi({
         ? "text-[var(--warning)]"
         : "text-[var(--fg)]";
   return (
-    <div className="flex items-baseline gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+    <div className="flex items-baseline gap-2 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-1.5">
+      <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-[var(--ink-secondary)] sm:text-[12px]">
         {label}
       </span>
-      <span className={cn("font-display text-[13px] font-semibold tabular-nums", colorClass)}>
+      <span className={cn("font-display text-[16px] font-semibold tabular-nums sm:text-[17px]", colorClass)}>
         {value}
       </span>
     </div>
@@ -652,10 +652,10 @@ function LegendDot({
           style={{ backgroundColor: t.color, boxShadow: `0 0 8px ${t.glow}` }}
         />
       </span>
-      <span className="font-display text-[12px] font-medium text-[var(--fg)]">
+      <span className="font-display text-[14px] font-medium text-[var(--ink-primary)] sm:text-[15px]">
         {label}
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+      <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--ink-secondary)] sm:text-[12px]">
         {sublabel}
       </span>
     </span>
@@ -682,27 +682,27 @@ function DetailPanel({
   return (
     <div className="flex h-full flex-col gap-4">
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+        <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
           {def.country}
         </p>
-        <h3 className="mt-1 font-display text-[20px] font-semibold tracking-tight text-[var(--fg)]">
+        <h3 className="mt-1 font-display text-[22px] font-semibold tracking-tight text-[var(--ink-primary)] sm:text-[24px]">
           {def.label}
         </h3>
       </div>
 
       <div>
         <div className="flex items-baseline justify-between">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--fg-subtle)]">
+          <p className="font-mono text-[12px] font-medium uppercase tracking-wider text-[var(--ink-secondary)]">
             Severity
           </p>
           <span
-            className="font-display text-3xl font-semibold tabular-nums"
+            className="font-display text-4xl font-semibold tabular-nums"
             style={{ color: tone.color }}
           >
             {Math.round(stress.severity)}
           </span>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--bg-elev-2)]">
+        <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[var(--bg-inset)]">
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{
@@ -713,32 +713,32 @@ function DetailPanel({
           />
         </div>
         <p
-          className="mt-1.5 font-mono text-[10px] uppercase tracking-wider"
+          className="mt-2 font-mono text-[12px] font-medium uppercase tracking-wider"
           style={{ color: tone.color }}
         >
           {tierLabel}
         </p>
       </div>
 
-      <p className="text-[13px] leading-relaxed text-[var(--fg-muted)]">
+      <p className="text-[15px] leading-relaxed text-[var(--ink-secondary)]">
         {stress.severity >= 40
           ? stress.summary
           : t(locale, "noTripwires")}
       </p>
 
       {stress.triggers.length > 0 && (
-        <div className="mt-auto space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+        <div className="mt-auto space-y-2.5">
+          <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
             {t(locale, "flaggedElements")}
           </p>
           {stress.triggers.slice(0, 2).map((trig, i) => (
             <div
               key={i}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-2.5"
+              className="rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] p-3"
             >
-              <div className="mb-1 flex items-center gap-2">
+              <div className="mb-1.5 flex items-center gap-2">
                 <span
-                  className="rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider"
+                  className="rounded px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider sm:text-[11px]"
                   style={{
                     backgroundColor: tone.soft,
                     color: tone.color,
@@ -749,7 +749,7 @@ function DetailPanel({
                     : t(locale, "triggerVisual")}
                 </span>
               </div>
-              <p className="line-clamp-2 text-[12px] leading-snug text-[var(--fg)]">
+              <p className="line-clamp-2 text-[14px] leading-snug text-[var(--ink-primary)]">
                 &ldquo;{trig.text}&rdquo;
               </p>
             </div>
@@ -762,18 +762,18 @@ function DetailPanel({
 
 function EmptyPanel({ locale }: { locale: Locale }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center text-center">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="6" x2="12" y2="14" />
           <circle cx="12" cy="17" r="0.5" fill="currentColor" />
         </svg>
       </div>
-      <p className="font-display text-[14px] font-medium text-[var(--fg)]">
+      <p className="font-display text-[16px] font-semibold text-[var(--ink-primary)] sm:text-[17px]">
         Hover a market
       </p>
-      <p className="mt-1 max-w-[180px] text-[12px] text-[var(--fg-muted)]">
+      <p className="mt-2 max-w-[220px] text-[14px] leading-relaxed text-[var(--ink-secondary)]">
         {t(locale, "stressMapTitle")}
       </p>
     </div>

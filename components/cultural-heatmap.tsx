@@ -323,16 +323,16 @@ export function CulturalHeatmap({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             {slogan && (
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+              <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--ink-secondary)]">
                 {t(locale, "stressMapFor")}
               </p>
             )}
             {slogan && (
-              <h2 className="mt-1 font-display text-xl font-semibold text-[var(--fg)] md:text-2xl">
+              <h2 className="mt-1 font-display text-2xl font-semibold text-[var(--ink-primary)] md:text-3xl">
                 {slogan}
               </h2>
             )}
-            <p className="mt-2 text-[13px] text-[var(--fg-muted)]">
+            <p className="mt-2 text-[15px] text-[var(--ink-secondary)]">
               {MARKET_CATALOG.length} {t(locale, "marketsAnalyzed")} · {flaggedCount}{" "}
               {t(locale, "marketsFlagged")}
             </p>
@@ -369,7 +369,7 @@ export function CulturalHeatmap({
                 if (first) handleSelectMarket(first.id);
               }}
               className={cn(
-                "relative inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-medium transition-all duration-200",
+                "relative inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-medium transition-all duration-200 sm:text-[14px]",
                 isActive
                   ? "border-[var(--signal)] bg-[var(--accent-soft)] text-[var(--accent-400)] shadow-[var(--shadow-card)]"
                   : "border-[var(--border)] bg-[var(--bg-elev-1)] text-[var(--fg-muted)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elev-2)] hover:text-[var(--fg)]",

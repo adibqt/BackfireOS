@@ -46,7 +46,7 @@ function RunPicker({
         ))}
       </Select>
       {emptyMessage && (
-        <p className="text-[13px] text-[var(--fg-muted)]">{emptyMessage}</p>
+        <p className="text-[15px] text-[var(--fg-muted)]">{emptyMessage}</p>
       )}
     </div>
   );
@@ -107,7 +107,9 @@ function HeatmapContent() {
 
   return (
     <PageShell footer={false}>
+      <div className="heatmap-page">
       <SectionHeader
+        className="heatmap-page-header"
         eyebrow={t(locale, "heatmap")}
         title={t(locale, "stressMapTitle")}
         description={t(locale, "stressMapDescription")}
@@ -166,6 +168,7 @@ function HeatmapContent() {
           />
         </div>
       )}
+      </div>
     </PageShell>
   );
 }
