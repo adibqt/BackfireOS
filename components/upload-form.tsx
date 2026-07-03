@@ -3,14 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { AgentVerdict, Brand } from "@/lib/agents/types";
+import type { AgentVerdict, Brand, CulturalStressMap } from "@/lib/agents/types";
+import { countFlaggedMarkets } from "@/lib/cultural-stress-map";
 import { useLanguage } from "./language-provider";
 import { t } from "@/lib/i18n";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { SimpleBlockSkeleton } from "@/components/ui/skeleton";
 import { Input, Textarea, FileInput } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Badge, Kbd } from "@/components/ui/badge";
+import { Badge, Kbd, RiskBadge } from "@/components/ui/badge";
+import { riskLevel } from "@/lib/scoring";
 import { cn } from "@/lib/utils";
 
 export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
@@ -26,6 +28,8 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const [verdicts, setVerdicts] = useState<AgentVerdict[]>([]);
+  const [stressMapPreview, setStressMapPreview] = useState<CulturalStressMap | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -81,6 +85,8 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
   const runSimulation = async () => {
     setLoading(true);
     setError("");
+    setVerdicts([]);
+    setStressMapPreview(null);
     setStatus("Creating campaign...");
 
     try {
@@ -125,10 +131,11 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
               const data = JSON.parse(dataLine.replace("data: ", ""));
               if (event === "agent_verdict") {
                 collected.push(data as AgentVerdict);
+                setVerdicts([...collected]);
               } else if (event === "status") {
                 setStatus((data as { message: string }).message);
               } else if (event === "stress_map") {
-                /* captured server-side; results on run page */
+                setStressMapPreview(data as CulturalStressMap);
               } else if (event === "error") {
                 reject(new Error((data as { message: string }).message));
               }
@@ -317,6 +324,42 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
               <span>{error}</span>
+            </div>
+          )}
+
+          {verdicts.length > 0 && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[13px] font-medium text-[var(--fg)]">
+                  {t(locale, "agentVerdicts")}
+                </p>
+                <Badge variant="accent">{verdicts.length} / 6</Badge>
+              </div>
+              <div className="space-y-1.5">
+                {verdicts.map((v) => (
+                  <div
+                    key={v.agentId}
+                    className="flex items-center justify-between rounded-lg bg-[var(--bg-elev-2)] px-3 py-2 fade-up"
+                  >
+                    <span className="text-[13px] text-[var(--fg-muted)]">{v.agentName}</span>
+                    <RiskBadge level={riskLevel(v.severity)} score={v.severity} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {stressMapPreview && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 fade-up">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[13px] font-medium text-[var(--fg)]">
+                  {t(locale, "stressMapTitle")}
+                </p>
+                <Badge variant="accent">
+                  {stressMapPreview.markets.length} {t(locale, "stressMapPreview")} ·{" "}
+                  {countFlaggedMarkets(stressMapPreview)} {t(locale, "marketsFlagged")}
+                </Badge>
+              </div>
             </div>
           )}
         </div>

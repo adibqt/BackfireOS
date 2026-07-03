@@ -137,7 +137,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
                 {liveAi ? "Live AI · Gemini" : "Demo Mode"}
               </Badge>
             </div>
-            <div className="mt-8">
+            <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="#simulate" variant="primary" size="lg">
                 Run Simulation
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
@@ -145,6 +145,9 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
               </ButtonLink>
+              <PendingButtonLink href="/history" variant="secondary" size="lg">
+                View past runs
+              </PendingButtonLink>
             </div>
           </div>
 
