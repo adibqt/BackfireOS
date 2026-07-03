@@ -74,7 +74,7 @@ export function MemeGrid({
                   </div>
                 )}
                 <div className="absolute right-3 top-3">
-                  <Badge variant={badgeVariant} className="backdrop-blur-md">
+                  <Badge variant={badgeVariant}>
                     {Math.round(meme.memeabilityScore)}
                   </Badge>
                 </div>

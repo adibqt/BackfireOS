@@ -264,7 +264,7 @@ export function DocsAdminPanel({ initialConfig }: { initialConfig: DocsConfig })
             <button
               type="button"
               onClick={() => navigator.clipboard?.writeText(previewLink)}
-              className="block w-full truncate rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)] px-3 py-2 text-left font-mono text-[12px] text-[var(--accent-400)] transition-colors hover:bg-white/[0.04]"
+              className="block w-full truncate rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)] px-3 py-2 text-left font-mono text-[12px] text-[var(--accent-400)] transition-colors hover:bg-[var(--bg-elevated)]"
               title="Click to copy"
             >
               {previewLink}
@@ -374,7 +374,7 @@ function IconBtn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border-strong)] bg-white/[0.03] text-[var(--fg-muted)] transition-colors hover:bg-white/[0.06] hover:text-[var(--fg)] disabled:cursor-not-allowed disabled:opacity-30",
+        "flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] disabled:cursor-not-allowed disabled:opacity-30",
         danger && "hover:border-[var(--danger)]/50 hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
       )}
     >

@@ -3,21 +3,20 @@ import { cn } from "@/lib/utils";
 
 const variants = {
   primary: [
-    "relative isolate text-white",
-    "bg-[linear-gradient(180deg,#ff5d67,#e63946)]",
-    "shadow-[0_1px_0_0_rgba(255,255,255,0.18)_inset,0_-1px_0_0_rgba(0,0,0,0.25)_inset,0_8px_24px_-8px_rgba(255,77,87,0.55)]",
-    "hover:brightness-110 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.2)_inset,0_-1px_0_0_rgba(0,0,0,0.25)_inset,0_10px_30px_-6px_rgba(255,77,87,0.65)]",
+    "relative isolate text-[var(--selection-fg)]",
+    "bg-[var(--accent)]",
+    "shadow-[var(--btn-primary-shadow)]",
+    "hover:brightness-110",
     "active:scale-[0.98] active:brightness-95",
   ].join(" "),
   secondary: [
-    "border border-[var(--border-strong)] bg-white/[0.03] text-[var(--fg)]",
-    "backdrop-blur-sm",
-    "hover:bg-white/[0.06] hover:border-[var(--border-bright)]",
+    "border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--fg)]",
+    "hover:bg-[var(--bg-elevated)] hover:border-[var(--border-bright)]",
     "active:scale-[0.98]",
   ].join(" "),
   ghost: [
     "text-[var(--fg-muted)]",
-    "hover:bg-white/[0.04] hover:text-[var(--fg)]",
+    "hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]",
     "active:scale-[0.98]",
   ].join(" "),
   outline: [

@@ -37,8 +37,8 @@ export function AuthButton() {
       <Link
         href="/login"
         className={cn(
-          "hidden h-9 items-center rounded-lg border border-[var(--border-strong)] bg-white/[0.03] px-3.5 text-[13px] font-medium text-[var(--fg)] backdrop-blur",
-          "transition-colors hover:bg-white/[0.06] hover:border-[var(--border-bright)] sm:inline-flex"
+          "hidden h-9 items-center rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3.5 text-[13px] font-medium text-[var(--fg)]",
+          "transition-colors hover:bg-[var(--bg-elevated)] hover:border-[var(--border-bright)] sm:inline-flex"
         )}
       >
         Sign in
@@ -52,15 +52,15 @@ export function AuthButton() {
     <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger
         className={cn(
-          "flex h-9 items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-0.5 pl-0.5 pr-1.5 backdrop-blur",
+          "flex h-9 items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)] py-0.5 pl-0.5 pr-1.5",
           "transition-[border-color,background-color,box-shadow] duration-200",
-          "hover:border-[var(--border-bright)] hover:bg-white/[0.06]",
-          menuOpen && "border-[var(--border-bright)] bg-white/[0.06] ring-2 ring-[var(--accent-ring)]",
+          "hover:border-[var(--border-bright)] hover:bg-[var(--bg-elevated)]",
+          menuOpen && "border-[var(--border-bright)] bg-[var(--bg-elevated)] ring-2 ring-[var(--accent-ring)]",
           "sm:pr-3"
         )}
         aria-label={menuOpen ? "Close account menu" : "Open account menu"}
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff7a82,#c92c39)] text-[12px] font-semibold text-white shadow-[0_2px_8px_-2px_rgba(255,77,87,0.5)]">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)] text-[12px] font-semibold text-[var(--selection-fg)] shadow-[var(--btn-primary-shadow)]">
           {initial}
         </span>
         <span className="hidden max-w-[120px] truncate text-[13px] text-[var(--fg)] sm:inline">

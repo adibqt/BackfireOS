@@ -43,7 +43,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
           <div className="relative">
             <div className="bg-grid absolute -inset-x-6 -top-12 -bottom-12 -z-10 opacity-50" aria-hidden />
 
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-1 pr-3 text-[12px] backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)] py-1 pl-1 pr-3 text-[12px]">
               <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
                 v0.1
               </span>
@@ -100,7 +100,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
       </section>
 
       {/* ── Trust strip ── */}
-      <section className="relative -mx-5 mb-24 border-y border-[var(--border)] bg-[var(--bg-elev-1)]/40 px-5 py-6 backdrop-blur md:mb-32">
+      <section className="relative -mx-5 mb-24 border-y border-[var(--border)] bg-[var(--bg-surface)] px-5 py-6 md:mb-32">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
           <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">The red team</p>
           <div className="marquee-mask relative min-w-0 flex-1 overflow-hidden">
@@ -135,7 +135,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
         <div className="relative grid gap-4 md:grid-cols-3">
           <div aria-hidden className="absolute left-6 right-6 top-[44px] hidden h-px bg-gradient-to-r from-transparent via-[var(--border-strong)] to-transparent md:block" />
           {STEPS.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl lift fade-up" style={{ animationDelay: `${i * 80}ms` }}>
+            <div key={s.n} className="relative rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 lift fade-up" style={{ animationDelay: `${i * 80}ms` }}>
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
                 <span className="absolute inset-0 -z-10 rounded-2xl bg-[var(--accent-soft)] blur-xl" />
@@ -166,8 +166,8 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
           </div>
 
           <div className="relative">
-            <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[32px] bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(255,77,87,0.16),transparent_70%)] blur-2xl" />
-            <div className="overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/80 p-5 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+            <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[32px] bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,var(--aurora-1),transparent_70%)] blur-2xl" />
+            <div className="overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-xl)]">
               <div className="mb-4 flex items-center justify-between">
                 <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">/runs/preview · 14:32:08</p>
                 <Badge variant="accent" dot>live</Badge>
@@ -203,7 +203,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {MODES.map((m, i) => (
-            <Link key={m.href} href={m.href} className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl fade-up no-underline" style={{ animationDelay: `${i * 60}ms` }}>
+            <Link key={m.href} href={m.href} className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 fade-up no-underline" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20 transition-transform duration-300 group-hover:scale-110">

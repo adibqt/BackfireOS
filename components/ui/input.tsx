@@ -166,7 +166,7 @@ export function FileInput({ label, hint, previewUrl, onFileChange, onClear, acce
             aria-label="Remove image"
             className={cn(
               "absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-md",
-              "border border-white/20 bg-black/70 text-white shadow-sm backdrop-blur-sm",
+              "border border-[var(--border-strong)] bg-[color-mix(in_srgb,var(--text-primary)_70%,transparent)] text-[var(--selection-fg)] shadow-sm",
               "transition-colors duration-200 hover:bg-[var(--danger)] hover:border-[var(--danger)]/50"
             )}
           >

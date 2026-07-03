@@ -120,7 +120,7 @@ export function DocsExperience({
   return (
     <div className="docs-root min-h-screen">
       {/* ── Toolbar ──────────────────────────────────────────────── */}
-      <header className="no-print sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl">
+      <header className="no-print sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/95">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
           <Link href="/" className="flex items-center gap-2.5 no-underline">
             <LogoBadge size="sm" glow={false} />
@@ -143,7 +143,7 @@ export function DocsExperience({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search docs…"
-              className="h-9 w-44 rounded-lg border border-[var(--border-strong)] bg-white/[0.03] pl-8 pr-3 text-[13px] text-[var(--fg)] outline-none transition-colors placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)]/50 lg:w-56"
+              className="h-9 w-44 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] pl-8 pr-3 text-[13px] text-[var(--fg)] outline-none transition-colors placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)]/50 lg:w-56"
             />
           </div>
 
@@ -304,7 +304,7 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       title={title}
-      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] bg-white/[0.03] px-3 text-[13px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-white/[0.06] hover:text-[var(--fg)]"
+      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3 text-[13px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
     >
       {children}
     </button>
@@ -343,7 +343,7 @@ function NavGroup({
                   "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] transition-colors",
                   active
                     ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
-                    : "text-[var(--fg-muted)] hover:bg-white/[0.04] hover:text-[var(--fg)]"
+                    : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
                 )}
               >
                 <span
@@ -374,8 +374,8 @@ function DocsHero({
   loading: boolean;
 }) {
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-7 md:p-10">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(255,77,87,0.16),transparent_70%)]" />
+    <section className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-7 md:p-10">
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,var(--aurora-1),transparent_70%)]" />
       <div className="absolute inset-0 bg-grid opacity-40" aria-hidden />
       <div className="relative">
         <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--accent)]">

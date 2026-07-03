@@ -22,7 +22,7 @@ const LEVEL_TONE = {
     border: "border-[var(--success)]/20",
     accent: "var(--success)",
     badgeBg: "var(--success-soft)",
-    glow: "rgba(34,197,94,0.2)",
+    glow: "var(--success-glow)",
   },
   medium: {
     ring: "text-[var(--warning)]",
@@ -31,7 +31,7 @@ const LEVEL_TONE = {
     border: "border-[var(--warning)]/20",
     accent: "var(--warning)",
     badgeBg: "var(--warning-soft)",
-    glow: "rgba(255,138,61,0.2)",
+    glow: "var(--warning-glow)",
   },
   high: {
     ring: "text-[var(--danger)]",
@@ -40,7 +40,7 @@ const LEVEL_TONE = {
     border: "border-[var(--danger)]/20",
     accent: "var(--danger)",
     badgeBg: "var(--danger-soft)",
-    glow: "rgba(255,77,87,0.2)",
+    glow: "var(--danger-glow)",
   },
 } as const;
 
@@ -127,8 +127,8 @@ function MarketCard({
               tone.bg,
             )
           : cn(
-              "border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))]",
-              "hover:border-[var(--border-strong)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]",
+              "border-[var(--border)] bg-[var(--bg-surface)]",
+              "hover:border-[var(--border-strong)] hover:bg-[var(--bg-elevated)]",
             ),
         !flagged && "opacity-55",
       )}
@@ -205,7 +205,7 @@ function TriggerList({ stress, locale }: { stress: MarketStress; locale: Locale 
       {stress.triggers.map((trigger, i) => (
         <li
           key={`${trigger.type}-${i}`}
-          className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/60 p-3.5"
+          className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3.5"
         >
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <Badge variant={trigger.type === "copy" ? "accent" : "info"}>
@@ -371,7 +371,7 @@ export function CulturalHeatmap({
               className={cn(
                 "relative inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-medium transition-all duration-200",
                 isActive
-                  ? "border-[var(--accent)]/50 bg-[var(--accent-soft)] text-[var(--accent-400)] shadow-[0_0_16px_-4px_rgba(255,77,87,0.35)]"
+                  ? "border-[var(--accent)]/50 bg-[var(--accent-soft)] text-[var(--accent-400)] shadow-[0_0_16px_-4px_var(--accent-glow)]"
                   : "border-[var(--border)] bg-[var(--bg-elev-1)] text-[var(--fg-muted)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elev-2)] hover:text-[var(--fg)]",
               )}
             >
@@ -423,7 +423,7 @@ function DetailPanel({ stress, locale }: { stress: MarketStress; locale: Locale 
   const tone = LEVEL_TONE[level];
 
   return (
-    <div className="card-glow overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="card-glow overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
       {/* Colored header strip */}
       <div
         className="border-b border-[var(--border)] px-5 py-4"
@@ -477,7 +477,7 @@ export function CulturalHeatmapEmpty({
   locale: Locale;
 }) {
   return (
-    <div className="card-glow rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-6 py-10 text-center backdrop-blur-xl">
+    <div className="card-glow rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-6 py-10 text-center">
       <p className="font-display text-lg font-semibold text-[var(--fg)]">
         {t(locale, "stressMapUnavailable")}
       </p>

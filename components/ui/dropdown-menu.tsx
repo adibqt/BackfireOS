@@ -177,7 +177,7 @@ const itemBase =
   "flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] transition-colors duration-150 outline-none";
 
 const itemVariants = {
-  default: "text-[var(--fg-muted)] hover:bg-white/[0.05] hover:text-[var(--fg)] focus-visible:bg-white/[0.05] focus-visible:text-[var(--fg)]",
+  default: "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] focus-visible:bg-[var(--bg-elevated)] focus-visible:text-[var(--fg)]",
   danger:
     "text-[var(--danger)] hover:bg-[var(--danger-soft)] focus-visible:bg-[var(--danger-soft)]",
 } as const;

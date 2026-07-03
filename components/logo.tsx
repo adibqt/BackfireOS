@@ -76,9 +76,9 @@ function CrosshairGlyph({ stroke = "currentColor", opacity = 0.22 }: { stroke?: 
 function BrandGradient({ id }: { id: string }) {
   return (
     <linearGradient id={id} x1="5" y1="5" x2="27" y2="27" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stopColor="#ff9aa0" />
-      <stop offset="46%" stopColor="#ff4d57" />
-      <stop offset="100%" stopColor="#c0212e" />
+      <stop offset="0%" stopColor="var(--accent-400)" />
+      <stop offset="46%" stopColor="var(--accent)" />
+      <stop offset="100%" stopColor="var(--accent-700)" />
     </linearGradient>
   );
 }
@@ -111,8 +111,8 @@ function MarkDefs({
       {tile && <TileSheen id={sheenId} />}
       {ring && (
         <linearGradient id={ringGradId} x1="5" y1="5" x2="27" y2="27" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ff7a82" stopOpacity="0.75" />
-          <stop offset="100%" stopColor="#ff4d57" stopOpacity="0.15" />
+          <stop offset="0%" stopColor="var(--accent-400)" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.15" />
         </linearGradient>
       )}
     </defs>

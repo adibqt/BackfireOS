@@ -165,12 +165,12 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
       {/* Decorative glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-x-4 -top-4 -bottom-2 -z-10 rounded-[28px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(255,77,87,0.18),transparent_70%)] blur-2xl"
+        className="pointer-events-none absolute -inset-x-4 -top-4 -bottom-2 -z-10 rounded-[28px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,var(--aurora-1),transparent_70%)] blur-2xl"
       />
 
       <div
         onKeyDown={handleKeyDown}
-        className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl"
+        className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[var(--shadow-xl)]"
       >
         {/* Indeterminate progress while a simulation streams */}
         {loading && (
@@ -335,7 +335,7 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
           )}
 
           {verdicts.length > 0 && (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/80 p-4">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[13px] font-medium text-[var(--fg)]">
                   {t(locale, "agentVerdicts")}
@@ -359,7 +359,7 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
           )}
 
           {stressMapPreview && (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/80 p-4 fade-up">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 fade-up">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[13px] font-medium text-[var(--fg)]">
                   {t(locale, "stressMapTitle")}

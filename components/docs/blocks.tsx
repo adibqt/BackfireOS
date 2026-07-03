@@ -56,7 +56,7 @@ export function BlockRenderer({ block }: { block: DocBlock }) {
           {block.items.map((i) => (
             <div
               key={i.label}
-              className="rounded-xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] p-4"
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
             >
               <p className="font-display text-2xl font-semibold tracking-tight text-gradient-accent">{i.value}</p>
               <p className="mt-1 text-[13px] font-medium text-[var(--fg)]">{i.label}</p>

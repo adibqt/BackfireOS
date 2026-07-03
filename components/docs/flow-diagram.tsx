@@ -3,7 +3,7 @@ import { CopyButton } from "./copy-button";
 
 function Node({ label, sub }: { label: string; sub?: string }) {
   return (
-    <div className="rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/80 px-3 py-2.5 text-center shadow-sm">
+    <div className="rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3 py-2.5 text-center shadow-sm">
       <p className="text-[12.5px] font-medium leading-tight text-[var(--fg)]">{label}</p>
       {sub && <p className="mt-0.5 text-[11px] leading-tight text-[var(--fg-subtle)]">{sub}</p>}
     </div>
@@ -24,7 +24,7 @@ export function FlowDiagram({
 }) {
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(255,77,87,0.06),transparent_70%)] p-5">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,var(--aurora-1),transparent_70%)] p-5">
         <div className="flex min-w-fit flex-col gap-4 md:flex-row md:items-stretch">
           {columns.map((col, ci) => (
             <div key={col.title} className="flex flex-col gap-3 md:flex-row md:items-center">

@@ -880,10 +880,10 @@ function Header({
   const deltaResonance = scores.resonance - baseRef.resonance;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(255,77,87,0.18),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,var(--aurora-1),transparent_70%)]"
       />
       <div className="absolute inset-0 bg-grid opacity-40" aria-hidden />
 
@@ -1045,7 +1045,7 @@ function KpiTile({
   mono?: boolean;
 }) {
   return (
-    <div className="min-w-[140px] rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/70 px-4 py-3">
+    <div className="min-w-[140px] rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fg-subtle)]">
         {label}
       </p>
@@ -1151,10 +1151,10 @@ function TreeCanvas({
   const rootPos = root ? positions[root.id] : undefined;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.006))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_-8%,rgba(255,77,87,0.16),transparent_72%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_-8%,var(--aurora-1),transparent_72%)]"
       />
       <div
         aria-hidden
@@ -1202,16 +1202,16 @@ function TreeCanvas({
               <feGaussianBlur stdDeviation="9" />
             </filter>
             <linearGradient id="cardFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0.012)" />
+              <stop offset="0%" stopColor="var(--map-land-from)" />
+              <stop offset="100%" stopColor="var(--map-land-to)" />
             </linearGradient>
             <linearGradient id="spine" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(255,77,87,0.55)" />
-              <stop offset="100%" stopColor="rgba(255,77,87,0)" />
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
             </linearGradient>
             <radialGradient id="rootPulse" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(255,77,87,0.5)" />
-              <stop offset="100%" stopColor="rgba(255,77,87,0)" />
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
             </radialGradient>
           </defs>
 
@@ -1223,7 +1223,7 @@ function TreeCanvas({
                 y1={y}
                 x2={width - 20}
                 y2={y}
-                stroke="rgba(255,255,255,0.05)"
+                stroke="var(--chart-grid)"
                 strokeWidth={1}
                 strokeDasharray="2 8"
               />
@@ -1376,7 +1376,7 @@ function TreeCanvas({
                   height={NODE_H}
                   rx={13}
                   fill="var(--bg-elev-2)"
-                  stroke={isSel ? "var(--accent)" : "rgba(255,255,255,0.12)"}
+                  stroke={isSel ? "var(--accent)" : "var(--chart-grid)"}
                   strokeWidth={isSel ? 1.5 : 1}
                 />
                 <rect
@@ -1513,7 +1513,7 @@ function MiniBar({
         width={W}
         height={6}
         rx={3}
-        fill="rgba(255,255,255,0.06)"
+        fill="var(--chart-grid)"
       />
       <rect
         x={18}
@@ -1584,10 +1584,10 @@ function Inspector({
     ai?.status === "done" && ai.source === "ai" && !aiStale ? ai.scores : undefined;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,rgba(255,77,87,0.14),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,var(--aurora-1),transparent_70%)]"
       />
 
       <div className="relative flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
@@ -1752,7 +1752,7 @@ function Inspector({
         </div>
 
         {parent && parentScores && (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3 text-[12px] text-[var(--fg-muted)]">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-[12px] text-[var(--fg-muted)]">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
               parent · {parent.label}
             </p>
@@ -1793,7 +1793,7 @@ function aiSourceBadge(source: ScoreSource | undefined, cached: boolean | undefi
   return {
     label: "heuristic · no model key",
     color: "var(--fg-subtle)",
-    soft: "rgba(255,255,255,0.04)",
+    soft: "var(--card-hover-ring)",
   };
 }
 
@@ -1827,7 +1827,7 @@ function AiVerdictPanel({
       style={{
         borderColor: done && ai?.source === "ai" ? "var(--accent)" : "var(--border)",
         background:
-          "linear-gradient(180deg, rgba(255,77,87,0.06), transparent 70%)",
+          "linear-gradient(180deg, var(--accent-soft), transparent 70%)",
       }}
     >
       {/* Control bar */}
@@ -1860,7 +1860,7 @@ function AiVerdictPanel({
             className={cn(
               "rounded-md px-2 py-1 font-mono text-[9px] uppercase tracking-wider transition-colors",
               autoAi
-                ? "bg-[var(--accent)] text-white"
+                ? "bg-[var(--accent)] text-[var(--selection-fg)]"
                 : "border border-[var(--border)] text-[var(--fg-subtle)] hover:text-[var(--fg)]"
             )}
             title="Re-score automatically a moment after you stop editing"
@@ -2075,7 +2075,7 @@ function ScoreCell({
           <Sparkline values={spark} color={tone.color} />
         )}
       </div>
-      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/[0.05]">
+      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[var(--bg-elevated)]">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
@@ -2172,7 +2172,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          "w-full rounded-lg border bg-[var(--bg-elev-1)]/80 px-3 py-2 text-[14px] text-[var(--fg)] outline-none transition-all duration-200 placeholder:text-[var(--fg-subtle)]",
+          "w-full rounded-lg border bg-[var(--bg-surface)] px-3 py-2 text-[14px] text-[var(--fg)] outline-none transition-all duration-200 placeholder:text-[var(--fg-subtle)]",
           accent
             ? "border-[var(--accent)]/30 focus:border-[var(--accent)] focus:bg-[var(--accent-soft)]/30 focus:ring-2 focus:ring-[var(--accent-ring)]"
             : "border-[var(--border)] focus:border-[var(--border-bright)] focus:bg-[var(--bg-elev-2)]"
@@ -2198,7 +2198,7 @@ function SelectField({
       <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
         {label}
       </span>
-      <div className="flex flex-wrap gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)]/70 p-1">
+      <div className="flex flex-wrap gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-1">
         {options.map((o) => (
           <button
             type="button"
@@ -2207,8 +2207,8 @@ function SelectField({
             className={cn(
               "flex-1 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-all duration-150",
               value === o.value
-                ? "bg-[var(--accent)] text-white shadow-[0_4px_12px_-4px_rgba(255,77,87,0.6)]"
-                : "text-[var(--fg-muted)] hover:bg-white/[0.05] hover:text-[var(--fg)]"
+                ? "bg-[var(--accent)] text-[var(--selection-fg)] shadow-[var(--btn-primary-shadow)]"
+                : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
             )}
           >
             {o.label}
@@ -2225,7 +2225,7 @@ function SelectField({
 
 function DiffPanel({ branch, parent }: { branch: Branch; parent: Branch | null }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
         <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
           diff · vs parent
@@ -2236,7 +2236,7 @@ function DiffPanel({ branch, parent }: { branch: Branch; parent: Branch | null }
       </div>
       <div className="space-y-3 p-5">
         {!parent ? (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-6 text-center">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-6 text-center">
             <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
               This is the root commit
             </p>
@@ -2271,7 +2271,7 @@ function DiffRow({ label, a, b }: { label: string; a: string; b: string }) {
   const ops = useMemo(() => diffText(a, b), [a, b]);
   const same = a === b;
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)]/40 px-4 py-3">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
       <div className="flex items-center justify-between">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
           {label}
@@ -2335,7 +2335,7 @@ const EVENT_COLOR: Record<BranchEventType, string> = {
 
 function ActivityLog({ log }: { log: BranchEvent[] }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
         <div className="flex items-center gap-3">
           <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
@@ -2356,7 +2356,7 @@ function ActivityLog({ log }: { log: BranchEvent[] }) {
           log.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-start gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.03]"
+              className="flex items-start gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-[var(--bg-surface)]"
             >
               <span
                 className="mt-1.5 inline-flex h-1.5 w-1.5 shrink-0 rounded-full"

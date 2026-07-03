@@ -33,7 +33,7 @@ export function TeamGrid({
         {team.map((m) => (
           <div
             key={m.id}
-            className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-4 transition-colors hover:border-[var(--border-strong)]"
+            className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-colors hover:border-[var(--border-strong)]"
           >
             <Avatar name={m.name} src={m.avatarUrl} size={compact ? "md" : "lg"} />
             <div className="min-w-0">

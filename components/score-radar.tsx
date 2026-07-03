@@ -140,11 +140,11 @@ export function ScoreRadar({
   const headlineTone = tone(headline.value);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8">
       {/* Aurora */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,rgba(255,77,87,0.12),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,var(--aurora-1),transparent_70%)]"
       />
 
       <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_1.05fr]">
@@ -184,7 +184,7 @@ export function ScoreRadar({
                   key={scale}
                   points={ringPts}
                   fill="none"
-                  stroke="white"
+                  stroke="var(--chart-grid)"
                   strokeOpacity={0.04 + idx * 0.015}
                   strokeWidth={1}
                   className="fade-in"
@@ -203,7 +203,7 @@ export function ScoreRadar({
                   y1={CY}
                   x2={x}
                   y2={y}
-                  stroke="white"
+                  stroke="var(--chart-grid)"
                   strokeOpacity={0.08}
                   strokeWidth={1}
                   className="fade-in"
@@ -221,7 +221,7 @@ export function ScoreRadar({
                   cx={x}
                   cy={y}
                   r={1.5}
-                  fill="white"
+                  fill="var(--chart-axis)"
                   fillOpacity={0.18}
                   className="fade-in"
                   style={{ animationDelay: `${200 + i * 40}ms` }}
@@ -256,7 +256,7 @@ export function ScoreRadar({
             ))}
 
             {/* Center pin */}
-            <circle cx={CX} cy={CY} r={3} fill="white" fillOpacity={0.4} />
+            <circle cx={CX} cy={CY} r={3} fill="var(--chart-axis)" fillOpacity={0.4} />
             <circle cx={CX} cy={CY} r={1.25} fill="var(--accent)" />
 
             {/* Axis labels (outside the polygon) */}
@@ -318,7 +318,7 @@ export function ScoreRadar({
           </div>
 
           {/* Headline pill */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/70 p-4">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
             <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
               Highest-risk axis
             </p>

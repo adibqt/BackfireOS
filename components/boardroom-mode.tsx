@@ -110,7 +110,7 @@ const PERSONA_TONE: Record<PersonaId, Tone> = {
     chip: "bg-[var(--success-soft)] text-[var(--success)]",
     ring: "ring-[var(--success)]/25",
     bubble: "bg-[var(--success-soft)] border-[var(--success)]/20",
-    glow: "rgba(52,211,153,0.14)",
+    glow: "var(--success-glow)",
     dot: "bg-[var(--success)]",
     stance: "Advocate",
     side: "right",
@@ -120,7 +120,7 @@ const PERSONA_TONE: Record<PersonaId, Tone> = {
     chip: "bg-[var(--danger-soft)] text-[var(--danger)]",
     ring: "ring-[var(--danger)]/30",
     bubble: "bg-[var(--danger-soft)] border-[var(--danger)]/20",
-    glow: "rgba(248,113,113,0.16)",
+    glow: "var(--danger-glow)",
     dot: "bg-[var(--danger)]",
     stance: "Adversary",
     side: "left",
@@ -130,7 +130,7 @@ const PERSONA_TONE: Record<PersonaId, Tone> = {
     chip: "bg-[var(--warning-soft)] text-[var(--warning)]",
     ring: "ring-[var(--warning)]/25",
     bubble: "bg-[var(--warning-soft)] border-[var(--warning)]/20",
-    glow: "rgba(251,191,36,0.14)",
+    glow: "var(--warning-glow)",
     dot: "bg-[var(--warning)]",
     stance: "Skeptic",
     side: "left",
@@ -140,7 +140,7 @@ const PERSONA_TONE: Record<PersonaId, Tone> = {
     chip: "bg-[var(--accent-soft)] text-[var(--accent-200)]",
     ring: "ring-[var(--accent)]/25",
     bubble: "bg-[var(--accent-soft)] border-[var(--accent)]/20",
-    glow: "rgba(255,77,87,0.14)",
+    glow: "var(--aurora-1)",
     dot: "bg-[var(--accent)]",
     stance: "Guardian",
     side: "left",
@@ -152,9 +152,9 @@ const DECISION_TONE: Record<
   DebateDecision,
   { label: string; chip: "success" | "warning" | "danger"; text: string; glow: string }
 > = {
-  greenlight: { label: "Greenlight", chip: "success", text: "text-[var(--success)]", glow: "rgba(52,211,153,0.18)" },
-  revise: { label: "Revise", chip: "warning", text: "text-[var(--warning)]", glow: "rgba(251,191,36,0.18)" },
-  kill: { label: "Kill", chip: "danger", text: "text-[var(--danger)]", glow: "rgba(248,113,113,0.2)" },
+  greenlight: { label: "Greenlight", chip: "success", text: "text-[var(--success)]", glow: "var(--success-glow)" },
+  revise: { label: "Revise", chip: "warning", text: "text-[var(--warning)]", glow: "var(--warning-glow)" },
+  kill: { label: "Kill", chip: "danger", text: "text-[var(--danger)]", glow: "var(--danger-glow)" },
 };
 
 /**
@@ -309,7 +309,7 @@ function Avatar({
         size === "sm" ? "h-9 w-9 text-[12px]" : "h-10 w-10 text-[13px]",
         tone.chip,
         tone.ring,
-        active && "shadow-[0_0_0_3px_rgba(255,255,255,0.06)]"
+        active && "shadow-[0_0_0_3px_var(--card-hover-ring)]"
       )}
     >
       {initials}
@@ -340,7 +340,7 @@ function CampaignBriefPanel({
 
   return (
     <div className="lg:sticky lg:top-24 lg:self-start">
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
         {campaign.imageUrl && (
           <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-[var(--border)] bg-[var(--bg-elev-2)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -349,7 +349,7 @@ function CampaignBriefPanel({
               alt="Campaign creative under debate"
               className="h-full w-full object-cover"
             />
-            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-md">
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80">
               Exhibit A
             </span>
           </div>
@@ -444,7 +444,7 @@ function CampaignBriefPanel({
                             {Math.round(v.severity)}
                           </span>
                         </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-elevated)]">
                           <div
                             className="h-full rounded-full transition-all"
                             style={{ width: `${Math.min(100, v.severity)}%`, backgroundColor: color }}
@@ -497,7 +497,7 @@ function PersonaRoster({
             className={cn(
               "flex flex-col gap-2 rounded-xl border px-2.5 py-2 transition-all duration-200 sm:flex-row sm:items-center",
               active
-                ? "border-[var(--border-bright)] bg-white/[0.05]"
+                ? "border-[var(--border-bright)] bg-[var(--bg-elevated)]"
                 : "border-[var(--border)] bg-[var(--bg-elev-1)]/50"
             )}
           >
@@ -576,7 +576,7 @@ function ChatBubble({
             to form a chat "tail". */}
         <div
           className={cn(
-            "w-full rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-[var(--fg)] backdrop-blur-xl sm:px-4 sm:text-[14px]",
+            "w-full rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-[var(--fg)] sm:px-4 sm:text-[14px]",
             tone.bubble,
             right ? "rounded-br-sm" : "rounded-bl-sm"
           )}
@@ -608,7 +608,7 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
   const tone = DECISION_TONE[transcript.synthesis.decision];
   return (
     <section
-      className="fade-up relative mt-6 overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-4 py-5 backdrop-blur-xl sm:rounded-3xl sm:px-6 sm:py-7 md:px-8"
+      className="fade-up relative mt-6 overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-7 md:px-8"
     >
       <div
         aria-hidden
@@ -762,7 +762,7 @@ function IterationTimeline({
   onSelect: (t: BoardroomTranscript) => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/40 backdrop-blur-xl">
+    <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
           Iterations
@@ -781,7 +781,7 @@ function IterationTimeline({
                 disabled={debating}
                 className={cn(
                   "flex w-full flex-col gap-1.5 px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                  active ? "bg-white/[0.05]" : "hover:bg-white/[0.025]"
+                  active ? "bg-[var(--bg-elevated)]" : "hover:bg-white/[0.025]"
                 )}
               >
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
@@ -1342,7 +1342,7 @@ function BoardroomInner() {
             </div>
 
             {displayPersonas.length > 0 && (
-              <div className="mb-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/40 p-3 backdrop-blur-xl">
+              <div className="mb-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
                 <div className="mb-3 flex items-center justify-between gap-3 px-1">
                   <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
                     {debating && (
@@ -1369,7 +1369,7 @@ function BoardroomInner() {
             )}
 
             {/* Auto-scrolling chat thread. */}
-            <div className="flex max-h-[min(68vh,560px)] min-h-[min(40vh,320px)] flex-col gap-4 overflow-y-auto overflow-x-clip rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-3 sm:max-h-[68vh] sm:min-h-[40vh] sm:p-5">
+            <div className="flex max-h-[min(68vh,560px)] min-h-[min(40vh,320px)] flex-col gap-4 overflow-y-auto overflow-x-clip rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 sm:max-h-[68vh] sm:min-h-[40vh] sm:p-5">
               {renderMessages.length === 0 && (
                 <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
                   <ThinkingIndicator />
@@ -1386,7 +1386,7 @@ function BoardroomInner() {
                     {showDivider && (
                       <div className="flex items-center justify-center gap-3 py-1">
                         <span className="h-px w-10 bg-[var(--border)]" />
-                        <span className="rounded-full border border-[var(--border)] bg-[var(--bg-elev-1)]/70 px-3 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
+                        <span className="rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
                           Round {m.round}
                         </span>
                         <span className="h-px w-10 bg-[var(--border)]" />

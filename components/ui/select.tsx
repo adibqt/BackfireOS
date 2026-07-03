@@ -21,7 +21,7 @@ const fieldSizes = {
 
 const triggerBase =
   "flex w-full items-center justify-between gap-2 border border-[var(--border-strong)] bg-[var(--bg-elev-1)] text-left text-[var(--fg)] " +
-  "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] " +
+  "shadow-[inset_0_1px_0_0_var(--card-hover-ring)] " +
   "transition-[border-color,box-shadow,background-color] duration-200 " +
   "hover:border-[var(--border-bright)] hover:bg-[var(--bg-elev-2)]/90 " +
   "focus-visible:border-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-ring)] focus-visible:bg-[var(--bg-elev-2)] " +
@@ -339,7 +339,7 @@ export function Select({
               {groups.map((group, groupIndex) => (
                 <div key={group.label ?? groupIndex}>
                   {group.label ? (
-                    <p className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--bg-elev-2)]/95 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--fg-subtle)] backdrop-blur-sm">
+                    <p className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--bg-elev-2)]/95 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--fg-subtle)]">
                       {group.label}
                     </p>
                   ) : null}
@@ -368,15 +368,15 @@ export function Select({
                             isSelected
                               ? "bg-[var(--accent-soft)] text-[var(--accent-400)]"
                               : isHighlighted
-                                ? "bg-white/[0.06] text-[var(--fg)]"
-                                : "text-[var(--fg-muted)] hover:bg-white/[0.05] hover:text-[var(--fg)]"
+                                ? "bg-[var(--bg-elevated)] text-[var(--fg)]"
+                                : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
                           )}
                         >
                           <span
                             className={cn(
                               "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
                               isSelected
-                                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--selection-fg)]"
                                 : "border-[var(--border-strong)] bg-transparent"
                             )}
                             aria-hidden

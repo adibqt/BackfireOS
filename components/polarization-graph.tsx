@@ -200,10 +200,10 @@ export function PolarizationGraph({
         : "All your critics are zeroing in on the same weakness. That's actually good news — one targeted fix could address most of the risk.";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,rgba(255,77,87,0.08),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,var(--aurora-1),transparent_70%)]"
       />
 
       <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_1.05fr]">
@@ -240,7 +240,7 @@ export function PolarizationGraph({
               cy={CY}
               r={ORBIT_R}
               fill="none"
-              stroke="white"
+              stroke="var(--chart-grid)"
               strokeOpacity={0.05}
               strokeWidth={1}
               strokeDasharray="4 6"
@@ -449,7 +449,7 @@ export function PolarizationGraph({
           </div>
 
           {/* Polarization coefficient */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/70 p-4">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
             <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
               How spread out is the criticism?
             </p>

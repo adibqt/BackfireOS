@@ -44,7 +44,7 @@ function RunRow({
   return (
     <div
       className={cn(
-        "group flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl lift",
+        "group flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 lift",
         tone.border
       )}
     >
@@ -242,10 +242,10 @@ export default function HistoryPage() {
       )}
 
       {!loading && !error && runs.length === 0 && (
-        <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-elev-1)]/40 py-20 text-center">
+        <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-20 text-center">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,rgba(255,77,87,0.12),transparent_70%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,var(--aurora-1),transparent_70%)]"
           />
           <div className="relative">
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20">
@@ -276,7 +276,7 @@ export default function HistoryPage() {
           />
         ))}
         {!loading && !error && filtered.length === 0 && runs.length > 0 && (
-          <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-elev-1)]/40 py-10 text-center text-sm text-[var(--fg-muted)]">
+          <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] py-10 text-center text-sm text-[var(--fg-muted)]">
             No campaigns match &ldquo;{query}&rdquo;.
           </div>
         )}
@@ -295,7 +295,7 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
       <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
         {label}
       </p>

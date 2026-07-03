@@ -3,6 +3,7 @@ import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LanguageProvider } from "@/components/language-provider";
+import { ThemeProvider } from "@/lib/theme-provider";
 import "./globals.css";
 
 const syne = Syne({
@@ -34,6 +35,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const themeInitScript = `(function(){try{var t=localStorage.getItem("backfire-theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,10 +45,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full text-foreground">
-        <LanguageProvider>{children}</LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </ThemeProvider>
         <Analytics />
         <SpeedInsights />
       </body>

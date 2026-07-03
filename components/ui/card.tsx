@@ -17,9 +17,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "relative rounded-2xl border border-[var(--border)]",
-        "bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))]",
-        "backdrop-blur-xl",
+        "relative rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]",
         glow && "card-glow",
         interactive && "lift cursor-pointer",
         bleed && "overflow-hidden",

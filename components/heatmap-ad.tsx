@@ -156,12 +156,12 @@ function LiveScan() {
     <div className="relative mx-auto mt-14 max-w-5xl overflow-hidden px-1 text-left md:mt-16">
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,rgba(255,77,87,0.20),transparent_70%)] blur-3xl"
+        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,var(--aurora-1),transparent_70%)] blur-3xl"
       />
 
-      <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.005))] shadow-[0_44px_130px_-34px_rgba(0,0,0,0.75)] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[var(--shadow-xl)]">
         {/* App chrome */}
-        <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
           <div className="flex gap-1.5" aria-hidden>
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--danger)]/60" />
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--warning)]/60" />
@@ -196,7 +196,7 @@ function LiveScan() {
             {!done && !reduce && (
               <div
                 aria-hidden
-                className="scan-sweep pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-[linear-gradient(90deg,transparent,rgba(255,77,87,0.10),rgba(255,122,130,0.22),rgba(255,77,87,0.10),transparent)]"
+                className="scan-sweep pointer-events-none absolute inset-y-0 left-0 z-10 w-1/4 bg-[linear-gradient(90deg,transparent,var(--accent-soft),color-mix(in_srgb,var(--accent)_22%,transparent),var(--accent-soft),transparent)]"
               />
             )}
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -241,7 +241,7 @@ function LiveScan() {
           {/* The hottest tripwire, revealed once the scan settles */}
           <div className="mt-3 min-h-[92px]">
             {done ? (
-              <div className="fade-up relative overflow-hidden rounded-2xl border border-[var(--danger)]/30 bg-[linear-gradient(180deg,rgba(248,113,113,0.08),rgba(255,255,255,0.005))] p-4">
+              <div className="fade-up relative overflow-hidden rounded-2xl border border-[var(--danger)]/30 bg-[var(--danger-soft)] p-4">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(248,113,113,0.22),transparent_70%)] blur-2xl"
@@ -361,12 +361,12 @@ export function HeatmapAd() {
       <section className="relative overflow-x-clip pb-10 pt-4 text-center md:pt-10">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,rgba(255,77,87,0.26),transparent_70%)] blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[620px] w-[min(100vw,1100px)] -translate-x-1/2 bg-[radial-gradient(ellipse_50%_55%_at_50%_0%,var(--aurora-1),transparent_70%)] blur-3xl"
         />
         <div className="bg-grid absolute inset-x-0 top-0 -z-10 h-[620px] opacity-60" aria-hidden />
 
         <div className="mx-auto max-w-3xl">
-          <div className="fade-up mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-1 pl-2.5 pr-3 text-[12px] backdrop-blur">
+          <div className="fade-up mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)] py-1 pl-2.5 pr-3 text-[12px]">
             <LockIcon className="h-3.5 w-3.5 text-[var(--accent)]" />
             <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
               Cultural Heat Map
@@ -433,7 +433,7 @@ export function HeatmapAd() {
           {REGIONS.map((r, i) => (
             <div
               key={r.name}
-              className="card-glow flex flex-col rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl"
+              className="card-glow flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <h3 className="font-display text-[17px] font-semibold tracking-tight text-[var(--fg)]">
@@ -467,7 +467,7 @@ export function HeatmapAd() {
           {STEPS.map((s) => (
             <div
               key={s.n}
-              className="lift relative rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl"
+              className="lift relative rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6"
             >
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
@@ -484,10 +484,10 @@ export function HeatmapAd() {
 
       {/* ── Heat levels ── */}
       <section className="mb-28 md:mb-36">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(135deg,#1a0d12,#0a0708)] p-8 md:p-14">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] surface-dark-panel p-8 md:p-14">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(255,77,87,0.22),transparent_60%)] blur-3xl"
+            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--aurora-1),transparent_60%)] blur-3xl"
           />
           <div className="relative grid items-start gap-10 md:grid-cols-[1fr_1fr]">
             <div>
@@ -504,7 +504,7 @@ export function HeatmapAd() {
               {LEVELS.map((l) => (
                 <div
                   key={l.label}
-                  className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/70 p-4 backdrop-blur"
+                  className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
                 >
                   <Badge variant={l.variant} dot className="shrink-0">
                     {l.label}
@@ -519,10 +519,10 @@ export function HeatmapAd() {
 
       {/* ── Final gate ── */}
       <section className="mb-12">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-8 py-16 text-center md:px-12 md:py-20">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_50%_0%,rgba(255,77,87,0.18),transparent_70%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_50%_0%,var(--aurora-1),transparent_70%)]"
           />
           <div className="relative mx-auto max-w-2xl">
             <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] text-[var(--accent)]">

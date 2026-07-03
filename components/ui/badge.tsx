@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 const variants = {
   default:
-    "bg-white/[0.04] text-[var(--fg-muted)] border-[var(--border-strong)]",
+    "bg-[var(--bg-elevated)] text-[var(--fg-muted)] border-[var(--border-strong)]",
   accent:
     "bg-[var(--accent-soft)] text-[var(--accent-400)] border-[var(--accent)]/25",
   outline:

@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Moon, Sun } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { AuthButton } from "./auth-button";
 import { signOutUser, useAuthUser } from "./use-auth-user";
 import { useLanguage } from "./language-provider";
 import { LogoBadge } from "./logo";
+import { useTheme } from "@/lib/theme-provider";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +55,7 @@ type Pill = { left: number; top: number; width: number; height: number };
 
 function SiteHeaderInner() {
   const { locale, setLocale } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,9 +114,9 @@ function SiteHeaderInner() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 overflow-x-clip transition-[background-color,border-color,backdrop-filter] duration-200",
+        "sticky top-0 z-40 overflow-x-clip transition-[background-color,border-color] duration-200",
         scrolled
-          ? "border-b border-[var(--border)] bg-[var(--bg)]/75 backdrop-blur-xl"
+          ? "border-b border-[var(--border)] bg-[var(--bg)]/95"
           : "border-b border-transparent bg-transparent"
       )}
     >
@@ -124,14 +127,14 @@ function SiteHeaderInner() {
 
         <nav
           ref={navRef}
-          className="relative hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-elev-1)]/60 p-1 backdrop-blur lg:flex"
+          className="relative hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] p-1 lg:flex"
           aria-label="Main"
         >
           {/* Sliding active pill */}
           {pill && (
             <span
               aria-hidden
-              className="pointer-events-none absolute rounded-full bg-white/[0.06] transition-[left,top,width,height] duration-200 ease-out"
+              className="pointer-events-none absolute rounded-full bg-[var(--bg-elevated)] transition-[left,top,width,height] duration-200 ease-out"
               style={{ left: pill.left, top: pill.top, width: pill.width, height: pill.height }}
             />
           )}
@@ -159,8 +162,21 @@ function SiteHeaderInner() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? (
+              <Sun size={16} strokeWidth={2} aria-hidden />
+            ) : (
+              <Moon size={16} strokeWidth={2} aria-hidden />
+            )}
+          </button>
+
           <div
-            className="hidden items-center rounded-full border border-[var(--border)] bg-[var(--bg-elev-1)]/60 p-0.5 backdrop-blur sm:flex"
+            className="hidden items-center rounded-full border border-[var(--border)] bg-[var(--bg-surface)] p-0.5 sm:flex"
             role="group"
             aria-label="Language"
           >
@@ -172,7 +188,7 @@ function SiteHeaderInner() {
                 className={cn(
                   "rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider transition-colors duration-200",
                   locale === lang
-                    ? "bg-white/[0.08] text-[var(--fg)]"
+                    ? "bg-[var(--bg-elevated)] text-[var(--fg)]"
                     : "text-[var(--fg-subtle)] hover:text-[var(--fg)]"
                 )}
               >
@@ -185,7 +201,7 @@ function SiteHeaderInner() {
 
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)]/60 text-[var(--fg-muted)] backdrop-blur transition-colors hover:bg-white/[0.06] hover:text-[var(--fg)] lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] lg:hidden"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((open) => !open)}
@@ -207,7 +223,7 @@ function SiteHeaderInner() {
 
       {mobileOpen && (
         <nav
-          className="border-t border-[var(--border)] bg-[var(--bg-elev-1)]/90 px-5 py-4 backdrop-blur-xl lg:hidden fade-in"
+          className="border-t border-[var(--border)] bg-[var(--bg-surface)] px-5 py-4 lg:hidden fade-in"
           aria-label="Mobile"
         >
           <div className="flex flex-col gap-1">
@@ -222,7 +238,7 @@ function SiteHeaderInner() {
                     "rounded-lg px-3 py-2.5 text-sm transition-colors",
                     active
                       ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
-                      : "text-[var(--fg-muted)] hover:bg-white/[0.04] hover:text-[var(--fg)]"
+                      : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
                   )}
                 >
                   {labelOverride ?? t(locale, key as Exclude<typeof key, "home">)}
@@ -236,7 +252,7 @@ function SiteHeaderInner() {
                 "rounded-lg px-3 py-2.5 text-sm transition-colors",
                 pathname === "/history"
                   ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
-                  : "text-[var(--fg-muted)] hover:bg-white/[0.04] hover:text-[var(--fg)]"
+                  : "text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]"
               )}
             >
               History
@@ -270,7 +286,7 @@ function SiteHeaderInner() {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-white/[0.04]"
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-[var(--bg-elevated)]"
                   >
                     Sign in
                   </Link>
