@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Logo } from "@/components/logo";
+import { cn } from "@/lib/utils";
 
 export function PageShell({
   children,
@@ -14,12 +15,19 @@ export function PageShell({
   bare?: boolean;
 }) {
   return (
-    <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
+    <div
+      className={cn(
+        "flex min-w-0 flex-col overflow-x-clip",
+        // Bare mode owns the full viewport so a child can scroll internally
+        // (full-screen scroll-snap). A definite height lets `h-full` resolve.
+        bare ? "h-dvh overflow-hidden" : "min-h-screen"
+      )}
+    >
       <SiteHeader />
       <main
         className={
           bare
-            ? "min-w-0 flex-1 overflow-x-clip"
+            ? "min-h-0 min-w-0 flex-1 overflow-x-clip"
             : "w-full min-w-0 flex-1 overflow-x-clip px-5 py-10 md:px-8 md:py-16 lg:px-12"
         }
       >
