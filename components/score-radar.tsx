@@ -147,9 +147,9 @@ export function ScoreRadar({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,rgba(255,77,87,0.12),transparent_70%)]"
       />
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_1.05fr]">
+      <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
         {/* Chart */}
-        <div className="relative mx-auto w-full max-w-[420px]">
+        <div className="relative mx-auto w-full max-w-[520px]">
           <svg
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             className="h-auto w-full"
