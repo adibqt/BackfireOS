@@ -308,7 +308,7 @@ export default function RunPageClient({ id }: { id: string }) {
                 </span>
               </div>
 
-              <div className="-mt-2 flex flex-col items-center gap-3 md:-mt-4">
+              <div className="mt-4 flex flex-col items-center gap-3 md:mt-6">
                 <Badge variant={headlineTone.chip} dot>
                   {headlineTone.verdict}
                 </Badge>
