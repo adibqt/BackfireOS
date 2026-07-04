@@ -140,7 +140,7 @@ export function ScoreRadar({
   const headlineTone = tone(headline.value);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl md:p-8">
       {/* Aurora */}
       <div
         aria-hidden

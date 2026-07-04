@@ -262,7 +262,7 @@ function ConfidenceSignal({
       )}
       title={`Red-team severity for this persona: ${severity}/100`}
     >
-      <span className="relative h-1 w-7 overflow-hidden rounded-full bg-white/15">
+      <span className="relative h-1 w-7 overflow-hidden rounded-full bg-[var(--fill-active)]">
         <span
           className={cn("absolute inset-y-0 left-0 rounded-full", fill)}
           style={{ width: `${severity}%` }}
@@ -309,7 +309,7 @@ function Avatar({
         size === "sm" ? "h-9 w-9 text-[12px]" : "h-10 w-10 text-[13px]",
         tone.chip,
         tone.ring,
-        active && "shadow-[0_0_0_3px_rgba(255,255,255,0.06)]"
+        active && "shadow-[0_0_0_3px_var(--fill-hover)]"
       )}
     >
       {initials}
@@ -340,7 +340,7 @@ function CampaignBriefPanel({
 
   return (
     <div className="lg:sticky lg:top-24 lg:self-start">
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
         {campaign.imageUrl && (
           <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-[var(--border)] bg-[var(--bg-elev-2)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -373,7 +373,7 @@ function CampaignBriefPanel({
                 counterfactual variant is on trial we quote IT (not the original). */}
             <blockquote
               className={cn(
-                "relative rounded-xl border bg-white/[0.02] px-4 py-3 transition-all duration-300",
+                "relative rounded-xl border bg-[var(--fill-faint)] px-4 py-3 transition-all duration-300",
                 criticalActive
                   ? "border-[var(--warning)]/40 shadow-[0_0_0_1px_var(--warning-soft),0_0_30px_-10px_var(--warning)]"
                   : "border-[var(--border)]"
@@ -444,7 +444,7 @@ function CampaignBriefPanel({
                             {Math.round(v.severity)}
                           </span>
                         </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--fill-hover)]">
                           <div
                             className="h-full rounded-full transition-all"
                             style={{ width: `${Math.min(100, v.severity)}%`, backgroundColor: color }}
@@ -497,7 +497,7 @@ function PersonaRoster({
             className={cn(
               "flex flex-col gap-2 rounded-xl border px-2.5 py-2 transition-all duration-200 sm:flex-row sm:items-center",
               active
-                ? "border-[var(--border-bright)] bg-white/[0.05]"
+                ? "border-[var(--border-bright)] bg-[var(--fill-hover)]"
                 : "border-[var(--border)] bg-[var(--bg-elev-1)]/50"
             )}
           >
@@ -608,7 +608,7 @@ function DecisionCard({ transcript }: { transcript: BoardroomTranscript }) {
   const tone = DECISION_TONE[transcript.synthesis.decision];
   return (
     <section
-      className="fade-up relative mt-6 overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-4 py-5 backdrop-blur-xl sm:rounded-3xl sm:px-6 sm:py-7 md:px-8"
+      className="fade-up relative mt-6 overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] px-4 py-5 backdrop-blur-xl sm:rounded-3xl sm:px-6 sm:py-7 md:px-8"
     >
       <div
         aria-hidden
@@ -781,7 +781,7 @@ function IterationTimeline({
                 disabled={debating}
                 className={cn(
                   "flex w-full flex-col gap-1.5 px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                  active ? "bg-white/[0.05]" : "hover:bg-white/[0.025]"
+                  active ? "bg-[var(--fill-hover)]" : "hover:bg-[var(--fill-soft)]"
                 )}
               >
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
@@ -1372,7 +1372,7 @@ function BoardroomInner() {
             )}
 
             {/* Auto-scrolling chat thread. */}
-            <div className="flex max-h-[min(68vh,560px)] min-h-[min(40vh,320px)] flex-col gap-4 overflow-y-auto overflow-x-clip rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-3 sm:max-h-[68vh] sm:min-h-[40vh] sm:p-5">
+            <div className="flex max-h-[min(68vh,560px)] min-h-[min(40vh,320px)] flex-col gap-4 overflow-y-auto overflow-x-clip rounded-2xl border border-[var(--border)] bg-[image:var(--veil-faint)] p-3 sm:max-h-[68vh] sm:min-h-[40vh] sm:p-5">
               {renderMessages.length === 0 && (
                 <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
                   <ThinkingIndicator />

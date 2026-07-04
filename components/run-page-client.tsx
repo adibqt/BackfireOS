@@ -110,7 +110,7 @@ export default function RunPageClient({ id }: { id: string }) {
   return (
     <PageShell footer={false}>
       {/* Hero summary */}
-      <section className="relative mb-12 overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-6 py-8 backdrop-blur-xl md:px-10 md:py-10">
+      <section className="relative mb-12 overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] px-6 py-8 backdrop-blur-xl md:px-10 md:py-10">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-32 -top-32 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(255,77,87,0.25),transparent_70%)] blur-3xl"

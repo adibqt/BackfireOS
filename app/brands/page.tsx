@@ -121,7 +121,7 @@ export default function BrandsPage() {
       {showCreate && (
         <form
           onSubmit={handleCreate}
-          className="mb-8 space-y-4 rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] p-5 backdrop-blur-xl"
+          className="mb-8 space-y-4 rounded-2xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] p-5 backdrop-blur-xl"
         >
           <div className="flex items-center justify-between">
             <p className="font-display text-[15px] font-semibold text-[var(--fg)]">
@@ -228,7 +228,7 @@ function BrandRow({
   return (
     <div
       className={cn(
-        "group rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl",
+        "group rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-5 backdrop-blur-xl",
         "transition-colors hover:border-[var(--border-bright)]"
       )}
     >

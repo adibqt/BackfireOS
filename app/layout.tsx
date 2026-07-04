@@ -3,6 +3,7 @@ import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LanguageProvider } from "@/components/language-provider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const syne = Syne({
@@ -42,9 +43,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full text-foreground">
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <LanguageProvider>{children}</LanguageProvider>
         <Analytics />
         <SpeedInsights />

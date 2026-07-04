@@ -201,7 +201,7 @@ export function LiveDocument({
   publishDate: string;
 }) {
   return (
-    <article className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <article className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil)] backdrop-blur-xl">
       <Masthead failureType={failureType} publishDate={publishDate} />
       <div className="px-5 py-6 sm:px-7 sm:py-8">
         {markdown.trim().length === 0 ? (
@@ -224,7 +224,7 @@ export function LiveDocument({
 export function PreMortemDocument({ report }: { report: PreMortemReport }) {
   const tone = FAILURE_TONE[report.failureType];
   return (
-    <article className="fade-up overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <article className="fade-up overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil)] backdrop-blur-xl">
       <Masthead
         failureType={report.failureType}
         publishDate={report.publishDate}

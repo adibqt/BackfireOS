@@ -87,7 +87,7 @@ export default function LoginPage() {
           className="pointer-events-none absolute -inset-12 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,rgba(255,77,87,0.18),transparent_70%)] blur-3xl"
         />
 
-        <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+        <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] shadow-[var(--shadow-xl)] backdrop-blur-xl">
           <div className="px-8 pt-10 text-center">
             <div className="mx-auto inline-flex">
               <LogoBadge size="xl" glow />

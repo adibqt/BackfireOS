@@ -159,7 +159,7 @@ function LiveScan() {
         className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,rgba(255,77,87,0.20),transparent_70%)] blur-3xl"
       />
 
-      <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.005))] shadow-[0_44px_130px_-34px_rgba(0,0,0,0.75)] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] shadow-[var(--shadow-hero)] backdrop-blur-xl">
         {/* App chrome */}
         <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
           <div className="flex gap-1.5" aria-hidden>
@@ -241,7 +241,7 @@ function LiveScan() {
           {/* The hottest tripwire, revealed once the scan settles */}
           <div className="mt-3 min-h-[92px]">
             {done ? (
-              <div className="fade-up relative overflow-hidden rounded-2xl border border-[var(--danger)]/30 bg-[linear-gradient(180deg,rgba(248,113,113,0.08),rgba(255,255,255,0.005))] p-4">
+              <div className="fade-up relative overflow-hidden rounded-2xl border border-[var(--danger)]/30 bg-[image:linear-gradient(180deg,var(--danger-soft),transparent)] p-4">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(248,113,113,0.22),transparent_70%)] blur-2xl"
@@ -433,7 +433,7 @@ export function HeatmapAd() {
           {REGIONS.map((r, i) => (
             <div
               key={r.name}
-              className="card-glow flex flex-col rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl"
+              className="card-glow flex flex-col rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <h3 className="font-display text-[17px] font-semibold tracking-tight text-[var(--fg)]">
@@ -467,7 +467,7 @@ export function HeatmapAd() {
           {STEPS.map((s) => (
             <div
               key={s.n}
-              className="lift relative rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl"
+              className="lift relative rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl"
             >
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
@@ -484,7 +484,7 @@ export function HeatmapAd() {
 
       {/* ── Heat levels ── */}
       <section className="mb-28 md:mb-36">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(135deg,#1a0d12,#0a0708)] p-8 md:p-14">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--panel-deep)] p-8 md:p-14">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(255,77,87,0.22),transparent_60%)] blur-3xl"
@@ -519,7 +519,7 @@ export function HeatmapAd() {
 
       {/* ── Final gate ── */}
       <section className="mb-12">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_50%_0%,rgba(255,77,87,0.18),transparent_70%)]"

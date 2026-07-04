@@ -144,7 +144,7 @@ export function ScoreDashboard({
         return (
           <div
             key={key}
-            className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl fade-up"
+            className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-5 backdrop-blur-xl fade-up"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-start gap-4">

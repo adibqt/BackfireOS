@@ -368,8 +368,8 @@ export function Select({
                             isSelected
                               ? "bg-[var(--accent-soft)] text-[var(--accent-400)]"
                               : isHighlighted
-                                ? "bg-white/[0.06] text-[var(--fg)]"
-                                : "text-[var(--fg-muted)] hover:bg-white/[0.05] hover:text-[var(--fg)]"
+                                ? "bg-[var(--fill-hover)] text-[var(--fg)]"
+                                : "text-[var(--fg-muted)] hover:bg-[var(--fill-hover)] hover:text-[var(--fg)]"
                           )}
                         >
                           <span

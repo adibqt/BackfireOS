@@ -152,7 +152,7 @@ function WorstOutcomePanel({
 
   return (
     <div className="lg:sticky lg:top-24 lg:self-start">
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
         {campaign.imageUrl && (
           <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-[var(--border)] bg-[var(--bg-elev-2)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -176,7 +176,7 @@ function WorstOutcomePanel({
                 </Badge>
               )}
             </div>
-            <blockquote className="relative rounded-xl border border-[var(--border)] bg-white/[0.02] px-4 py-3">
+            <blockquote className="relative rounded-xl border border-[var(--border)] bg-[var(--fill-faint)] px-4 py-3">
               <span
                 className="absolute left-0 top-0 h-full w-[3px] rounded-l-xl bg-[var(--border-strong)]"
                 aria-hidden
@@ -240,7 +240,7 @@ function WorstOutcomePanel({
                           {Math.round(v.severity)}
                         </span>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--fill-hover)]">
                         <div
                           className="h-full rounded-full transition-all"
                           style={{
@@ -313,7 +313,7 @@ function IterationTimeline({
                 disabled={generating}
                 className={cn(
                   "flex w-full flex-col gap-1.5 px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                  active ? "bg-white/[0.05]" : "hover:bg-white/[0.025]"
+                  active ? "bg-[var(--fill-hover)]" : "hover:bg-[var(--fill-soft)]"
                 )}
               >
                 <div className="flex items-center justify-between gap-2">

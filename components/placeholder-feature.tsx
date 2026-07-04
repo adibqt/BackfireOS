@@ -53,7 +53,7 @@ export function PlaceholderFeature({
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
         {/* Aurora glow */}
         <div
           aria-hidden
@@ -99,12 +99,12 @@ export function PlaceholderFeature({
 
           {/* Skeleton preview */}
           <div className="relative">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/80 p-4 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)] backdrop-blur">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev-1)]/80 p-4 shadow-[var(--shadow-xl)] backdrop-blur">
               <div className="mb-3 flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-[var(--accent)]/40" />
                 <div className="h-2 w-2 rounded-full bg-[var(--warning)]/40" />
                 <div className="h-2 w-2 rounded-full bg-[var(--success)]/40" />
-                <div className="ml-auto h-2 w-16 rounded-full bg-white/[0.06]" />
+                <div className="ml-auto h-2 w-16 rounded-full bg-[var(--fill-hover)]" />
               </div>
               <div className="space-y-2.5">
                 {Array.from({ length: 5 }).map((_, i) => (

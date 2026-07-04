@@ -157,7 +157,7 @@ function Avatar({ persona, active = false }: { persona: Persona; active?: boolea
         "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-mono text-[12px] font-semibold ring-1 ring-inset transition-shadow",
         persona.chip,
         persona.ring,
-        active && "shadow-[0_0_0_3px_rgba(255,255,255,0.06)]"
+        active && "shadow-[0_0_0_3px_var(--fill-hover)]"
       )}
     >
       {persona.initials}
@@ -231,7 +231,7 @@ function LiveSession() {
         className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 -z-10 rounded-[44px] bg-[radial-gradient(ellipse_72%_60%_at_50%_45%,rgba(255,77,87,0.20),transparent_70%)] blur-3xl"
       />
 
-      <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.005))] shadow-[0_44px_130px_-34px_rgba(0,0,0,0.75)] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] shadow-[var(--shadow-hero)] backdrop-blur-xl">
         {/* App chrome */}
         <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
           <div className="flex gap-1.5" aria-hidden>
@@ -257,7 +257,7 @@ function LiveSession() {
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--accent)]">
               Campaign on trial
             </p>
-            <blockquote className="mt-2.5 rounded-xl border border-[var(--border)] bg-white/[0.02] px-3.5 py-3">
+            <blockquote className="mt-2.5 rounded-xl border border-[var(--border)] bg-[var(--fill-faint)] px-3.5 py-3">
               <p className="font-display text-[14px] font-semibold leading-snug tracking-tight text-[var(--fg)] sm:text-[16px]">
                 “{TRIAL_SLOGAN}”
               </p>
@@ -278,7 +278,7 @@ function LiveSession() {
                     className={cn(
                       "flex items-center gap-2.5 rounded-lg border px-2 py-1.5 transition-colors duration-200",
                       active
-                        ? "border-[var(--border-bright)] bg-white/[0.05]"
+                        ? "border-[var(--border-bright)] bg-[var(--fill-hover)]"
                         : "border-[var(--border)] bg-transparent"
                     )}
                   >
@@ -298,7 +298,7 @@ function LiveSession() {
           {/* Right: the live transcript */}
           <div
             ref={scrollerRef}
-            className="order-1 flex h-[min(420px,55vh)] min-h-[280px] flex-col gap-4 overflow-x-clip overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent)] p-4 sm:h-[420px] sm:overflow-hidden sm:p-5 md:order-none"
+            className="order-1 flex h-[min(420px,55vh)] min-h-[280px] flex-col gap-4 overflow-x-clip overflow-y-auto bg-[image:var(--veil-faint)] p-4 sm:h-[420px] sm:overflow-hidden sm:p-5 md:order-none"
           >
             <div className="flex items-center justify-center gap-3 pt-0.5">
               <span className="h-px w-8 bg-[var(--border)]" />
@@ -387,7 +387,7 @@ function LiveSession() {
 
             {/* The verdict the room converges on */}
             {frame.verdict && (
-              <div className="fade-up relative mt-auto overflow-hidden rounded-2xl border border-[var(--warning)]/30 bg-[linear-gradient(180deg,rgba(251,191,36,0.08),rgba(255,255,255,0.005))] px-5 py-4">
+              <div className="fade-up relative mt-auto overflow-hidden rounded-2xl border border-[var(--warning)]/30 bg-[image:linear-gradient(180deg,var(--warning-soft),transparent)] px-5 py-4">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),transparent_70%)] blur-2xl"
@@ -588,7 +588,7 @@ export function BoardroomAd() {
           {PERSONAS.map((p, i) => (
             <div
               key={p.id}
-              className="card-glow flex flex-col rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl"
+              className="card-glow flex flex-col rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-start gap-3.5">
@@ -633,7 +633,7 @@ export function BoardroomAd() {
           {STEPS.map((s) => (
             <div
               key={s.n}
-              className="lift relative rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl"
+              className="lift relative rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl"
             >
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
@@ -650,7 +650,7 @@ export function BoardroomAd() {
 
       {/* ── The verdict ── */}
       <section className="mb-28 md:mb-36">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(135deg,#1a0d12,#0a0708)] p-8 md:p-14">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--panel-deep)] p-8 md:p-14">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(255,77,87,0.22),transparent_60%)] blur-3xl"
@@ -686,7 +686,7 @@ export function BoardroomAd() {
 
       {/* ── Final gate ── */}
       <section className="mb-12">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_50%_0%,rgba(255,77,87,0.18),transparent_70%)]"

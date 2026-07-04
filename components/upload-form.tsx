@@ -170,7 +170,7 @@ export function UploadForm({ liveAi = false }: { liveAi?: boolean }) {
 
       <div
         onKeyDown={handleKeyDown}
-        className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl"
+        className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] shadow-[var(--shadow-xl)] backdrop-blur-xl"
       >
         {/* Indeterminate progress while a simulation streams */}
         {loading && (

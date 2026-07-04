@@ -7,6 +7,7 @@ import { AuthButton } from "./auth-button";
 import { signOutUser, useAuthUser } from "./use-auth-user";
 import { useLanguage } from "./language-provider";
 import { LogoBadge } from "./logo";
+import { ThemeToggle } from "./theme-toggle";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -131,7 +132,7 @@ function SiteHeaderInner() {
           {pill && (
             <span
               aria-hidden
-              className="pointer-events-none absolute rounded-full bg-white/[0.06] transition-[left,top,width,height] duration-200 ease-out"
+              className="pointer-events-none absolute rounded-full bg-[var(--fill-hover)] transition-[left,top,width,height] duration-200 ease-out"
               style={{ left: pill.left, top: pill.top, width: pill.width, height: pill.height }}
             />
           )}
@@ -172,7 +173,7 @@ function SiteHeaderInner() {
                 className={cn(
                   "rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider transition-colors duration-200",
                   locale === lang
-                    ? "bg-white/[0.08] text-[var(--fg)]"
+                    ? "bg-[var(--fill-active)] text-[var(--fg)]"
                     : "text-[var(--fg-subtle)] hover:text-[var(--fg)]"
                 )}
               >
@@ -181,11 +182,13 @@ function SiteHeaderInner() {
             ))}
           </div>
 
+          <ThemeToggle />
+
           <AuthButton />
 
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)]/60 text-[var(--fg-muted)] backdrop-blur transition-colors hover:bg-white/[0.06] hover:text-[var(--fg)] lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elev-1)]/60 text-[var(--fg-muted)] backdrop-blur transition-colors hover:bg-[var(--fill-hover)] hover:text-[var(--fg)] lg:hidden"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((open) => !open)}
@@ -222,7 +225,7 @@ function SiteHeaderInner() {
                     "rounded-lg px-3 py-2.5 text-sm transition-colors",
                     active
                       ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
-                      : "text-[var(--fg-muted)] hover:bg-white/[0.04] hover:text-[var(--fg)]"
+                      : "text-[var(--fg-muted)] hover:bg-[var(--fill-soft)] hover:text-[var(--fg)]"
                   )}
                 >
                   {labelOverride ?? t(locale, key as Exclude<typeof key, "home">)}
@@ -236,7 +239,7 @@ function SiteHeaderInner() {
                 "rounded-lg px-3 py-2.5 text-sm transition-colors",
                 pathname === "/history"
                   ? "bg-[var(--accent-soft)] font-medium text-[var(--accent-400)]"
-                  : "text-[var(--fg-muted)] hover:bg-white/[0.04] hover:text-[var(--fg)]"
+                  : "text-[var(--fg-muted)] hover:bg-[var(--fill-soft)] hover:text-[var(--fg)]"
               )}
             >
               History
@@ -270,7 +273,7 @@ function SiteHeaderInner() {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-white/[0.04]"
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--fg)] transition-colors hover:bg-[var(--fill-soft)]"
                   >
                     Sign in
                   </Link>

@@ -10,14 +10,14 @@ const variants = {
     "active:scale-[0.98] active:brightness-95",
   ].join(" "),
   secondary: [
-    "border border-[var(--border-strong)] bg-white/[0.03] text-[var(--fg)]",
+    "border border-[var(--border-strong)] bg-[var(--fill-soft)] text-[var(--fg)]",
     "backdrop-blur-sm",
-    "hover:bg-white/[0.06] hover:border-[var(--border-bright)]",
+    "hover:bg-[var(--fill-hover)] hover:border-[var(--border-bright)]",
     "active:scale-[0.98]",
   ].join(" "),
   ghost: [
     "text-[var(--fg-muted)]",
-    "hover:bg-white/[0.04] hover:text-[var(--fg)]",
+    "hover:bg-[var(--fill-soft)] hover:text-[var(--fg)]",
     "active:scale-[0.98]",
   ].join(" "),
   outline: [

@@ -47,7 +47,7 @@ export function AgentVerdictCard({
   return (
     <details
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl card-glow"
+        "group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl card-glow"
       )}
     >
       {/* Left accent line */}

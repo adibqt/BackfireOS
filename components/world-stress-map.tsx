@@ -147,8 +147,8 @@ const MapBackground = memo(function MapBackground({
           y2={VIEW_H}
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.02)" />
+          <stop offset="0%" stopColor="var(--map-land-hi)" />
+          <stop offset="100%" stopColor="var(--map-land-lo)" />
         </linearGradient>
         <filter id="markerGlow" x="-100%" y="-100%" width="300%" height="300%">
           <feGaussianBlur stdDeviation="2.5" />
@@ -157,7 +157,7 @@ const MapBackground = memo(function MapBackground({
 
       {/* Graticule */}
       <g
-        stroke="rgba(255,255,255,0.025)"
+        stroke="var(--map-line-faint)"
         strokeWidth="0.5"
         fill="none"
         pointerEvents="none"
@@ -180,7 +180,7 @@ const MapBackground = memo(function MapBackground({
         y1={VIEW_H / 2}
         x2={VIEW_W}
         y2={VIEW_H / 2}
-        stroke="rgba(255,255,255,0.05)"
+        stroke="var(--map-line)"
         strokeDasharray="2 4"
         pointerEvents="none"
       />
@@ -297,12 +297,12 @@ export function WorldStressMap({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,#0a0708_0%,#070506_100%)] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)]",
+        "relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--map-bg)] shadow-[var(--shadow-xl)]",
         className
       )}
     >
       {/* ─── Top chrome ─── */}
-      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-white/[0.02] px-5 py-3.5 backdrop-blur">
+      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--fill-faint)] px-5 py-3.5 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/25">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -338,7 +338,7 @@ export function WorldStressMap({
         <div className="relative aspect-[2/1] w-full overflow-hidden">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,transparent_50%,rgba(0,0,0,0.5))] z-10"
+            className="pointer-events-none absolute inset-0 bg-[image:var(--map-vignette)] z-10"
           />
 
           <svg
@@ -446,7 +446,7 @@ export function WorldStressMap({
                       cy={y}
                       r={isFocus ? 3.5 : 2.8}
                       fill={tone.color}
-                      stroke="#0a0708"
+                      stroke="var(--bg)"
                       strokeWidth={0.8}
                       filter={isFocus ? "url(#markerGlow)" : undefined}
                     />
@@ -539,7 +539,7 @@ export function WorldStressMap({
                       <text
                         x={anchor === "end" ? -150 : 10}
                         y={align === "baseline" ? -26 : 16}
-                        fill="rgba(255,255,255,0.95)"
+                        fill="var(--map-ink)"
                         fontSize="11"
                         fontFamily="var(--font-display), system-ui"
                         fontWeight="600"
@@ -549,7 +549,7 @@ export function WorldStressMap({
                       <text
                         x={anchor === "end" ? -150 : 10}
                         y={align === "baseline" ? -14 : 28}
-                        fill="rgba(255,255,255,0.55)"
+                        fill="var(--map-ink-muted)"
                         fontSize="9"
                         fontFamily="var(--font-mono), monospace"
                         letterSpacing="0.08em"
@@ -575,7 +575,7 @@ export function WorldStressMap({
         </div>
 
         {/* DETAIL PANEL */}
-        <div className="border-t border-[var(--border)] bg-white/[0.015] p-5 lg:border-l lg:border-t-0">
+        <div className="border-t border-[var(--border)] bg-[var(--fill-faint)] p-5 lg:border-l lg:border-t-0">
           {focusPoint ? (
             <DetailPanel point={focusPoint} locale={locale} />
           ) : (
@@ -585,7 +585,7 @@ export function WorldStressMap({
       </div>
 
       {/* ─── Bottom strip ─── */}
-      <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] bg-white/[0.02] px-5 py-3 backdrop-blur">
+      <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] bg-[var(--fill-faint)] px-5 py-3 backdrop-blur">
         <div className="flex flex-wrap items-center gap-4">
           <LegendDot tone="high" label={t(locale, "heatHigh")} sublabel="70 — 100" />
           <LegendDot tone="medium" label={t(locale, "heatMedium")} sublabel="40 — 69" />

@@ -200,7 +200,7 @@ export function PolarizationGraph({
         : "All your critics are zeroing in on the same weakness. That's actually good news — one targeted fix could address most of the risk.";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl md:p-8">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_50%,rgba(255,77,87,0.08),transparent_70%)]"

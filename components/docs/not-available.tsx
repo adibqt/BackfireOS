@@ -83,7 +83,7 @@ export function NotAvailable({
       </p>
 
       {(startsAt || endsAt) && (
-        <div className="mt-6 w-full rounded-2xl border border-[var(--border)] bg-white/[0.015] p-5">
+        <div className="mt-6 w-full rounded-2xl border border-[var(--border)] bg-[var(--fill-faint)] p-5">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
             Publishing window
           </p>

@@ -57,7 +57,7 @@ export function FlowDiagram({
       </div>
 
       {mermaid && (
-        <details className="group rounded-xl border border-[var(--border)] bg-white/[0.015]">
+        <details className="group rounded-xl border border-[var(--border)] bg-[var(--fill-faint)]">
           <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3">
             <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--fg-subtle)]">
               Mermaid source

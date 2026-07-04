@@ -57,7 +57,7 @@ export function FeatureMatrix() {
                 return (
                   <div
                     key={f.feature}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-white/[0.012] px-3.5 py-2.5"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-[var(--fill-faint)] px-3.5 py-2.5"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-[14px] text-[var(--fg)]">{f.feature}</p>

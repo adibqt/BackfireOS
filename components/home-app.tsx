@@ -148,7 +148,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
         <div className="relative grid gap-4 md:grid-cols-3">
           <div aria-hidden className="absolute left-6 right-6 top-[44px] hidden h-px bg-gradient-to-r from-transparent via-[var(--border-strong)] to-transparent md:block" />
           {STEPS.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl lift fade-up" style={{ animationDelay: `${i * 80}ms` }}>
+            <div key={s.n} className="relative rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl lift fade-up" style={{ animationDelay: `${i * 80}ms` }}>
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
                 {s.n}
                 <span className="absolute inset-0 -z-10 rounded-2xl bg-[var(--accent-soft)] blur-xl" />
@@ -179,7 +179,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
 
         <div className="relative">
           <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[40px] bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(255,77,87,0.18),transparent_70%)] blur-3xl" />
-          <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] shadow-[0_40px_120px_-32px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+          <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] shadow-[var(--shadow-hero)] backdrop-blur-xl">
             {/* App chrome */}
             <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
               <LogoBadge size="xs" tile glow={false} />
@@ -210,7 +210,7 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {MODES.map((m, i) => (
-            <Link key={m.href} href={m.href} className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl fade-up no-underline" style={{ animationDelay: `${i * 60}ms` }}>
+            <Link key={m.href} href={m.href} className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl fade-up no-underline" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/20 transition-transform duration-300 group-hover:scale-110">

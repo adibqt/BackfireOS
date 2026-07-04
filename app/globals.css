@@ -57,7 +57,32 @@
   --shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
   --shadow-lg: 0 12px 40px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
   --shadow-xl: 0 24px 80px -16px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-hero: 0 44px 130px -34px rgba(0, 0, 0, 0.75);
   --shadow-glow: 0 0 40px -8px var(--accent-glow);
+
+  /* Surface veils — translucent card gradients laid over the page bg */
+  --veil-faint: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0));
+  --veil: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.005));
+  --veil-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.008));
+
+  /* Interaction fills — hover / highlight / pressed tints */
+  --fill-faint: rgba(255, 255, 255, 0.015);
+  --fill-soft: rgba(255, 255, 255, 0.03);
+  --fill-hover: rgba(255, 255, 255, 0.06);
+  --fill-active: rgba(255, 255, 255, 0.09);
+
+  /* Deep feature panel (localization callouts) */
+  --panel-deep: linear-gradient(135deg, #1a0d12, #0a0708);
+
+  /* Data-viz surfaces (world map, branch tree) */
+  --map-bg: linear-gradient(180deg, #0a0708 0%, #070506 100%);
+  --map-land-hi: rgba(255, 255, 255, 0.05);
+  --map-land-lo: rgba(255, 255, 255, 0.02);
+  --map-line: rgba(255, 255, 255, 0.05);
+  --map-line-faint: rgba(255, 255, 255, 0.025);
+  --map-ink: rgba(255, 255, 255, 0.95);
+  --map-ink-muted: rgba(255, 255, 255, 0.55);
+  --map-vignette: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.5));
 
   /* Layering */
   --z-dropdown-backdrop: 60;
@@ -66,6 +91,82 @@
   --z-modal-backdrop: 80;
   --z-modal: 90;
   --z-toast: 100;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Light theme — porcelain surfaces, same coral identity
+   Activated via <html data-theme="light"> (see ThemeToggle)
+   ────────────────────────────────────────────────────────────────── */
+
+[data-theme="light"] {
+  /* Backgrounds — cool porcelain tinted faintly toward the brand hue */
+  --bg: #faf8f9;
+  --bg-elev-1: #ffffff;
+  --bg-elev-2: #f4f1f3;
+  --bg-elev-3: #ece8eb;
+
+  /* Foreground — warm ink ramp, all steps ≥ 4.5:1 on --bg */
+  --fg: #1b1519;
+  --fg-muted: #564f55;
+  --fg-subtle: #6e6670;
+  --fg-faint: #746c77;
+
+  /* Borders — ink-based hairlines */
+  --border: rgba(27, 21, 25, 0.09);
+  --border-strong: rgba(27, 21, 25, 0.16);
+  --border-bright: rgba(27, 21, 25, 0.26);
+
+  /* Accent — coral deepened for text contrast on white */
+  --accent-50: #fff1f1;
+  --accent-200: #a01f2c;
+  --accent-400: #b42533;
+  --accent: #cf2938;
+  --accent-600: #b01f2e;
+  --accent-700: #93192a;
+  --accent-glow: rgba(207, 41, 56, 0.22);
+  --accent-soft: rgba(207, 41, 56, 0.07);
+  --accent-ring: rgba(207, 41, 56, 0.18);
+
+  /* Status — darkened for light surfaces */
+  --success: #047857;
+  --success-soft: rgba(4, 120, 87, 0.09);
+  --warning: #b45309;
+  --warning-soft: rgba(180, 83, 9, 0.1);
+  --danger: #d92d20;
+  --danger-soft: rgba(217, 45, 32, 0.08);
+  --info: #1d4ed8;
+  --info-soft: rgba(29, 78, 216, 0.08);
+
+  /* Shadows — soft ink, no luminous rings */
+  --shadow-sm: 0 1px 2px rgba(27, 21, 25, 0.06);
+  --shadow-md: 0 4px 16px -4px rgba(27, 21, 25, 0.08), 0 0 0 1px rgba(27, 21, 25, 0.03);
+  --shadow-lg: 0 12px 40px -12px rgba(27, 21, 25, 0.14), 0 0 0 1px rgba(27, 21, 25, 0.03);
+  --shadow-xl: 0 24px 80px -16px rgba(27, 21, 25, 0.18), 0 0 0 1px rgba(27, 21, 25, 0.03);
+  --shadow-hero: 0 44px 130px -34px rgba(27, 21, 25, 0.22);
+
+  /* Surface veils — frosted white cards over the porcelain bg */
+  --veil-faint: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.3));
+  --veil: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.55));
+  --veil-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.72));
+
+  /* Interaction fills — ink tints instead of white tints */
+  --fill-faint: rgba(27, 21, 25, 0.025);
+  --fill-soft: rgba(27, 21, 25, 0.04);
+  --fill-hover: rgba(27, 21, 25, 0.07);
+  --fill-active: rgba(27, 21, 25, 0.1);
+
+  /* Deep feature panel — blush porcelain in light mode */
+  --panel-deep: linear-gradient(135deg, #fbf0f1, #f6e9ec);
+
+  /* Data-viz surfaces */
+  --map-bg: linear-gradient(180deg, #f5f2f4 0%, #edeaec 100%);
+  --map-land-hi: rgba(27, 21, 25, 0.07);
+  --map-land-lo: rgba(27, 21, 25, 0.035);
+  --map-line: rgba(27, 21, 25, 0.09);
+  --map-line-faint: rgba(27, 21, 25, 0.045);
+  --map-ink: rgba(27, 21, 25, 0.95);
+  --map-ink-muted: rgba(27, 21, 25, 0.55);
+  --map-vignette: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 55%, rgba(27, 21, 25, 0.07));
 }
 
 @theme inline {
@@ -128,6 +229,10 @@ html {
   max-width: 100%;
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
 body {
   background-color: var(--bg);
   color: var(--fg);
@@ -152,6 +257,13 @@ body::before {
   z-index: 0;
 }
 
+[data-theme="light"] body::before {
+  background-image:
+    radial-gradient(ellipse 70% 50% at 20% -10%, rgba(207, 41, 56, 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(224, 70, 83, 0.045) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 110%, rgba(176, 31, 46, 0.05) 0%, transparent 60%);
+}
+
 /* Subtle film grain */
 body::after {
   content: "";
@@ -162,6 +274,11 @@ body::after {
   pointer-events: none;
   z-index: 0;
   mix-blend-mode: overlay;
+}
+
+[data-theme="light"] body::after {
+  opacity: 0.03;
+  mix-blend-mode: multiply;
 }
 
 body > * {
@@ -178,17 +295,22 @@ body > * {
   font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
+/* Theme-scoped visibility (used by the theme toggle icons) */
+[data-theme="light"] .dark-only {
+  display: none;
+}
+
+html:not([data-theme="light"]) .light-only {
+  display: none;
+}
+
 /* ──────────────────────────────────────────────────────────────────
    Utility classes
    ────────────────────────────────────────────────────────────────── */
 
 /* Glass panel */
 .glass {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.025) 0%,
-    rgba(255, 255, 255, 0.01) 100%
-  );
+  background: var(--veil-faint);
   backdrop-filter: blur(14px) saturate(150%);
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   border: 1px solid var(--border);
@@ -203,6 +325,12 @@ body > * {
   color: transparent;
 }
 
+[data-theme="light"] .text-gradient {
+  background: linear-gradient(180deg, #1b1519 0%, #4d444c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 .text-gradient-accent {
   background: linear-gradient(135deg, #ff7a82 0%, #ff4d57 50%, #c92c39 100%);
   -webkit-background-clip: text;
@@ -211,11 +339,17 @@ body > * {
   color: transparent;
 }
 
+[data-theme="light"] .text-gradient-accent {
+  background: linear-gradient(135deg, #e04653 0%, #cf2938 50%, #93192a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 /* Grid overlay */
 .bg-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(var(--map-line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line-faint) 1px, transparent 1px);
   background-size: 56px 56px;
   background-position: -1px -1px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 100%);
@@ -223,7 +357,7 @@ body > * {
 }
 
 .bg-dot {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(var(--map-line) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -273,8 +407,7 @@ body > * {
 .card-glow:hover {
   border-color: var(--border-strong);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 12px 40px -12px rgba(0, 0, 0, 0.6),
+    var(--shadow-lg),
     0 0 60px -16px var(--accent-glow);
 }
 
@@ -292,10 +425,10 @@ body > * {
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(255, 77, 87, 0.5) 0%,
-    rgba(255, 255, 255, 0.06) 35%,
-    rgba(255, 255, 255, 0.02) 65%,
-    rgba(255, 122, 130, 0.3) 100%
+    var(--accent-glow) 0%,
+    var(--border) 35%,
+    var(--border) 65%,
+    var(--accent-glow) 100%
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -322,6 +455,14 @@ body > * {
     transparent 60%
   );
   pointer-events: none;
+}
+
+[data-theme="light"] .spotlight::before {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% -20%,
+    rgba(207, 41, 56, 0.09) 0%,
+    transparent 60%
+  );
 }
 
 /* Status pulse */
@@ -488,7 +629,7 @@ body > * {
    ────────────────────────────────────────────────────────────────── */
 
 select {
-  color-scheme: dark;
+  color-scheme: inherit;
 }
 
 select option,

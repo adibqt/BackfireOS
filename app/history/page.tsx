@@ -44,7 +44,7 @@ function RunRow({
   return (
     <div
       className={cn(
-        "group flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl lift",
+        "group flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-5 backdrop-blur-xl lift",
         tone.border
       )}
     >
@@ -295,7 +295,7 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-5 backdrop-blur-xl">
+    <div className="rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-5 backdrop-blur-xl">
       <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--fg-subtle)]">
         {label}
       </p>

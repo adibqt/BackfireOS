@@ -10,7 +10,7 @@ const SOURCE_LABEL: Record<LiveStats["source"], string> = {
 
 function Stat({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] p-4">
+    <div className="rounded-xl border border-[var(--border)] bg-[image:var(--veil)] p-4">
       <p className="font-display text-2xl font-semibold tracking-tight text-[var(--fg)] tabular-nums">
         {typeof value === "number" ? value.toLocaleString() : value}
       </p>
@@ -41,7 +41,7 @@ export function LiveStatsPanel({
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="no-print inline-flex items-center gap-1.5 rounded-md border border-[var(--border-strong)] bg-white/[0.03] px-2.5 py-1 text-[12px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-white/[0.06] hover:text-[var(--fg)] disabled:opacity-50"
+            className="no-print inline-flex items-center gap-1.5 rounded-md border border-[var(--border-strong)] bg-[var(--fill-soft)] px-2.5 py-1 text-[12px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-[var(--fill-hover)] hover:text-[var(--fg)] disabled:opacity-50"
           >
             <svg
               width="13"

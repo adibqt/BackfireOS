@@ -37,8 +37,8 @@ export function AuthButton() {
       <Link
         href="/login"
         className={cn(
-          "hidden h-9 items-center rounded-lg border border-[var(--border-strong)] bg-white/[0.03] px-3.5 text-[13px] font-medium text-[var(--fg)] backdrop-blur",
-          "transition-colors hover:bg-white/[0.06] hover:border-[var(--border-bright)] sm:inline-flex"
+          "hidden h-9 items-center rounded-lg border border-[var(--border-strong)] bg-[var(--fill-soft)] px-3.5 text-[13px] font-medium text-[var(--fg)] backdrop-blur",
+          "transition-colors hover:bg-[var(--fill-hover)] hover:border-[var(--border-bright)] sm:inline-flex"
         )}
       >
         Sign in
@@ -54,8 +54,8 @@ export function AuthButton() {
         className={cn(
           "flex h-9 items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-elev-1)]/60 py-0.5 pl-0.5 pr-1.5 backdrop-blur",
           "transition-[border-color,background-color,box-shadow] duration-200",
-          "hover:border-[var(--border-bright)] hover:bg-white/[0.06]",
-          menuOpen && "border-[var(--border-bright)] bg-white/[0.06] ring-2 ring-[var(--accent-ring)]",
+          "hover:border-[var(--border-bright)] hover:bg-[var(--fill-hover)]",
+          menuOpen && "border-[var(--border-bright)] bg-[var(--fill-hover)] ring-2 ring-[var(--accent-ring)]",
           "sm:pr-3"
         )}
         aria-label={menuOpen ? "Close account menu" : "Open account menu"}

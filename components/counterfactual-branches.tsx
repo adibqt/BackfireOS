@@ -880,7 +880,7 @@ function Header({
   const deltaResonance = scores.resonance - baseRef.resonance;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl md:p-8">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(255,77,87,0.18),transparent_70%)]"
@@ -1151,7 +1151,7 @@ function TreeCanvas({
   const rootPos = root ? positions[root.id] : undefined;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.006))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_-8%,rgba(255,77,87,0.16),transparent_72%)]"
@@ -1202,8 +1202,8 @@ function TreeCanvas({
               <feGaussianBlur stdDeviation="9" />
             </filter>
             <linearGradient id="cardFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0.012)" />
+              <stop offset="0%" stopColor="var(--map-land-hi)" />
+              <stop offset="100%" stopColor="var(--map-land-lo)" />
             </linearGradient>
             <linearGradient id="spine" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(255,77,87,0.55)" />
@@ -1223,7 +1223,7 @@ function TreeCanvas({
                 y1={y}
                 x2={width - 20}
                 y2={y}
-                stroke="rgba(255,255,255,0.05)"
+                stroke="var(--map-line)"
                 strokeWidth={1}
                 strokeDasharray="2 8"
               />
@@ -1376,7 +1376,7 @@ function TreeCanvas({
                   height={NODE_H}
                   rx={13}
                   fill="var(--bg-elev-2)"
-                  stroke={isSel ? "var(--accent)" : "rgba(255,255,255,0.12)"}
+                  stroke={isSel ? "var(--accent)" : "var(--border-strong)"}
                   strokeWidth={isSel ? 1.5 : 1}
                 />
                 <rect
@@ -1513,7 +1513,7 @@ function MiniBar({
         width={W}
         height={6}
         rx={3}
-        fill="rgba(255,255,255,0.06)"
+        fill="var(--fill-hover)"
       />
       <rect
         x={18}
@@ -1584,7 +1584,7 @@ function Inspector({
     ai?.status === "done" && ai.source === "ai" && !aiStale ? ai.scores : undefined;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,rgba(255,77,87,0.14),transparent_70%)]"
@@ -1793,7 +1793,7 @@ function aiSourceBadge(source: ScoreSource | undefined, cached: boolean | undefi
   return {
     label: "heuristic · no model key",
     color: "var(--fg-subtle)",
-    soft: "rgba(255,255,255,0.04)",
+    soft: "var(--fill-soft)",
   };
 }
 
@@ -2075,7 +2075,7 @@ function ScoreCell({
           <Sparkline values={spark} color={tone.color} />
         )}
       </div>
-      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/[0.05]">
+      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[var(--fill-hover)]">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
@@ -2208,7 +2208,7 @@ function SelectField({
               "flex-1 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-all duration-150",
               value === o.value
                 ? "bg-[var(--accent)] text-white shadow-[0_4px_12px_-4px_rgba(255,77,87,0.6)]"
-                : "text-[var(--fg-muted)] hover:bg-white/[0.05] hover:text-[var(--fg)]"
+                : "text-[var(--fg-muted)] hover:bg-[var(--fill-hover)] hover:text-[var(--fg)]"
             )}
           >
             {o.label}
@@ -2225,7 +2225,7 @@ function SelectField({
 
 function DiffPanel({ branch, parent }: { branch: Branch; parent: Branch | null }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
         <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
           diff · vs parent
@@ -2335,7 +2335,7 @@ const EVENT_COLOR: Record<BranchEventType, string> = {
 
 function ActivityLog({ log }: { log: BranchEvent[] }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
         <div className="flex items-center gap-3">
           <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--fg-subtle)]">
@@ -2356,7 +2356,7 @@ function ActivityLog({ log }: { log: BranchEvent[] }) {
           log.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-start gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.03]"
+              className="flex items-start gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-[var(--fill-soft)]"
             >
               <span
                 className="mt-1.5 inline-flex h-1.5 w-1.5 shrink-0 rounded-full"

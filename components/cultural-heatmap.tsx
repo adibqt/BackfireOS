@@ -127,8 +127,8 @@ function MarketCard({
               tone.bg,
             )
           : cn(
-              "border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))]",
-              "hover:border-[var(--border-strong)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]",
+              "border-[var(--border)] bg-[image:var(--veil)]",
+              "hover:border-[var(--border-strong)] hover:bg-[image:var(--veil-strong)]",
             ),
         !flagged && "opacity-55",
       )}
@@ -423,7 +423,7 @@ function DetailPanel({ stress, locale }: { stress: MarketStress; locale: Locale 
   const tone = LEVEL_TONE[level];
 
   return (
-    <div className="card-glow overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005))] backdrop-blur-xl">
+    <div className="card-glow overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] backdrop-blur-xl">
       {/* Colored header strip */}
       <div
         className="border-b border-[var(--border)] px-5 py-4"

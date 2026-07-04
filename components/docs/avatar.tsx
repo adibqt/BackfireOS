@@ -41,7 +41,7 @@ export function Avatar({
       className={cn(
         "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-2xl",
         "ring-1 ring-inset ring-[var(--border-strong)]",
-        "shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]",
+        "shadow-[var(--shadow-md)]",
         SIZES[size],
         className
       )}

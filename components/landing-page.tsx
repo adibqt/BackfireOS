@@ -114,7 +114,7 @@ export function LandingPage() {
             aria-hidden
             className="pointer-events-none absolute -inset-x-8 -bottom-8 -top-4 -z-10 rounded-[40px] bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(255,77,87,0.18),transparent_70%)] blur-3xl"
           />
-          <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] shadow-[0_40px_120px_-32px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+          <div className="overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] shadow-[var(--shadow-hero)] backdrop-blur-xl">
             {/* App chrome: frames a real component, not a fake one */}
             <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg-elev-1)]/60 px-4 py-3">
               <LogoBadge size="xs" tile glow={false} />
@@ -178,7 +178,7 @@ export function LandingPage() {
           {AGENTS.map((a, i) => (
             <div
               key={a.id}
-              className="card-glow group flex flex-col rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl fade-up"
+              className="card-glow group flex flex-col rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl fade-up"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-start gap-3.5">
@@ -232,7 +232,7 @@ export function LandingPage() {
           {STEPS.map((s, i) => (
             <div
               key={s.n}
-              className="relative rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl lift fade-up"
+              className="relative rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl lift fade-up"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="relative z-10 mb-5 flex h-[58px] w-[58px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[14px] font-semibold text-[var(--accent)]">
@@ -266,7 +266,7 @@ export function LandingPage() {
             <Link
               key={m.href}
               href={m.href}
-              className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005))] p-6 backdrop-blur-xl fade-up no-underline"
+              className="card-glow group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[image:var(--veil)] p-6 backdrop-blur-xl fade-up no-underline"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="flex items-start justify-between gap-4">
@@ -345,7 +345,7 @@ export function LandingPage() {
 
       {/* ── Localization callout ── */}
       <section className="mb-28 md:mb-36">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(135deg,#1a0d12,#0a0708)] p-8 md:p-14">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--panel-deep)] p-8 md:p-14">
           <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(255,77,87,0.25),transparent_60%)] blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(255,122,130,0.15),transparent_60%)] blur-3xl" />
           <div className="relative grid items-center gap-10 md:grid-cols-[1.3fr_1fr]">
@@ -398,7 +398,7 @@ export function LandingPage() {
 
       {/* ── Final CTA ── */}
       <section className="mb-12">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005))] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[image:var(--veil-strong)] px-8 py-16 text-center backdrop-blur-xl md:px-12 md:py-20">
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_50%_0%,rgba(255,77,87,0.18),transparent_70%)]" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--fg)] md:text-5xl">
