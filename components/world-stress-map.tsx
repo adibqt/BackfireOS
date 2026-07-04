@@ -539,7 +539,7 @@ export function WorldStressMap({
                       <text
                         x={anchor === "end" ? -150 : 10}
                         y={align === "baseline" ? -26 : 16}
-                        fill="var(--map-ink)"
+                        fill="rgba(255,255,255,0.95)"
                         fontSize="11"
                         fontFamily="var(--font-display), system-ui"
                         fontWeight="600"
@@ -549,7 +549,7 @@ export function WorldStressMap({
                       <text
                         x={anchor === "end" ? -150 : 10}
                         y={align === "baseline" ? -14 : 28}
-                        fill="var(--map-ink-muted)"
+                        fill="rgba(255,255,255,0.6)"
                         fontSize="9"
                         fontFamily="var(--font-mono), monospace"
                         letterSpacing="0.08em"
