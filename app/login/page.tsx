@@ -9,31 +9,42 @@ import { LogoBadge } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const DEMO_EMAIL = "adibrahman44@gmail.com";
+const DEMO_PASSWORD = "a9011822";
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<"signin" | "demo" | null>(null);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const signIn = async (
+    credentials: { email: string; password: string },
+    mode: "signin" | "demo",
+  ) => {
+    setLoading(mode);
     setError("");
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error: authError } = await supabase.auth.signInWithPassword(credentials);
     if (authError) {
       setError(authError.message);
-      setLoading(false);
+      setLoading(null);
       return;
     }
     router.push(redirect);
     router.refresh();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signIn({ email, password }, "signin");
+  };
+
+  const handleDemoLogin = async () => {
+    await signIn({ email: DEMO_EMAIL, password: DEMO_PASSWORD }, "demo");
   };
 
   return (
@@ -61,8 +72,18 @@ function LoginForm() {
           {error}
         </div>
       )}
-      <Button type="submit" size="lg" disabled={loading} className="w-full">
+      <Button type="submit" size="lg" disabled={loading !== null} className="w-full">
         {loading ? "Signing in…" : "Sign in"}
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        size="lg"
+        disabled={loading !== null}
+        className="w-full"
+        onClick={handleDemoLogin}
+      >
+        {loading === "demo" ? "Opening demo…" : "Demo login"}
       </Button>
       <p className="pt-2 text-center text-sm text-[var(--fg-muted)]">
         No account?{" "}

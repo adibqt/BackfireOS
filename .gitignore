@@ -54,3 +54,5 @@ PRELIM_BUILD_GUIDE.md
 /.agents
 /.cursor
 backfire-architecture-deck.html
+
+/package-lock.json
