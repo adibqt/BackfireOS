@@ -1,6 +1,6 @@
 # Backfire OS
 
-**Adversarial Brand Simulation Engine** — MarTech Track 2 for THE INFINITY AI BUILDFEST 2026.
+**Adversarial Brand Simulation Engine**
 
 Penetration testing for marketing campaigns in emerging markets. Upload a draft campaign and watch six AI red-team personas stress-test it against Bangladesh's cultural, linguistic, and regulatory landscape.
 
@@ -700,4 +700,4 @@ Add env vars in Vercel dashboard before deploying for live AI.
 
 ## License
 
-Team retains full IP per BuildFest Code of Conduct.
+Team retains full IP.

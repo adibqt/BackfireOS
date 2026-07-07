@@ -45,8 +45,7 @@ function SiteFooter() {
         <div>
           <Logo size="sm" tile glow={false} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-[var(--fg-muted)]">
-            Adversarial brand simulation engine for emerging markets. Built for
-            MarTech Track 2 · BuildFest 2026.
+            Adversarial brand simulation engine for emerging markets.
           </p>
         </div>
         <FooterCol

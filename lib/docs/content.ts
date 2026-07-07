@@ -253,7 +253,7 @@ export const SECTIONS: DocSection[] = [
     title: "Traction",
     description: "Numbers below are pulled live from the running system.",
     blocks: [
-      { kind: "para", text: "Built end-to-end for Infinity AI BuildFest 2026 (MarTech Track 2): a working adversarial engine, real Banglish RAG over ~20K samples, multimodal vision, and a full persistence + auth layer." },
+      { kind: "para", text: "Built end-to-end: a working adversarial engine, real Banglish RAG over ~20K samples, multimodal vision, and a full persistence + auth layer." },
     ],
     special: "overview-live",
   },

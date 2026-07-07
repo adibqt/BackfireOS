@@ -74,9 +74,6 @@ export function LandingPage() {
             <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
               Preview
             </span>
-            <span className="text-[var(--fg-muted)]">
-              MarTech Track 2 · BuildFest 2026
-            </span>
           </div>
 
           <h1

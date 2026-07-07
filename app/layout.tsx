@@ -27,7 +27,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Backfire OS — Adversarial Brand Simulation",
   description:
-    "Penetration testing for marketing campaigns in emerging markets. Infinity AI BuildFest 2026.",
+    "Penetration testing for marketing campaigns in emerging markets.",
 };
 
 export const viewport: Viewport = {

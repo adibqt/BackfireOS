@@ -60,7 +60,6 @@ export function HomeApp({ liveAi }: { liveAi: boolean }) {
               <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--accent)]">
                 v0.1
               </span>
-              <span className="text-[var(--fg-muted)]">MarTech Track 2 · BuildFest 2026</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[var(--fg-subtle)]" aria-hidden>
                 <polyline points="9 18 15 12 9 6" />
               </svg>
